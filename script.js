@@ -6,7 +6,7 @@
 
   let nodes = document.querySelectorAll("*")
   nodes = Array.from(nodes).filter(node => !node.children.length)
-  const excludeNodes = ['META', 'STYLE', 'SCRIPT', 'HEAD']
+  const excludeNodes = ['META', 'STYLE', 'SCRIPT', 'HEAD', 'INPUT', 'TEXTAREA']
   nodes = nodes.filter(node => !excludeNodes.includes(node.tagName))
 
   const keys = words.map(i => i[0])
