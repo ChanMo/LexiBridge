@@ -1,0 +1,12 @@
+.lexibridge-word {
+  display: inline-block;
+  border-radius: 2px;
+  line-height: normal;
+  position: relative;
+  width: max-content;
+  height: max-content;
+  transition: all 250ms linear 0ms;
+  box-shadow: rgba(202, 228, 237, 0.5) 2px 0px 0px 0px, rgba(202, 228, 237, 0.5) -2px 0px 0px 0px;
+  background-color: rgba(202, 228, 237, 0.5);
+  cursor: pointer;
+}
