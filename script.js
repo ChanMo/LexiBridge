@@ -29,19 +29,30 @@
   var ranges = [];
   nodes.map(node => {
     let content = node.textContent.toLowerCase();
-    keys.map((text, index) => {
-      const matches = content.match(new RegExp(text, "i"));
-      if(matches) {
-	for(const match of matches) {
-	  const range = document.createRange();
-	  ranges.push({'word': text, 'range': range, 'value': words[index][1]});
-	  const startOffset = content.indexOf(text);
-	  range.setStart(node, startOffset);
-	  range.setEnd(node, startOffset + text.length);
-	  highlight.add(range);
-	}
+    let textList = content.split(' ');
+    textList.map((text, index) => {
+      if(keys.includes(text)) {
+	const range = document.createRange();
+	const startOffset = content.indexOf(text);
+	range.setStart(node, startOffset);
+	range.setEnd(node, startOffset + text.length);
+	ranges.push({'word': text, 'range': range, 'value': words[keys.indexOf(text)][1]});
+	highlight.add(range);
       }
     });
+    // keys.map((text, index) => {
+    //   const matches = content.match(new RegExp(text, "i"));
+    //   if(matches) {
+    // 	for(const match of matches) {
+    // 	  const range = document.createRange();
+    // 	  ranges.push({'word': text, 'range': range, 'value': words[index][1]});
+    // 	  const startOffset = content.indexOf(text);
+    // 	  range.setStart(node, startOffset);
+    // 	  range.setEnd(node, startOffset + text.length);
+    // 	  highlight.add(range);
+    // 	}
+    //   }
+    // });
   });
 
   // apply highlight css
