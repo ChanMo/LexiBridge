@@ -15,6 +15,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       words = words.words ? words.words : []
       sendResponse(words);      
     });
+  } else if (request.action == "delete-word") {
+    const word = request.data.word;
+    chrome.storage.local.get(['words']).then(res => {
+      const words = res.words ? res.words : [];
+      chrome.storage.local.set({'words': words.filter(i => i[0] !== word)}).then(() => {
+	sendResponse('deleted.');	
+      });
+    });
   }
   return true;
 });

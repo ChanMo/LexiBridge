@@ -1,12 +1,50 @@
-.lexibridge-word {
-  display: inline-block;
-  border-radius: 2px;
-  line-height: normal;
-  position: relative;
-  width: max-content;
-  height: max-content;
-  transition: all 250ms linear 0ms;
-  box-shadow: rgba(202, 228, 237, 0.5) 2px 0px 0px 0px, rgba(202, 228, 237, 0.5) -2px 0px 0px 0px;
-  background-color: rgba(202, 228, 237, 0.5);
-  cursor: pointer;
+::highlight(lexibridge) {
+    background: rgba(202, 228, 237, 0.5);
+}
+.lexibridge-popover {
+    border-radius: 16px;
+    border: none;
+    box-shadow: 1px 2px 4px rgba(0,0,0,0.1);
+    width: 320px;
+    padding: 16px;
+    margin: auto;
+}
+.lexibridge-popover::backdrop {
+    background: rgba(0,0,0,0.12);
+}
+.lexibridge-popover h5 {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin: 0 0 1rem;
+    line-height: 1.5;
+    color: #333;
+    text-transform: initial;
+}
+.lexibridge-popover p {
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #666;
+    margin: 0 0 1.5rem;
+}
+.lexibridge-popover button {
+    padding: .5rem 1rem;
+    color: #ffffff;
+    background: #7bc962;
+    border: 1px solid #4e9c36;
+    font-size: 0.85rem;
+    border-radius: 8px;
+    outline: none;
+    cursor: pointer;
+    margin: 0 .5rem 0 0;
+}
+.lexibridge-popover button:hover {
+    background: #4e9c36;
+}
+.lexibridge-popover button:last-child {
+    color: #333;
+    background: #efefef;
+    border-color: #e3e3e3;
+}
+.lexibridge-popover button:last-child:hover {
+    background: #e3e3e3;
 }
