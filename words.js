@@ -61,9 +61,11 @@
     }
   });
   document.getElementById("clear-btn").addEventListener("click", async(e) => {
-    e.target.classList.add("is-loading");
-    e.preventDefault();
-    await chrome.storage.local.set({"words":[]})
-    window.location.reload();
+    if(window.confirm('确定清空词库吗?')) {
+      e.target.classList.add("is-loading");
+      e.preventDefault();
+      await chrome.storage.local.set({"words":[]})
+      window.location.reload();
+    }
   });  
 })();
