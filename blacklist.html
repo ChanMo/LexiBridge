@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>禁用域名 | LexiBridge</title>
+    <link rel="stylesheet" href="bulma.min.css">
+  </head>
+  <body>
+    <section class="section">
+      <div class="container">
+        <h1 class="title">LexiBridge设置</h1>
+        <div class="columns">
+          <div class="column is-narrow">
+            <aside class="menu" style="width:200px;">
+	      <ul class="menu-list">
+		<li><a href="options.html">单词库</a></li>
+		<li><a class="is-active">禁用域名</a></li>
+	      </ul>
+            </aside>
+          </div>
+	  <div class="column">
+	    <!-- <h2 class="subtitle is-4">Exclude sites</h2> -->
+	    <div class="table-container">
+	      <table class="table is-fullwidth">
+		<thead>
+		  <tr>
+		    <th>域名</th>
+		    <th></th>
+		  </tr>
+		</thead>
+		<tbody>
+		</tbody>
+	      </table>
+	    </div>
+	  </div>
+        </div>
+      </div>
+    </section>
+    <template id="row">
+      <tr>
+	<td></td>
+	<td>
+	  <div class="buttons are-small">
+	    <button class="button is-danger is-outlined">删除</button>
+	  </div>
+	</td>
+      </tr>
+    </template>
+    <script src="options.js"></script>
+  </body>
+</html>

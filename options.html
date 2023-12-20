@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>单词库 | LexiBridge</title>
+    <link rel="stylesheet" href="bulma.min.css">
+  </head>
+  <body>
+    <section class="section">
+      <div class="container">
+        <h1 class="title">LexiBridge设置</h1>
+        <div class="columns">
+          <div class="column is-narrow">
+            <aside class="menu" style="width:200px;">
+	      <!-- <p class="menu-label">Genreal</p> -->
+	      <ul class="menu-list">
+		<li><a class="is-active">单词库</a></li>
+		<li><a href="blacklist.html">禁用域名</a></li>
+	      </ul>
+            </aside>
+          </div>
+	  <div class="column">
+	    <!-- <h2 class="subtitle is-4">My Words</h2> -->
+	    <div class="field">
+	      <label class="label">从JSON文件导入</label>
+	      <div class="field has-addons">
+
+		<p class="control">
+		  <input class="input" type="file" name="source" />		
+		</p>
+		<p class="control">
+		  <button id="import-btn" class="button is-primary">导入</button>
+		</p>
+	      </div>
+	      <p class="help">示例文件: <a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/en_zh.json">CET6单词下载</a></p>
+	    </div>
+
+	    <div class="table-container">
+	      <table class="table is-fullwidth">
+		<thead>
+		  <tr>
+		    <th>单词</th>
+		    <th>释义</th>
+		    <th>操作</th>
+		  </tr>
+		</thead>
+		<tbody>
+		  <tr id="add-form">
+		    <td><input name="key" type="text" class="input" /></td>
+		    <td><input name="value" type="text" class="input" /></td>
+		    <td><button id="add-btn" class="button is-primary is-small mb-0">添加</button></td>
+		  </tr>
+		</tbody>
+	      </table>
+	    </div>
+	  </div>
+        </div>
+      </div>
+    </section>
+    <template id="row">
+      <tr>
+	<td></td>
+	<td></td>
+	<td>
+	  <div class="buttons are-small mb-0">
+	    <button class="button is-danger is-outlined mb-0">删除</button>
+	  </div>
+	</td>
+      </tr>
+    </template>    
+    <script src="words.js"></script>
+  </body>
+</html>
