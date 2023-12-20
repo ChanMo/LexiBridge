@@ -47,15 +47,23 @@
     
   });
   document.getElementById("import-btn").addEventListener("click", (e) => {
+    e.target.classList.add("is-loading");
     e.preventDefault();
     const files = document.querySelector("[name=source]").files;
     for (const file of files) {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async(e) => {
 	const data = JSON.parse(e.target.result);
-	chrome.storage.local.set({"words":data})
+	await chrome.storage.local.set({"words":data})
+	window.location.reload();
       }
       reader.readAsText(file);
     }
   });
+  document.getElementById("clear-btn").addEventListener("click", async(e) => {
+    e.target.classList.add("is-loading");
+    e.preventDefault();
+    await chrome.storage.local.set({"words":[]})
+    window.location.reload();
+  });  
 })();
