@@ -25,6 +25,7 @@
     line-height: 1.5;
     color: #666;
     margin: 0 0 1.5rem;
+    font-weight: normal;
 }
 .lexibridge-popover button {
     padding: .5rem 1rem;
@@ -36,9 +37,11 @@
     outline: none;
     cursor: pointer;
     margin: 0 .5rem 0 0;
+    font-weight: normal;
 }
 .lexibridge-popover button:hover {
-    background: #4e9c36;
+  background: #4e9c36;
+  color: #ffffff;
 }
 .lexibridge-popover button:last-child {
     color: #333;
