@@ -1,7 +1,7 @@
 {
-  "name": "LexiBridge",
-  "version": "1.2.4",
-  "description": "LexiBridge 帮助您在浏览网页时学习新词汇，提升阅读流畅度。",
+  "name": "LexiBridge: 英语学习，从阅读开始",
+  "version": "1.2.5",
+  "description": "LexiBridge 是一个开源、无服务器的英语学习应用程序，帮助英语学习者在阅读网页时学习新词汇，提升阅读流畅度。",
   "manifest_version": 3,
   "author": "chan.mo@outlook.com",
   "homepage_url": "https://chanmo.github.io/LexiBridge/",
@@ -17,7 +17,7 @@
     "css": ["app.css"]
   }
   ],
-  "permissions": ["tabs", "storage"],
+  "permissions": ["tabs", "storage", "tts"],
   "icons": {
     "16": "logo_16.png",
     "48": "logo_48.png",

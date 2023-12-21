@@ -1,9 +1,11 @@
 (() => {
   loadData();
-
+  const totalSpan = document.getElementById("total-words");
+  
   async function loadData() {
     let res = await chrome.storage.local.get(["words"])
     res = res.words ? res.words : []
+    totalSpan.textContent = res.length;
     const tb = document.querySelector("table tbody");
     res.map(i => {
       const t = document.getElementById("row");

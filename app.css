@@ -20,6 +20,10 @@
     color: #333;
     text-transform: initial;
 }
+.lexibridge-popover span {
+  margin-left: 0.25rem;
+  cursor: pointer;
+}
 .lexibridge-popover p {
     font-size: 1rem;
     line-height: 1.5;

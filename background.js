@@ -15,6 +15,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       words = words.words ? words.words : []
       sendResponse(words);
     });
+  } else if(request.action == 'speak') {
+    chrome.tts.speak(request.data.word);
   } else if (request.action == "delete-word") {
     const word = request.data.word;
     chrome.storage.local.get(['words']).then(res => {

@@ -63,6 +63,7 @@
     let has_range = false;
     for(const [range] of highlight.entries()) {
       if(range.isPointInRange(target.startContainer, target.startOffset)) {
+	e.preventDefault();
 	const rect = range.getBoundingClientRect();
 	has_range = true;
 	const value = ranges.find(i => i.range === range)
@@ -74,6 +75,17 @@
 	const title = document.createElement("h5");
 	title.textContent = value.word;
 	popover.appendChild(title);
+	const speakBtn = document.createElement("span");
+	speakBtn.innerHTML = '&#128264;';
+	speakBtn.addEventListener("click", () => {
+	  chrome.runtime.sendMessage({
+	    action: 'speak',
+	    data: {
+              word: value.word,
+	    }
+	  });	  
+	});
+	title.appendChild(speakBtn);
 	const p = document.createElement("p");
 	p.textContent = value.value;
 	popover.appendChild(p);
