@@ -59,7 +59,6 @@
   CSS.highlights.set('lexibridge', highlight);
 
   document.body.addEventListener("click", (e) => {
-    e.preventDefault();
     const target = document.caretRangeFromPoint(e.clientX, e.clientY);
     let has_range = false;
     for(const [range] of highlight.entries()) {
