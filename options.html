@@ -5,77 +5,104 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>单词库 | LexiBridge</title>
     <link rel="stylesheet" href="bulma.min.css">
+    <link rel="stylesheet" href="options.css" />
   </head>
   <body>
-    <section class="section">
-      <div class="container">
-        <h1 class="title">LexiBridge设置</h1>
-        <div class="columns">
-          <div class="column is-narrow">
-            <aside class="menu" style="width:200px;">
-	      <!-- <p class="menu-label">Genreal</p> -->
-	      <ul class="menu-list">
-		<li><a class="is-active">单词库</a></li>
-		<li><a href="blacklist.html">禁用域名</a></li>
-	      </ul>
-            </aside>
-          </div>
-	  <div class="column">
-	    <h2 class="subtitle is-4">我的词库 (当前总数:<span id="total-words">0</span>)</h2>
-	    <div class="field">
-	      <label class="label">从JSON文件导入</label>
-	      <div class="field has-addons">
-
-		<p class="control">
-		  <input class="input" type="file" name="source" />		
-		</p>
-		<p class="control">
-		  <button id="import-btn" class="button is-primary">导入</button>
-		</p>
-	      </div>
-	      <p class="help">示例文件:
-		<a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/CET4_edited.json">大学四级(4615)</a>,
-		<a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/CET6_edited.json">大学六级(2270)</a>,
-		<a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/GRE_8000_Words.json">考研(7744)</a>,
-		<a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/GRE_abridged.json">考研(精简)(4333)</a>
-		<a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/OALD8_abridged_edited.json">牛津高阶英语词典第八版(13653)</a>
+    <nav class="navbar is-white">
+      <div class="navbar-brand pl-5">
+	<a href="options.html" id="logo" class="navbar-item has-text-weight-bold is-size-5">LexiBridge</a>
+      </div>
+      <div class="navbar-menu">
+	<div class="navbar-end">
+	  <a class="navbar-item" href="https://github.com/ChanMo/LexiBridge/issues" target="_blank">Issues</a>
+	  <a class="navbar-item" href="https://github.com/ChanMo/LexiBridge" target="_blank">Github</a>
+	</div>
+      </div>
+    </nav>
+    <div class="columns">
+      <div class="column is-narrow pr-0">
+	<div id="left-panel">
+          <aside class="menu">
+	    <ul class="menu-list">
+	      <li><a class="is-active">单词库</a></li>
+	      <li><a href="blacklist.html">禁用域名</a></li>
+	    </ul>
+          </aside>
+	  <footer>
+	    <p id="version"></p>
+	  </footer>
+	</div>
+      </div>
+      <div class="column">
+	<div id="main">
+	  <div class="level">
+	    <div class="level-left">
+	      <h2 class="title is-4">我的词库 (当前总数:<span id="total-words">0</span>)</h2>	      
+	    </div>
+	    <div class="level-right">
+	      <p class="buttons">
+		<button id="open-modal" class="button is-primary">导入</button>
+		<button id="export-btn" class="button">导出</button>
+		<button id="clear-btn" class="button is-danger is-outlined">清空词库</button>
 	      </p>
 	    </div>
-	    <p><button id="clear-btn" class="button is-danger is-outlined">清空词库</button></p>
-
-	    <div class="table-container">
-	      <table class="table is-fullwidth is-hoverable">
-		<thead>
-		  <tr>
-		    <th>单词</th>
-		    <th>释义</th>
-		    <th>操作</th>
-		  </tr>
-		</thead>
-		<tbody>
-		  <tr id="add-form">
-		    <td><input name="key" type="text" class="input" /></td>
-		    <td><input name="value" type="text" class="input" /></td>
-		    <td><button id="add-btn" class="button is-primary is-small mb-0">添加</button></td>
-		  </tr>
-		</tbody>
-	      </table>
-	    </div>
 	  </div>
-        </div>
+
+	  <div class="table-container">
+	    <table class="table is-fullwidth is-hoverable is-narrow">
+	      <thead>
+		<tr>
+		  <th>单词</th>
+		  <th>释义</th>
+		  <th></th>
+		</tr>
+	      </thead>
+	      <tbody>
+		<tr id="add-form">
+		  <td><input name="key" type="text" class="input is-small" /></td>
+		  <td><input name="value" type="text" class="input is-small" /></td>
+		  <td class="has-text-right"><button id="add-btn" class="button is-primary is-small mb-0 is-rounded is-inverted">添加</button></td>
+		</tr>
+	      </tbody>
+	    </table>
+	  </div>	
+	</div>
       </div>
-    </section>
+    </div>
     <template id="row">
       <tr>
 	<td></td>
 	<td></td>
 	<td>
 	  <div class="buttons are-small mb-0">
-	    <button class="button is-danger is-outlined mb-0">删除</button>
+	    <button class="button is-danger mb-0 is-inverted is-rounded">删除</button>
 	  </div>
 	</td>
       </tr>
-    </template>    
-    <script src="words.js"></script>
+    </template>
+    <dialog id="import-modal">
+      <h4 class="title is-5">从文件导入</h4>
+      <hr />
+      <div class="field py-3">
+	<div class="field">
+	  <p class="control">
+	    <input class="input" type="file" name="source" id="id-file" />
+	  </p>
+	</div>
+	<p class="help">示例文件:
+	  <a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/CET4_edited.json">大学四级(4615)</a>,
+	  <a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/CET6_edited.json">大学六级(2270)</a>,
+	  <a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/GRE_8000_Words.json">考研(7744)</a>,
+	  <a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/GRE_abridged.json">考研(精简)(4333)</a>
+	  <a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/OALD8_abridged_edited.json">牛津高阶英语词典第八版(13653)</a>
+	</p>
+      </div>
+      <hr />
+      <div class="buttons is-right">
+	<button disabled id="import-btn" class="button is-primary">导入</button>
+	<button id="cancel-btn" class="button is-outlined">取消</button>
+      </div>
+    </dialog>
+    <script src="options.js"></script>
   </body>
 </html>

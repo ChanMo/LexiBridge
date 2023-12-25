@@ -1,6 +1,6 @@
 {
   "name": "LexiBridge: 英语学习，从阅读开始",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "LexiBridge 是一个开源、无服务器的英语学习应用程序，帮助英语学习者在阅读网页时学习新词汇，提升阅读流畅度。",
   "manifest_version": 3,
   "author": "chan.mo@outlook.com",
@@ -8,24 +8,30 @@
   "action": {
     "default_title": "LexiBridge",
     "default_popup": "popup.html",
-    "default_icon": "logo_96.png"
+    "default_icon": "icon_96.png"
   },  
   "content_scripts": [
     {
-    "matches": ["*://*/*"],
+    "matches": ["http://*/*", "https://*/*"],
     "js": ["script.js"],
     "css": ["app.css"]
   }
   ],
   "permissions": ["tabs", "storage", "tts"],
   "icons": {
-    "16": "logo_16.png",
-    "48": "logo_48.png",
-    "128": "logo_128.png"
+    "16": "icon_16.png",
+    "48": "icon_48.png",
+    "128": "icon_128.png"
   },
   "background": {
     "service_worker": "background.js"
   },
-  "options_page": "options.html"
+  "options_page": "options.html",
+  "web_accessible_resources": [
+    {
+    "resources": ["words/*"],
+    "matches": ["*://*/*"]
+  }
+  ]
 }
 

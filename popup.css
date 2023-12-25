@@ -3,20 +3,41 @@ body {
   width: 240px;
   margin: 0;
 }
+.is-text {
+  border: none;
+  background: none;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #454545;
+}
+.is-text:not(:last-child) {
+  margin: 0 .5rem 0;
+}
+.is-text:hover {
+  color: #000;
+}
+#footer {
+  text-align: center;
+  padding: .25rem 1rem;
+}
 #domain {
     font-size: 1rem;
     text-align: center;
     border-bottom: 1px solid #e3e3e3;
     padding: 0.75rem 1rem;
     margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 #main {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 3rem 0;
+    padding: 3rem 0 2rem;
 }
-button {
+#toggle {
     color: #ffffff;
     background: #7bc962;
     border-radius: 99px;
@@ -29,17 +50,17 @@ button {
     text-align: center;
     cursor: pointer;
 }
-button:hover, button:active {
+#toggle:hover, #toggle:active {
     background: #4e9c36;
 }
-button:active {
+#toggle:active {
     border-color: #95d481;
 }
-button.is-blocked {
+#toggle.is-blocked {
     color: #333;
     background: #e3e3e3;
     border-color: #efefef;
 }
-button.is-blocked:hover, button.is-blocked:active {
+#toggle.is-blocked:hover, #toggle.is-blocked:active {
     background: #dadada;
 }

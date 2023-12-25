@@ -1,0 +1,68 @@
+:root {
+  --background-color: #f0f4f9;
+}
+html, body {
+  overflow: hidden;
+  background: var(--background-color);
+}
+#main {
+  background: white;
+  border-radius: 32px;
+  height: calc(100vh - 3.25rem - 1.5rem);
+  overflow-y: auto;
+  padding: 2rem;
+  margin-right: 1.5rem;
+}
+.navbar {
+  background: var(--background-color) !important;
+}
+.navbar .navbar-item:hover {
+  background: #d3dbe5 !important;
+}
+#logo:hover {
+  background: transparent !important;
+}
+#left-panel {
+  width: 320px;
+  padding: 0rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 3.25rem);
+}
+#left-panel a {
+  border-radius: 99px;
+  padding: 0.75rem 1.5rem;
+  margin: .25rem 0;
+  color: rgba(0,0,0,0.87);
+}
+#left-panel a:hover {
+  background: #dde3ea;
+}
+#left-panel a.is-active {
+  background: #c2e7ff;
+  color: #001d35;
+}
+#left-panel .menu {
+  flex-grow: 1;
+}
+#left-panel footer {
+  text-align: center;
+  color: #666;
+}
+#main .table th {
+  color: #666;
+  font-size: 0.8rem;
+  border-bottom: 1px solid #e3e3e3;
+  font-weight: normal;
+}
+#main .table td {
+  border-color: #e3e3e3;
+}
+dialog {
+  border-radius: 16px;
+  border: none;
+  padding: 1.25rem;
+}
+dialog::backdrop {
+  background: rgba(0,0,0,0.6);
+}

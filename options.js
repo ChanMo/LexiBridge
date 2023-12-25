@@ -1,22 +1,99 @@
 (() => {
-  init();
-  async function init() {
-    let data = await chrome.storage.local.get(['blocked']);
-    data = data.blocked ? data.blocked : [];
-    const table = document.querySelector("table tbody");
-    // https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/template
-    data.map(row => {
-      const tr = document.getElementById("row");
-      const td = tr.content.querySelectorAll("td");
-      td[0].textContent = row;
-      const clone = document.importNode(tr.content, true);
+  const manifest = chrome.runtime.getManifest();
+  document.getElementById("version").textContent = 'v' + manifest.version;
+  
+  const totalSpan = document.getElementById("total-words");
+  loadData();
+  
+  // Add a click event on buttons to open a specific modal
+  const modal = document.getElementById("import-modal");
+  const importBtn = document.getElementById("import-btn");
+  const fileInput = document.getElementById("id-file");
+  document.getElementById("open-modal").addEventListener("click", () => {
+    modal.showModal();
+  });
+  document.getElementById("cancel-btn").addEventListener("click", () => {
+    importBtn.disabled = true;
+    fileInput.value = null;
+    modal.close();
+  });
+  fileInput.addEventListener("change", () => {
+    importBtn.disabled = false;
+  });
+  async function loadData() {
+    let res = await chrome.storage.local.get(["words"])
+    res = res.words ? res.words : []
+    totalSpan.textContent = res.length;
+    const tb = document.querySelector("table tbody");
+    res.map(i => {
+      const t = document.getElementById("row");
+      const td = t.content.querySelectorAll("td");
+      td[0].textContent = i[0];
+      td[1].textContent = i[1];
+
+      const clone = document.importNode(t.content, true);
       clone.querySelector(".button").addEventListener("click", async(e) => {
 	e.target.closest("tr").remove();
-	let domains = await chrome.storage.local.get(['blocked']);
-	domains = domains.blocked ? domains.blocked : [];
-	chrome.storage.local.set({"blocked": domains.filter(j => j !== row)});
-      });            
-      table.appendChild(clone);
+	let words = await chrome.storage.local.get(['words']);
+	words = words.words ? words.words : [];
+	chrome.storage.local.set({"words": words.filter(j => j[0] !== i[0])});
+      });      
+      tb.appendChild(clone);
     });
   }
+  document.getElementById("add-btn").addEventListener("click", async() => {
+    const key = document.querySelector("[name=key]");
+    const value = document.querySelector("[name=value]");
+    let words = await chrome.storage.local.get(["words"])
+    words = words.words ? words.words : [];
+    const res = await chrome.storage.local.set({"words": [[key.value,value.value], ...words ]});
+
+    const tb = document.querySelector("table tbody");
+    const t = document.getElementById("row");
+    const td = t.content.querySelectorAll("td");
+    td[0].textContent = key.value;
+    td[1].textContent = value.value;
+
+    const clone = document.importNode(t.content, true);
+    clone.querySelector(".button").addEventListener("click", async(e) => {
+      e.target.closest("tr").remove();
+      let words = await chrome.storage.local.get(['words']);
+      words = words.words ? words.words : [];
+      chrome.storage.local.set({"words": words.filter(j => j[0] !== key.value)});
+    });      
+    tb.insertBefore(clone, document.getElementById("add-form").nextSibling);
+    key.value = '';
+    value.value = '';
+    
+  });
+  document.getElementById("import-btn").addEventListener("click", (e) => {
+    e.target.classList.add("is-loading");
+    e.preventDefault();
+    const files = document.querySelector("[name=source]").files;
+    for (const file of files) {
+      const reader = new FileReader();
+      reader.onload = async(e) => {
+	const data = JSON.parse(e.target.result);
+	await chrome.storage.local.set({"words":data})
+	window.location.reload();
+      }
+      reader.readAsText(file);
+    }
+  });
+  document.getElementById("clear-btn").addEventListener("click", async(e) => {
+    if(window.confirm('确定清空词库吗?')) {
+      e.target.classList.add("is-loading");
+      e.preventDefault();
+      await chrome.storage.local.set({"words":[]})
+      window.location.reload();
+    }
+  });
+  document.getElementById("export-btn").addEventListener("click", async(e) => {
+    const res = await chrome.storage.local.get(['words']);
+    const resStr = JSON.stringify(res.words);
+    const a = document.createElement("a");
+    a.href = `data:text/json;charset=utf-8,${resStr}`;	//
+    a.download = 'my_words.json'
+    a.click();
+  });
 })();

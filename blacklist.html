@@ -5,48 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>禁用域名 | LexiBridge</title>
     <link rel="stylesheet" href="bulma.min.css">
+    <link rel="stylesheet" href="options.css">
   </head>
   <body>
-    <section class="section">
-      <div class="container">
-        <h1 class="title">LexiBridge设置</h1>
-        <div class="columns">
-          <div class="column is-narrow">
-            <aside class="menu" style="width:200px;">
-	      <ul class="menu-list">
-		<li><a href="options.html">单词库</a></li>
-		<li><a class="is-active">禁用域名</a></li>
-	      </ul>
-            </aside>
-          </div>
-	  <div class="column">
-	    <!-- <h2 class="subtitle is-4">Exclude sites</h2> -->
-	    <div class="table-container">
-	      <table class="table is-fullwidth">
-		<thead>
-		  <tr>
-		    <th>域名</th>
-		    <th></th>
-		  </tr>
-		</thead>
-		<tbody>
-		</tbody>
-	      </table>
-	    </div>
-	  </div>
-        </div>
+    <nav class="navbar is-white">
+      <div class="navbar-brand pl-5">
+	<a href="options.html" id="logo" class="navbar-item has-text-weight-bold is-size-5">LexiBridge</a>
       </div>
-    </section>
+      <div class="navbar-menu">
+	<div class="navbar-end">
+	  <a class="navbar-item" href="https://github.com/ChanMo/LexiBridge/issues" target="_blank">Issues</a>
+	  <a class="navbar-item" href="https://github.com/ChanMo/LexiBridge" target="_blank">Github</a>
+	</div>
+      </div>
+    </nav>
+    <div class="columns">
+      <div class="column is-narrow pr-0">
+	<div id="left-panel">
+          <aside class="menu">
+	    <ul class="menu-list">
+	      <li><a href="options.html">单词库</a></li>
+	      <li><a href="blacklist.html" class="is-active">禁用域名</a></li>
+	    </ul>
+          </aside>
+	  <footer>
+	    <p id="version"></p>
+	  </footer>
+	</div>
+      </div>
+      <div class="column">
+	<div id="main">
+	  <h2 class="title is-4">禁用域名</h2>
+	  <div class="table-container">
+	    <table class="table is-fullwidth is-hoverable is-narrow">
+	      <thead>
+		<tr>
+		  <th>域名</th>
+		  <th></th>
+		</tr>
+	      </thead>
+	      <tbody>
+	      </tbody>
+	    </table>
+	  </div>
+	</div>
+      </div>
+    </div>
     <template id="row">
       <tr>
 	<td></td>
 	<td>
-	  <div class="buttons are-small">
-	    <button class="button is-danger is-outlined">删除</button>
+	  <div class="buttons are-small is-right">
+	    <button class="button is-danger is-inverted is-rounded">删除</button>
 	  </div>
 	</td>
       </tr>
     </template>
-    <script src="options.js"></script>
+    <script src="blacklist.js"></script>
   </body>
 </html>

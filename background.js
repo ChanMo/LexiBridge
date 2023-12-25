@@ -1,3 +1,10 @@
+chrome.runtime.onInstalled.addListener(async() => {
+  const url = chrome.runtime.getURL("words/CET6_edited.json");
+  const res = await fetch(url);
+  const resJson = await res.json();
+  await chrome.storage.local.set({"words":resJson})
+  chrome.tabs.create({url: 'options.html'});
+});
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if(request.action == 'is-blocked') {
     const domain = new URL(sender.origin).hostname;
