@@ -21,11 +21,28 @@
     importBtn.disabled = false;
   });
   async function loadData() {
+    const page = parseInt(new URL(window.location.href).searchParams.get('page')??1);
+    const limit = 100;
     let res = await chrome.storage.local.get(["words"])
     res = res.words ? res.words : []
     totalSpan.textContent = res.length;
+
+    const pagination = document.getElementById("pagination");
+    pagination.content.querySelector(".current-page").textContent = page;
+    if(page > 1) {
+      pagination.content.querySelector(".previous-page").href = `?page=${page-1}`;
+    } else {
+      pagination.content.querySelector(".previous-page").remove();
+    }
+    if(res.length > (page-1) * limit) {
+      pagination.content.querySelector(".next-page").href = `?page=${page+1}`;
+    } else {
+      pagination.content.querySelector(".next-page").remove();
+    }
+    document.querySelector("table").parentNode.parentNode.appendChild(pagination.content);
+    
     const tb = document.querySelector("table tbody");
-    res.slice(0,200).map(i => {
+    res.slice((page-1)*limit, page*limit).map(i => {
       const t = document.getElementById("row");
       const td = t.content.querySelectorAll("td");
       td[0].textContent = i[0];

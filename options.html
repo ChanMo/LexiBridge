@@ -32,8 +32,8 @@
           <md-outlined-button id="export-btn">导出</md-outlined-button>
           <md-outlined-button id="clear-btn" class="is-danger">清空词库</md-outlined-button>
 	</div>
-	<div class="table-container">
-	  <table class="table is-fullwidth is-hoverable">
+	<div class="table-container scroll-wrapper">
+	  <table>
 	    <thead>
 	      <tr>
 		<th>单词</th>
@@ -49,8 +49,8 @@
 		<td>
 		  <md-outlined-text-field name="value" type="text"></md-outlined-text-field>
 		</td>
-		<td class="has-text-right">
-		  <md-outlined-button class="is-small" id="add-btn" >添加</md-outlined-button>
+		<td>
+		  <md-outlined-button id="add-btn" >添加</md-outlined-button>
 		</td>
 	      </tr>
 	    </tbody>
@@ -58,25 +58,27 @@
 	</div>
       </main>
     </nav-drawer>
+    <template id="pagination">
+      <div class="pagination">
+	<md-outlined-button link class="previous-page">上一页</md-outlined-button>
+	<md-outlined-button class="current-page" disabled></md-outlined-button>
+	<md-outlined-button link class="next-page">下一页</md-outlined-button>
+      </div>
+    </template>
     <template id="row">
       <tr>
 	<td></td>
 	<td></td>
 	<td>
-	  <md-text-button class="is-small is-danger">删除</md-text-button>
+	  <md-text-button>删除</md-text-button>
 	</td>
       </tr>
     </template>
     <md-dialog id="import-modal">
       <div slot="headline">从文件导入</div>
       <div slot="content" method="dialog">
-      <div class="field py-3">
-	<div class="field">
-	  <p class="control">
-	    <input type="file" accept=".json" name="source" id="id-file" />
-	  </p>
-	</div>
-	<p class="help">示例文件:
+	<input type="file" accept=".json" name="source" id="id-file" />
+	<p>示例文件:
 	  <a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/CET4_edited.json">大学四级(4615)</a>,
 	  <a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/CET6_edited.json">大学六级(2270)</a>,
 	  <a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/GRE_8000_Words.json">考研(7744)</a>,
@@ -84,12 +86,9 @@
 	  <a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/OALD8_abridged_edited.json">牛津高阶英语词典第八版(13653)</a>
 	</p>
       </div>
-      </div>
       <div slot="actions">
-      <div class="buttons is-right">
 	<md-text-button disabled id="import-btn">导入</md-text-button>
 	<md-text-button id="cancel-btn">取消</md-text-button>
-      </div>
       </div>
     </md-dialog>
     <script src="options.js"></script>

@@ -89,9 +89,15 @@ main > table {
   max-width: max-content;
 }
 
+.table-container {
+  max-height: 65vh;
+  overflow: auto;
+  border-radius: var(--catalog-shape-xl);
+}
 table {
   width: 100%;
   border-spacing: 0;
+  position: relative;
 }
 
 td,
@@ -110,12 +116,17 @@ tr td:last-of-type,
 tr th:last-of-type {
   border-inline-end: 1px solid var(--md-sys-color-outline-variant);
 }
-
 th {
   background-color: var(--md-sys-color-surface-container);
   text-shadow: 0 1px 1px var(--md-sys-color-surface-container-lowest);
   color: var(--md-sys-color-on-surface);
   font-size: 1.25em;
+
+}
+thead {
+  top: 0;
+  position: sticky;
+  z-index: 9;
 }
 
 :not(pre) > code {
@@ -249,4 +260,22 @@ blockquote.warning {
 blockquote.warning,
 blockquote.warning a {
   color: var(--md-sys-color-on-error-container);
+}
+
+.pagination {
+  display: flex;
+  margin-block: 1.5rem;
+  gap: 8px;
+  align-items: center;
+  overflow: hidden;
+}
+
+.table-container::-webkit-scrollbar {
+  background-color: transparent;
+  width: 8px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background-color: var(--md-sys-color-primary);
+  border-radius: 4px;
 }
