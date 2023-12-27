@@ -1,0 +1,23 @@
+{
+  "name": "lexibridge",
+  "version": "1.0.0",
+  "description": "* LexiBridge",
+  "main": "background.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@lit-labs/motion": "^1.0.6",
+    "@material/web": "^1.1.1",
+    "@preact/signals-core": "^1.5.1",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "lit": "^3.1.0",
+    "rollup": "^4.9.1"
+  }
+}

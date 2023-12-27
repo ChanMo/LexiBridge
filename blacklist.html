@@ -4,59 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>禁用域名 | LexiBridge</title>
-    <link rel="stylesheet" href="bulma.min.css">
-    <link rel="stylesheet" href="options.css">
+    <link rel="stylesheet" href="theme.css" />
+    <link rel="stylesheet" href="global.css" />
+    <link rel="stylesheet" href="md-layout.css" />
+    <script type="module" src="./bundle.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&amp;display=swap">
   </head>
   <body>
-    <nav class="navbar is-white">
-      <div class="navbar-brand pl-5">
-	<a href="options.html" id="logo" class="navbar-item has-text-weight-bold is-size-5">LexiBridge</a>
-      </div>
-      <div class="navbar-menu">
-	<div class="navbar-end">
-	  <a class="navbar-item" href="https://github.com/ChanMo/LexiBridge/issues" target="_blank">Issues</a>
-	  <a class="navbar-item" href="https://github.com/ChanMo/LexiBridge" target="_blank">Github</a>
-	</div>
-      </div>
-    </nav>
-    <div class="columns">
-      <div class="column is-narrow pr-0">
-	<div id="left-panel">
-          <aside class="menu">
-	    <ul class="menu-list">
-	      <li><a href="options.html">单词库</a></li>
-	      <li><a href="blacklist.html" class="is-active">禁用域名</a></li>
-	    </ul>
-          </aside>
-	  <footer>
-	    <p id="version"></p>
-	  </footer>
-	</div>
-      </div>
-      <div class="column">
+    <nav-drawer>
+      <top-app-bar slot="top-app-bar"></top-app-bar>
+      <md-list role="menubar" class="nav">
+	<md-list-item type="link" href="options.html">单词库</md-list-item>
+	<md-list-item selected="selected" type="link" href="blacklist.html">禁用域名</md-list-item>
+      </md-list>
+      <main slot="app-content">
+	<h2>禁用域名</h2>
 	<div id="main">
-	  <h2 class="title is-4">禁用域名</h2>
-	  <div class="table-container">
-	    <table class="table is-fullwidth is-hoverable is-narrow">
-	      <thead>
-		<tr>
-		  <th>域名</th>
-		  <th></th>
-		</tr>
-	      </thead>
-	      <tbody>
-	      </tbody>
-	    </table>
-	  </div>
+	  <table>
+	    <thead>
+	      <tr>
+		<th>域名</th>
+		<th style="width:1px;"></th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	    </tbody>
+	  </table>
 	</div>
-      </div>
-    </div>
+      </main>
+    </nav-drawer>
     <template id="row">
       <tr>
 	<td></td>
 	<td>
-	  <div class="buttons are-small is-right">
-	    <button class="button is-danger is-inverted is-rounded">删除</button>
+	  <div>
+	    <md-text-button>删除</md-text-button>
 	  </div>
 	</td>
       </tr>

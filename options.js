@@ -1,20 +1,20 @@
 (() => {
-  const manifest = chrome.runtime.getManifest();
-  document.getElementById("version").textContent = 'v' + manifest.version;
-  
+  // const manifest = chrome.runtime.getManifest();
+  // document.getElementById("version").textContent = 'v' + manifest.version;
+
   const totalSpan = document.getElementById("total-words");
   loadData();
-  
+
   // Add a click event on buttons to open a specific modal
   const modal = document.getElementById("import-modal");
   const importBtn = document.getElementById("import-btn");
   const fileInput = document.getElementById("id-file");
   document.getElementById("open-modal").addEventListener("click", () => {
-    modal.showModal();
+    modal.show();
   });
   document.getElementById("cancel-btn").addEventListener("click", () => {
     importBtn.disabled = true;
-    fileInput.value = null;
+    fileInput.value = null;	
     modal.close();
   });
   fileInput.addEventListener("change", () => {
@@ -25,19 +25,19 @@
     res = res.words ? res.words : []
     totalSpan.textContent = res.length;
     const tb = document.querySelector("table tbody");
-    res.map(i => {
+    res.slice(0,200).map(i => {
       const t = document.getElementById("row");
       const td = t.content.querySelectorAll("td");
       td[0].textContent = i[0];
       td[1].textContent = i[1];
 
       const clone = document.importNode(t.content, true);
-      clone.querySelector(".button").addEventListener("click", async(e) => {
+      clone.querySelector("md-text-button").addEventListener("click", async(e) => {
 	e.target.closest("tr").remove();
 	let words = await chrome.storage.local.get(['words']);
 	words = words.words ? words.words : [];
 	chrome.storage.local.set({"words": words.filter(j => j[0] !== i[0])});
-      });      
+      });
       tb.appendChild(clone);
     });
   }
@@ -55,19 +55,19 @@
     td[1].textContent = value.value;
 
     const clone = document.importNode(t.content, true);
-    clone.querySelector(".button").addEventListener("click", async(e) => {
+    clone.querySelector("md-text-button").addEventListener("click", async(e) => {
       e.target.closest("tr").remove();
       let words = await chrome.storage.local.get(['words']);
       words = words.words ? words.words : [];
       chrome.storage.local.set({"words": words.filter(j => j[0] !== key.value)});
-    });      
+    });
     tb.insertBefore(clone, document.getElementById("add-form").nextSibling);
     key.value = '';
     value.value = '';
-    
+
   });
-  document.getElementById("import-btn").addEventListener("click", (e) => {
-    e.target.classList.add("is-loading");
+  importBtn.addEventListener("click", (e) => {
+    //e.target.classList.add("is-loading");
     e.preventDefault();
     const files = document.querySelector("[name=source]").files;
     for (const file of files) {

@@ -4,89 +4,76 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>单词库 | LexiBridge</title>
-    <link rel="stylesheet" href="bulma.min.css">
-    <link rel="stylesheet" href="options.css" />
+    <link rel="stylesheet" href="theme.css" />
+    <link rel="stylesheet" href="global.css" />
+    <link rel="stylesheet" href="md-layout.css" />
+    <style>
+     .buttons {
+       display: flex;
+       margin-bottom: 1.5rem;
+       overflow: hidden;
+       gap: 8px;
+     }
+    </style>
+    <script type="module" src="./bundle.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&amp;display=swap">
   </head>
   <body>
-    <nav class="navbar is-white">
-      <div class="navbar-brand pl-5">
-	<a href="options.html" id="logo" class="navbar-item has-text-weight-bold is-size-5">LexiBridge</a>
-      </div>
-      <div class="navbar-menu">
-	<div class="navbar-end">
-	  <a class="navbar-item" href="https://github.com/ChanMo/LexiBridge/issues" target="_blank">Issues</a>
-	  <a class="navbar-item" href="https://github.com/ChanMo/LexiBridge" target="_blank">Github</a>
+    <nav-drawer>
+      <top-app-bar slot="top-app-bar"></top-app-bar>
+      <md-list role="menubar" class="nav">
+	<md-list-item selected="selected" type="link" href="options.html">单词库</md-list-item>
+	<md-list-item type="link" href="blacklist.html">禁用域名</md-list-item>
+      </md-list>
+      <main slot="app-content">
+	<h2 class="mb-0">我的词库 (当前总数:<span id="total-words">0</span>)</h2>
+	<div class="buttons">
+          <md-filled-button id="open-modal">导入</md-filled-button>
+          <md-outlined-button id="export-btn">导出</md-outlined-button>
+          <md-outlined-button id="clear-btn" class="is-danger">清空词库</md-outlined-button>
 	</div>
-      </div>
-    </nav>
-    <div class="columns">
-      <div class="column is-narrow pr-0">
-	<div id="left-panel">
-          <aside class="menu">
-	    <ul class="menu-list">
-	      <li><a class="is-active">单词库</a></li>
-	      <li><a href="blacklist.html">禁用域名</a></li>
-	    </ul>
-          </aside>
-	  <footer>
-	    <p id="version"></p>
-	  </footer>
+	<div class="table-container">
+	  <table class="table is-fullwidth is-hoverable">
+	    <thead>
+	      <tr>
+		<th>单词</th>
+		<th>释义</th>
+		<th style="width:1px;"></th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	      <tr id="add-form">
+		<td>
+		  <md-outlined-text-field name="key" type="text"></md-outlined-text-field>
+		</td>
+		<td>
+		  <md-outlined-text-field name="value" type="text"></md-outlined-text-field>
+		</td>
+		<td class="has-text-right">
+		  <md-outlined-button class="is-small" id="add-btn" >添加</md-outlined-button>
+		</td>
+	      </tr>
+	    </tbody>
+	  </table>
 	</div>
-      </div>
-      <div class="column">
-	<div id="main">
-	  <div class="level">
-	    <div class="level-left">
-	      <h2 class="title is-4">我的词库 (当前总数:<span id="total-words">0</span>)</h2>	      
-	    </div>
-	    <div class="level-right">
-	      <p class="buttons">
-		<button id="open-modal" class="button is-primary">导入</button>
-		<button id="export-btn" class="button">导出</button>
-		<button id="clear-btn" class="button is-danger is-outlined">清空词库</button>
-	      </p>
-	    </div>
-	  </div>
-
-	  <div class="table-container">
-	    <table class="table is-fullwidth is-hoverable is-narrow">
-	      <thead>
-		<tr>
-		  <th>单词</th>
-		  <th>释义</th>
-		  <th></th>
-		</tr>
-	      </thead>
-	      <tbody>
-		<tr id="add-form">
-		  <td><input name="key" type="text" class="input is-small" /></td>
-		  <td><input name="value" type="text" class="input is-small" /></td>
-		  <td class="has-text-right"><button id="add-btn" class="button is-primary is-small mb-0 is-rounded is-inverted">添加</button></td>
-		</tr>
-	      </tbody>
-	    </table>
-	  </div>	
-	</div>
-      </div>
-    </div>
+      </main>
+    </nav-drawer>
     <template id="row">
       <tr>
 	<td></td>
 	<td></td>
 	<td>
-	  <div class="buttons are-small mb-0">
-	    <button class="button is-danger mb-0 is-inverted is-rounded">删除</button>
-	  </div>
+	  <md-text-button class="is-small is-danger">删除</md-text-button>
 	</td>
       </tr>
     </template>
-    <dialog id="import-modal">
-      <h4 class="title is-5">从文件导入</h4>
-      <hr />
+    <md-dialog id="import-modal">
+      <div slot="headline">从文件导入</div>
+      <div slot="content" method="dialog">
       <div class="field py-3">
 	<div class="field">
 	  <p class="control">
-	    <input class="input" type="file" name="source" id="id-file" />
+	    <input type="file" accept=".json" name="source" id="id-file" />
 	  </p>
 	</div>
 	<p class="help">示例文件:
@@ -97,12 +84,14 @@
 	  <a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/OALD8_abridged_edited.json">牛津高阶英语词典第八版(13653)</a>
 	</p>
       </div>
-      <hr />
-      <div class="buttons is-right">
-	<button disabled id="import-btn" class="button is-primary">导入</button>
-	<button id="cancel-btn" class="button is-outlined">取消</button>
       </div>
-    </dialog>
+      <div slot="actions">
+      <div class="buttons is-right">
+	<md-text-button disabled id="import-btn">导入</md-text-button>
+	<md-text-button id="cancel-btn">取消</md-text-button>
+      </div>
+      </div>
+    </md-dialog>
     <script src="options.js"></script>
   </body>
 </html>

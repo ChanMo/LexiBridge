@@ -12,6 +12,7 @@ LexiBridge：这个名称将“lexicon”（词汇）和“bridge”（桥梁）
 
 ** TODO:
 
+- [ ] 使用Material/web
 - [ ] 增加词库一键切换
 - [ ] 优化options页面
 - [ ] 增加更多Highlight样式选项

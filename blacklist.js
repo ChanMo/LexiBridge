@@ -1,6 +1,6 @@
 (() => {
-  const manifest = chrome.runtime.getManifest();
-  document.getElementById("version").textContent = 'v' + manifest.version;
+  // const manifest = chrome.runtime.getManifest();
+  // document.getElementById("version").textContent = 'v' + manifest.version;
   
   init();
   async function init() {
@@ -14,7 +14,7 @@
 	const td = tr.content.querySelectorAll("td");
 	td[0].textContent = row;
 	const clone = document.importNode(tr.content, true);
-	clone.querySelector(".button").addEventListener("click", async(e) => {
+	clone.querySelector("md-text-button").addEventListener("click", async(e) => {
 	  e.target.closest("tr").remove();
 	  let domains = await chrome.storage.local.get(['blocked']);
 	  domains = domains.blocked ? domains.blocked : [];
@@ -26,7 +26,7 @@
       const empty = document.createElement("div");
       empty.classList.add("block", "has-text-centered", "py-6");
       empty.textContent = "Empty.";
-      const root = document.querySelector("#main .table-container");
+      const root = document.querySelector("#main");
       root.innerHTML = '';
       root.appendChild(empty);
     }      
