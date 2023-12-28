@@ -13,6 +13,14 @@
        margin-bottom: 1.5rem;
        overflow: hidden;
        gap: 8px;
+       align-items: center;
+     }
+     #search-input {
+       --md-outlined-text-field-top-space: 8px;
+       --md-outlined-text-field-bottom-space: 8px;       
+     }
+     #clear-btn {
+       /* --md-sys-color-on-surface-variant: var(--md-sys-color-error); */
      }
     </style>
     <script type="module" src="./bundle.js"></script>
@@ -27,34 +35,40 @@
       </md-list>
       <main slot="app-content">
 	<h2 class="mb-0">我的词库 (当前总数:<span id="total-words">0</span>)</h2>
+
 	<div class="buttons">
-          <md-filled-button id="open-modal">导入</md-filled-button>
-          <md-outlined-button id="export-btn">导出</md-outlined-button>
-          <md-outlined-button id="clear-btn" class="is-danger">清空词库</md-outlined-button>
+	  <md-outlined-text-field id="search-input" name="search" placeholder="搜索单词" type="search">
+	    <md-icon slot="leading-icon">search</md-icon>
+	  </md-outlined-text-field>
+	  <md-filled-button id="search-btn">搜索</md-filled-button>
+	  <div style="flex-grow:1;"></div>
+	  <md-icon-button title="手动添加" aria-label="手动添加" id="open-add-modal">
+	    <md-icon>add</md-icon>
+	  </md-icon-button>
+	  <md-icon-button title="导入" aria-label="导入" id="open-modal">
+	    <md-icon>file_upload</md-icon>
+	  </md-icon-button>
+	  <md-icon-button title="导出" aria-label="导出" id="export-btn">
+	    <md-icon>file_download</md-icon>
+	  </md-icon-button>
+	  <md-icon-button title="清空词库" aria-label="清空词库" id="clear-btn">
+	    <md-icon>delete_forever</md-icon>
+	  </md-icon-button>
 	</div>
-	<div class="table-container scroll-wrapper">
-	  <table>
-	    <thead>
-	      <tr>
-		<th>单词</th>
-		<th>释义</th>
-		<th style="width:1px;"></th>
-	      </tr>
-	    </thead>
-	    <tbody>
-	      <tr id="add-form">
-		<td>
-		  <md-outlined-text-field name="key" type="text"></md-outlined-text-field>
-		</td>
-		<td>
-		  <md-outlined-text-field name="value" type="text"></md-outlined-text-field>
-		</td>
-		<td>
-		  <md-outlined-button id="add-btn" >添加</md-outlined-button>
-		</td>
-	      </tr>
-	    </tbody>
-	  </table>
+	<div class="table-container">
+	  <div class="scroll-wrapper">	  
+	    <table>
+	      <thead>
+		<tr>
+		  <th>单词</th>
+		  <th>释义</th>
+		  <th style="width:1px;"></th>
+		</tr>
+	      </thead>
+	      <tbody>
+	      </tbody>
+	    </table>
+	  </div>
 	</div>
       </main>
     </nav-drawer>
@@ -74,6 +88,21 @@
 	</td>
       </tr>
     </template>
+    <md-dialog id="add-modal">
+      <p slot="headline">手动添加</p>
+      <div slot="content" style="width:560px;">
+	<div class="field">
+	  <md-outlined-text-field label="单词" name="key" type="text"></md-outlined-text-field>
+	</div>
+	<div class="field">
+	  <md-outlined-text-field label="释义" rows="3" name="value" type="textarea"></md-outlined-text-field>
+	</div>
+      </div>
+      <footer slot="actions">
+	<md-text-button disabled id="add-btn">添加</md-text-button>
+	<md-text-button id="cancel-add-btn">取消</md-text-button>
+      </footer>     
+    </md-dialog>
     <md-dialog id="import-modal">
       <div slot="headline">从文件导入</div>
       <div slot="content" method="dialog">
