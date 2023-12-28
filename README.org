@@ -12,10 +12,12 @@ LexiBridge：这个名称将“lexicon”（词汇）和“bridge”（桥梁）
 
 ** TODO:
 
-- [ ] 使用Material/web
-- [ ] 增加词库一键切换
-- [ ] 优化options页面
+- [ ] 导入导出增加CSV支持
 - [ ] 增加更多Highlight样式选项
+- [ ] 增加词库一键切换
+- [X] 增加搜索和分页
+- [X] 使用Material/web
+- [X] 优化options页面
 - [X] 使用Highlight代替span标签
 - [X] 在弹出框中增加删除单词
 

@@ -5,7 +5,7 @@
     border-radius: 16px;
     border: none;
     box-shadow: 1px 2px 4px rgba(0,0,0,0.1);
-    width: 320px;
+    width: 400px;
     padding: 16px;
     margin: auto;
 }
@@ -13,30 +13,35 @@
     background: rgba(0,0,0,0.12);
 }
 .lexibridge-popover h5 {
-    font-size: 1.25rem;
-    font-weight: bold;
-    margin: 0 0 1rem;
-    line-height: 1.5;
-    color: #333;
-    text-transform: initial;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0 0 1rem;
+  line-height: 1.5;
+  color: #333;
+  text-transform: initial;
+  text-shadow: none;
+  font-style: normal;
 }
 .lexibridge-popover span {
   margin-left: 0.25rem;
   cursor: pointer;
+  font-style: normal;
 }
 .lexibridge-popover p {
-    font-size: 1rem;
-    line-height: 1.5;
-    color: #666;
-    margin: 0 0 1.5rem;
-    font-weight: normal;
+  font-size: 1.2rem;
+  line-height: 1.5;
+  color: #666;
+  margin: 0 0 1.5rem;
+  font-weight: normal;
+  text-shadow: none;
+  font-style: normal;    
 }
 .lexibridge-popover button {
     padding: .5rem 1rem;
     color: #ffffff;
     background: #7bc962;
     border: 1px solid #4e9c36;
-    font-size: 0.85rem;
+    font-size: 1rem;
     border-radius: 8px;
     outline: none;
     cursor: pointer;

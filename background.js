@@ -1,8 +1,11 @@
 chrome.runtime.onInstalled.addListener(async() => {
-  const url = chrome.runtime.getURL("words/CET6_edited.json");
-  const res = await fetch(url);
-  const resJson = await res.json();
-  await chrome.storage.local.set({"words":resJson})
+  const words = (await chrome.storage.local.get(["words"])).words??[];
+  if(words.length <= 0) {
+    const url = chrome.runtime.getURL("words/CET6_edited.json");
+    const res = await fetch(url);
+    const resJson = await res.json();
+    await chrome.storage.local.set({"words":resJson})
+  }    
   chrome.tabs.create({url: 'options.html'});
 });
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {

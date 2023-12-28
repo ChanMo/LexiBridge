@@ -1,6 +1,6 @@
 {
   "name": "LexiBridge: 英语学习，从阅读开始",
-  "version": "1.2.7",
+  "version": "1.2.8",
   "description": "LexiBridge 是一个开源、无服务器的英语学习应用程序，帮助英语学习者在阅读网页时学习新词汇，提升阅读流畅度。",
   "manifest_version": 3,
   "author": "chan.mo@outlook.com",
