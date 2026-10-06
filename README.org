@@ -12,25 +12,27 @@ LexiBridge：这个名称将“lexicon”（词汇）和“bridge”（桥梁）
 
 ** 开发
 
+没有依赖，也不需要构建：在 =chrome://extensions= 中"加载已解压的扩展程序"，选择仓库根目录即可。
+
 #+begin_src sh
-npm ci            # 安装依赖
-npm run build     # 打包管理页组件 (index.js -> bundle.js)
-npm test          # 单元测试 (node:test，无需额外依赖)
+npm test          # 单元测试 (node:test)
 npm run package   # 生成 dist/lexibridge-<version>.zip，用于上传应用商店
 #+end_src
 
-- =icons/=: 图标 SVG 源文件 (商店 128 / 满版 / 工具栏小尺寸)，=icons/render.js= 导出 PNG
+- =lexicon.js=: 分词、词形还原、释义解析，内容脚本、管理页和测试共用
+- =script.js=: 内容脚本，负责高亮和交互
+- =ui.js=: 网页内的单词卡片、加词按钮、提示条 (Shadow DOM，不受网页样式影响)
+- =background.js=: 安装初始化、TTS 发音、从内置词库查释义
+- =popup.*=: 扩展图标弹出面板
+- =options.*=, =level.*=, =blacklist.*=: 管理页 (单词库、选择水平、禁用网站)，共用 =pages.css= 和 =page.js=
+- =levels.js=: 水平定义，由内置词表做差集生成词库
+- =icons/=: 图标 SVG 源文件 (商店 128 / 满版 / 工具栏小尺寸) 和界面图标 =ui.svg=；
+  =icons/render.js= 导出 PNG
 
 ** 品牌
 
 墨与荧光笔：墨蓝 =#1f2a44= 为主色，荧光金 =#f5b83d= 为标记色，纸色 =#f7f1e3= 为底色。
 网页上的下划线高亮用 =#c98400=。高亮色避开蓝/紫 (链接) 和红 (拼写错误)。
-
-- =lexicon.js=: 分词、词形还原和词库匹配，内容脚本、管理页和测试共用
-- =levels.js=, =level.html=: 水平定义与选择页面，由内置词表做差集生成词库
-- =script.js=: 内容脚本，负责高亮和交互
-- =ui.js=: 网页内的单词卡片、加词按钮、提示条 (Shadow DOM，不受网页样式影响)
-- =background.js=: 安装初始化、TTS 发音、从内置词库查释义
 
 ** TODO:
 
@@ -38,15 +40,14 @@ npm run package   # 生成 dist/lexibridge-<version>.zip，用于上传应用商
 - [X] 高亮样式可选 (底色 / 下划线 / 点线)，在扩展弹出面板中切换
 - [X] 单词卡片重新设计：贴近单词弹出、解析音标/词性/义项、深色模式、可撤销
 - [X] 首次使用选择水平，可随时一键切换 (已掌握词表与要学词表做差集)
-- [ ] 图标字体本地化 (Google Fonts 在国内无法加载)
-- [ ] 管理页、选择水平页、官网应用新品牌色
+- [X] 管理页改为纯 HTML/CSS，去掉 Material Web 与 Google Fonts 依赖
+- [ ] 官网应用新品牌色
 - [X] 新图标与品牌色 (墨与荧光笔)，工具栏 16/32 单独绘制
 - [X] 在网页中选中单词添加到词库 (释义自动从内置词库查找)
 - [X] 词形还原 (abandoned -> abandon)、标点和连字符分词
 - [X] 动态内容高亮、多标签页同步删除
 - [X] 导入合并、校验，搜索支持释义
 - [X] 增加搜索和分页
-- [X] 使用Material/web
 - [X] 优化options页面
 - [X] 使用Highlight代替span标签
 - [X] 在弹出框中增加删除单词

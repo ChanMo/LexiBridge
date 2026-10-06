@@ -1,34 +1,74 @@
-(() => {
-  // const manifest = chrome.runtime.getManifest();
-  // document.getElementById("version").textContent = 'v' + manifest.version;
-  
-  init();
-  async function init() {
-    let data = await chrome.storage.local.get(['blocked']);
-    data = data.blocked ? data.blocked : [];
-    if(data.length) {
-      const table = document.querySelector("table tbody");
-      // https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/template
-      data.map(row => {
-	const tr = document.getElementById("row");
-	const td = tr.content.querySelectorAll("td");
-	td[0].textContent = row;
-	const clone = document.importNode(tr.content, true);
-	clone.querySelector("md-text-button").addEventListener("click", async(e) => {
-	  e.target.closest("tr").remove();
-	  let domains = await chrome.storage.local.get(['blocked']);
-	  domains = domains.blocked ? domains.blocked : [];
-	  chrome.storage.local.set({"blocked": domains.filter(j => j !== row)});
-	});            
-	table.appendChild(clone);
-      });
-    } else {
-      const empty = document.createElement("div");
-      empty.classList.add("block", "has-text-centered", "py-6");
-      empty.textContent = "Empty.";
-      const root = document.querySelector("#main");
-      root.innerHTML = '';
-      root.appendChild(empty);
-    }      
+(async() => {
+  const $ = (id) => document.getElementById(id);
+  const {el, icon, toast} = Page;
+  let blocked = (await chrome.storage.local.get(['blocked'])).blocked ?? [];
+  const save = (list) => chrome.storage.local.set({blocked: list});
+
+  // "https://www.bbc.com/news" or "www.bbc.com" -> "www.bbc.com"
+  function hostnameOf(text) {
+    const value = text.trim();
+    if(!value) return null;
+    try {
+      const host = new URL(value.includes('://') ? value : `http://${value}`).hostname;
+      return /^[a-z0-9.-]+$/.test(host) && (host.includes('.') || host === 'localhost') ? host : null;
+    } catch {
+      return null;
+    }
   }
+
+  function render() {
+    const list = $("list");
+    if(!blocked.length) {
+      const empty = el('div', 'empty');
+      empty.append(el('b', '', '还没有禁用任何网站'), el('div', '', '在不需要标出生词的网站上，点击浏览器工具栏里的 LexiBridge 图标，关闭开关即可。'));
+      list.replaceChildren(empty);
+      return;
+    }
+    list.replaceChildren(...blocked.map(domain => {
+      const row = el('div', 'site-row');
+      const remove = el('button', 'icon-btn danger');
+      remove.type = 'button';
+      remove.title = remove.ariaLabel = `移除 ${domain}`;
+      remove.appendChild(icon('close'));
+      remove.addEventListener('click', async() => {
+        const index = blocked.indexOf(domain);
+        await save(blocked.filter(d => d !== domain));
+        toast(`已在 ${domain} 重新启用`, '撤销', async() => {
+          const now = (await chrome.storage.local.get(['blocked'])).blocked ?? [];
+          if(now.includes(domain)) return;
+          now.splice(Math.min(index, now.length), 0, domain);
+          await save(now);
+        });
+      });
+      const ic = icon('block');
+      ic.style.color = 'var(--muted)';
+      row.append(ic, el('span', 'domain', domain), remove);
+      return row;
+    }));
+  }
+
+  $("add-form").addEventListener("submit", async(e) => {
+    e.preventDefault();
+    const host = hostnameOf($("domain").value);
+    const error = $("add-error");
+    if(!host) {
+      error.textContent = '请输入有效的域名，例如 www.bbc.com';
+      error.hidden = false;
+      return;
+    }
+    error.hidden = true;
+    $("domain").value = '';
+    if(!blocked.includes(host)) await save([...blocked, host]);
+    toast(`已在 ${host} 停用`);
+  });
+
+  // The popup switch updates this list too.
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if(area === 'local' && changes.blocked) {
+      blocked = changes.blocked.newValue ?? [];
+      render();
+    }
+  });
+
+  render();
 })();
