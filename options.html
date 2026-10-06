@@ -37,7 +37,7 @@
 	<h2 class="mb-0">我的词库 (当前总数:<span id="total-words">0</span>)</h2>
 
 	<div class="buttons">
-	  <md-outlined-text-field id="search-input" name="search" placeholder="搜索单词" type="search">
+	  <md-outlined-text-field id="search-input" name="search" placeholder="搜索单词或释义" type="search">
 	    <md-icon slot="leading-icon">search</md-icon>
 	  </md-outlined-text-field>
 	  <md-filled-button id="search-btn">搜索</md-filled-button>
@@ -107,6 +107,12 @@
       <div slot="headline">从文件导入</div>
       <div slot="content" method="dialog">
 	<input type="file" accept=".json" name="source" id="id-file" />
+	<p>
+	  <label>
+	    <md-checkbox id="replace-checkbox"></md-checkbox>
+	    替换现有词库（默认合并到现有词库）
+	  </label>
+	</p>
 	<p>示例文件:
 	  <a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/CET4_edited.json">大学四级(4615)</a>,
 	  <a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/CET6_edited.json">大学六级(2270)</a>,
@@ -120,6 +126,7 @@
 	<md-text-button id="cancel-btn">取消</md-text-button>
       </div>
     </md-dialog>
+    <script src="lexicon.js"></script>
     <script src="options.js"></script>
   </body>
 </html>

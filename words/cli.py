@@ -14,7 +14,8 @@ if not source.exists():
     sys.exit()
 
 res = []
-with source.open() as f:
+# utf-8-sig drops the BOM some word lists start with
+with source.open(encoding='utf-8-sig') as f:
     for line in tqdm(f.readlines()):
         line = line.strip()
         if not line:
@@ -22,7 +23,7 @@ with source.open() as f:
         data = line.split(' ')
         if len(data) < 2:
             continue
-        res.append([data[0], ' '.join(data[1:])])
+        res.append([data[0].lower(), ' '.join(data[1:])])
 
 
 output = source.stem + '.json'

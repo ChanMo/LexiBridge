@@ -10,11 +10,29 @@ LexiBridge：这个名称将“lexicon”（词汇）和“bridge”（桥梁）
 表示插件可以将用户与其他语言的词汇连接起来。
 
 
+** 开发
+
+#+begin_src sh
+npm ci            # 安装依赖
+npm run build     # 打包管理页组件 (index.js -> bundle.js)
+npm test          # 单元测试 (node:test，无需额外依赖)
+npm run package   # 生成 dist/lexibridge-<version>.zip，用于上传应用商店
+#+end_src
+
+- =lexicon.js=: 分词、词形还原和词库匹配，内容脚本、管理页和测试共用
+- =script.js=: 内容脚本，负责高亮和弹窗
+- =background.js=: 安装初始化和 TTS 发音
+
 ** TODO:
 
 - [ ] 导入导出增加CSV支持
 - [ ] 增加更多Highlight样式选项
 - [ ] 增加词库一键切换
+- [ ] 图标字体本地化 (Google Fonts 在国内无法加载)
+- [ ] 在网页中选中单词添加到词库
+- [X] 词形还原 (abandoned -> abandon)、标点和连字符分词
+- [X] 动态内容高亮、多标签页同步删除
+- [X] 导入合并、校验，搜索支持释义
 - [X] 增加搜索和分页
 - [X] 使用Material/web
 - [X] 优化options页面
