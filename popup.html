@@ -1,17 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <p id="domain"></p>
-  <div id="main">
-    <button type="button" title="在当前域名下启用" id="toggle">OFF</button>
-  </div>
-  <p id="footer">
-    <a class="is-text" id="go-options">词库设置</a>
-  </p>
+  <header class="brand">
+    <img src="icon_48.png" alt="" width="24" height="24" />
+    <span class="name">LexiBridge</span>
+  </header>
+
+  <section class="site" id="site">
+    <div class="site-text">
+      <div class="domain" id="domain"></div>
+      <div class="status" id="status"></div>
+    </div>
+    <label class="switch" title="在此网站高亮生词">
+      <input type="checkbox" role="switch" id="site-toggle" aria-label="在此网站高亮生词" />
+      <span class="track"><span class="thumb"></span></span>
+    </label>
+  </section>
+
+  <section class="styles">
+    <div class="label">高亮样式</div>
+    <div class="segmented" role="radiogroup" aria-label="高亮样式">
+      <label><input type="radio" name="style" value="tint" /><span><b class="sample tint">word</b>底色</span></label>
+      <label><input type="radio" name="style" value="underline" /><span><b class="sample underline">word</b>下划线</span></label>
+      <label><input type="radio" name="style" value="dotted" /><span><b class="sample dotted">word</b>点线</span></label>
+    </div>
+  </section>
+
+  <footer class="links">
+    <button type="button" id="words-link"><span>单词库</span><span class="count" id="word-count"></span></button>
+    <button type="button" id="level-link"><span>选择水平</span><span class="count" id="level-name"></span></button>
+  </footer>
+  <script src="lexicon.js"></script>
+  <script src="levels.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

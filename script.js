@@ -1,15 +1,22 @@
 (async() => {
-  let {words = [], blocked = []} = await chrome.storage.local.get(['words', 'blocked']);
-  if(blocked.includes(location.hostname)) {
-    return;
-  }
+  let {words = [], blocked = [], highlightStyle = 'tint'} =
+    await chrome.storage.local.get(['words', 'blocked', 'highlightStyle']);
   let dict = LexiBridge.buildDictionary(words);
   words = null;
+  let enabled = !blocked.includes(location.hostname);
 
+  // Each style is a separately named highlight, styled in app.css.
   const highlight = new Highlight();
-  CSS.highlights.set('lexibridge', highlight);
+  let highlightName = null;
+  function applyStyle(style) {
+    if(highlightName) CSS.highlights.delete(highlightName);
+    highlightName = `lexibridge-${style}`;
+    CSS.highlights.set(highlightName, highlight);
+  }
+  applyStyle(highlightStyle);
+
   let entries = []; // [{word, range}]
-  const seen = new WeakSet();
+  let seen = new WeakSet();
   const excluded = 'meta, style, script, noscript, head, input, textarea, select, pre, code, kbd, svg, .lexibridge-ui';
 
   function acceptText(node) {
@@ -61,12 +68,22 @@
     });
   }
 
-  scan(document.body);
+  function setEnabled(on) {
+    enabled = on;
+    highlight.clear();
+    entries = [];
+    seen = new WeakSet();
+    LexiBridgeUI.closeAll();
+    if(on) scan(document.body);
+  }
+
+  if(enabled) scan(document.body);
 
   // Content added later (SPA navigation, infinite scroll, lazy loading).
   let pending = [];
   let timer = null;
   new MutationObserver((mutations) => {
+    if(!enabled) return;
     for(const m of mutations) {
       pending.push(...m.addedNodes);
     }
@@ -81,66 +98,66 @@
     }
   }).observe(document.body, {childList: true, subtree: true});
 
-  // Words added or deleted here, in another tab or on the options page.
+  // Settings changed here, in another tab, the popup or the options page.
   chrome.storage.onChanged.addListener((changes, area) => {
-    if(area !== 'local' || !changes.words) {
+    if(area !== 'local') {
       return;
     }
-    const old = dict;
-    dict = LexiBridge.buildDictionary(changes.words.newValue ?? []);
-    removeEntries(e => !dict.has(e.word));
-    const added = new Set([...dict.keys()].filter(k => !old.has(k)));
-    if(added.size) {
-      scan(document.body, added);
+    if(changes.highlightStyle) {
+      applyStyle(changes.highlightStyle.newValue ?? 'tint');
+    }
+    if(changes.blocked) {
+      const on = !(changes.blocked.newValue ?? []).includes(location.hostname);
+      if(on !== enabled) setEnabled(on);
+    }
+    if(changes.words) {
+      const old = dict;
+      dict = LexiBridge.buildDictionary(changes.words.newValue ?? []);
+      if(!enabled) return;
+      removeEntries(e => !dict.has(e.word));
+      const added = new Set([...dict.keys()].filter(k => !old.has(k)));
+      if(added.size) {
+	scan(document.body, added);
+      }
     }
   });
 
-  async function saveWord(word, definition) {
-    const res = await chrome.storage.local.get(['words']);
-    const rest = (res.words ?? []).filter(i => LexiBridge.normalizeWord(i[0]) !== word);
-    await chrome.storage.local.set({'words': definition === null ? rest : [[word, definition], ...rest]});
-  }
-
-  function el(tag, text) {
-    const e = document.createElement(tag);
-    if(text) e.textContent = text;
-    return e;
-  }
-
-  function showPopover(word, body, buttons) {
-    const popover = el("div");
-    popover.popover = "auto";
-    popover.classList.add("lexibridge-popover", "lexibridge-ui");
-    const title = el("h5", word);
-    const speakBtn = el("span");
-    speakBtn.innerHTML = '&#128264;';
-    speakBtn.addEventListener("click", () => {
-      chrome.runtime.sendMessage({action: 'speak', data: {word}});
-    });
-    title.appendChild(speakBtn);
-    popover.append(title, ...body);
-    const footer = el("div");
-    for(const [label, onClick] of buttons) {
-      const btn = el("button", label);
-      btn.addEventListener("click", async() => {
-	if(await onClick() !== false) popover.remove();
-      });
-      footer.appendChild(btn);
+  // The popup asks how many distinct words are highlighted on this page.
+  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if(request.action === 'page-stats') {
+      sendResponse({enabled, count: new Set(entries.map(e => e.word)).size});
     }
-    popover.appendChild(footer);
-    popover.addEventListener("toggle", (e) => {
-      if(e.newState === "closed") {
-	popover.remove();
-      }
-    });
-    document.body.appendChild(popover);
-    popover.showPopover();
-    return popover;
+  });
+
+  async function getWords() {
+    return (await chrome.storage.local.get(['words'])).words ?? [];
   }
 
-  // Click a highlighted word: show its definition.
+  async function addWord(word, definition) {
+    const rest = (await getWords()).filter(i => LexiBridge.normalizeWord(i[0]) !== word);
+    await chrome.storage.local.set({'words': [[word, definition], ...rest]});
+  }
+
+  // Returns a function that puts the word back where it was.
+  async function removeWord(word) {
+    const words = await getWords();
+    const index = words.findIndex(i => LexiBridge.normalizeWord(i[0]) === word);
+    if(index < 0) return async() => {};
+    const row = words[index];
+    await chrome.storage.local.set({'words': words.filter((_, i) => i !== index)});
+    return async() => {
+      const now = await getWords();
+      if(now.some(i => LexiBridge.normalizeWord(i[0]) === word)) return;
+      now.splice(Math.min(index, now.length), 0, row);
+      await chrome.storage.local.set({'words': now});
+    };
+  }
+
+  const speak = (word) => chrome.runtime.sendMessage({action: 'speak', data: {word}});
+
+  // Click a highlighted word: show its card.
   document.body.addEventListener("click", (e) => {
-    if(!window.getSelection().isCollapsed || e.target.closest?.('.lexibridge-ui')) {
+    if(!enabled || !window.getSelection().isCollapsed || e.target.closest?.('.lexibridge-ui')) {
       return;
     }
     const target = document.caretRangeFromPoint(e.clientX, e.clientY);
@@ -152,28 +169,30 @@
       return;
     }
     e.preventDefault();
-    const word = entry.word;
-    showPopover(word, [el("p", dict.get(word))], [
-      ["关闭(ESC)", () => {}],
+    const {word, range} = entry;
+    LexiBridgeUI.showCard({
+      word,
+      surface: range.toString(),
+      definition: dict.get(word),
+      anchor: () => range.getBoundingClientRect(),
+      state: 'known',
+      onSpeak: () => speak(word),
       // Highlights are removed by the storage.onChanged listener, in every tab.
-      ["从词库删除", () => saveWord(word, null)],
-    ]);
+      onKnown: async() => {
+	const undo = await removeWord(word);
+	LexiBridgeUI.toast(`已移出词库：${word}`, '撤销', undo);
+      },
+    });
   });
 
   // Select a word that is not in the list yet: offer to add it.
-  let addBtn = null;
-  function hideAddButton() {
-    addBtn?.remove();
-    addBtn = null;
-  }
-
   document.addEventListener("mouseup", (e) => {
-    if(e.target.closest?.('.lexibridge-ui')) {
+    if(!enabled || e.target.closest?.('.lexibridge-ui')) {
       return;
     }
     // Let the browser finish updating the selection first.
     setTimeout(() => {
-      hideAddButton();
+      LexiBridgeUI.hidePill();
       const selection = window.getSelection();
       const text = selection.toString().trim();
       if(selection.isCollapsed || !LexiBridge.isWord(text) || LexiBridge.lookup(dict, LexiBridge.normalizeWord(text))) {
@@ -184,45 +203,35 @@
       if(!parent || parent.closest('input, textarea, .lexibridge-ui') || parent.isContentEditable) {
 	return;
       }
-      const rect = selection.getRangeAt(0).getBoundingClientRect();
-      addBtn = el("button", "＋ 加入词库");
-      addBtn.classList.add("lexibridge-add", "lexibridge-ui");
-      addBtn.style.top = `${rect.bottom + 6}px`;
-      addBtn.style.left = `${rect.left}px`;
-      // Keep the selection while clicking the button.
-      addBtn.addEventListener("mousedown", (ev) => ev.preventDefault());
-      addBtn.addEventListener("click", () => {
-	hideAddButton();
-	showAddForm(text);
-      });
-      document.body.appendChild(addBtn);
+      const range = selection.getRangeAt(0).cloneRange();
+      LexiBridgeUI.showPill(range.getBoundingClientRect(), () => addFromSelection(text, range));
     });
   });
   document.addEventListener("mousedown", (e) => {
-    if(!e.target.closest?.('.lexibridge-ui')) hideAddButton();
+    if(!e.target.closest?.('.lexibridge-ui')) LexiBridgeUI.hidePill();
   });
-  window.addEventListener("scroll", hideAddButton, {passive: true});
+  window.addEventListener("scroll", () => LexiBridgeUI.hidePill(), {passive: true});
 
-  async function showAddForm(text) {
+  async function addFromSelection(text, range) {
     // Base form and definition from the bundled word lists, if known.
     const {word, definition} = await chrome.runtime.sendMessage({action: 'lookup', data: {word: text}});
-    const textarea = el("textarea");
-    textarea.rows = 3;
-    textarea.placeholder = "输入释义";
-    textarea.value = definition;
-    const hint = el("small", definition ? "释义来自内置词库，可修改" : "内置词库中没有这个词，请输入释义");
-    const popover = showPopover(word, [textarea, hint], [
-      ["加入词库", async() => {
-	const value = textarea.value.trim();
-	if(!value) {
-	  textarea.focus();
-	  return false;
-	}
-	await saveWord(word, value);
-      }],
-      ["取消", () => {}],
-    ]);
-    popover.classList.add("lexibridge-add-form");
-    textarea.focus();
+    const card = {
+      word,
+      surface: text,
+      anchor: () => range.getBoundingClientRect(),
+      onSpeak: () => speak(word),
+    };
+    if(definition) {
+      // One click: add it and show what it means, with a way back. The
+      // selection goes so the new highlight shows.
+      await addWord(word, definition);
+      window.getSelection().removeAllRanges();
+      LexiBridgeUI.showCard({...card, definition, state: 'added', onUndoAdd: () => removeWord(word)});
+    } else {
+      LexiBridgeUI.showCard({...card, definition: '', state: 'new', onSave: async(value) => {
+	await addWord(word, value);
+	window.getSelection().removeAllRanges();
+      }});
+    }
   }
 })();
