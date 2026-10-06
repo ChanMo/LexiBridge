@@ -80,7 +80,47 @@ const LexiBridge = (() => {
     return matches;
   }
 
-  return {isWord, normalizeWord, buildDictionary, stems, lookup, findMatches};
+  // Part-of-speech markers as written in the bundled lists: "vt.", "vt.&vi.",
+  // "v./n.", "a." (adj.), "ad." (adv.), and OALD's "noun", "adjective"...
+  const POS_ABBR = 'n|v|vt|vi|a|ad|adj|adv|art|prep|conj|pron|num|int|interj|aux|abbr';
+  const POS_WORD = 'noun|verb|adjective|adverb|preposition|conjunction|pronoun|exclamation|determiner|number';
+  const POS_RE = new RegExp(
+    `(?:^|\\s)((?:${POS_ABBR})\\.(?:\\s*[&/]\\s*(?:${POS_ABBR})\\.)*|(?:${POS_WORD})(?=\\s))`, 'g');
+  const POS_SHORT = {a: 'adj.', ad: 'adv.', noun: 'n.', verb: 'v.', adjective: 'adj.', adverb: 'adv.',
+    preposition: 'prep.', conjunction: 'conj.', pronoun: 'pron.', exclamation: 'int.', determiner: 'det.', number: 'num.'};
+
+  function shortPos(pos) {
+    return pos.split(/\s*([&/])\s*/).map(p => POS_SHORT[p.replace(/\.$/, '')] ?? p).join('');
+  }
+
+  // "[əˈbændən] v. 1. 抛弃 2. 离弃 n. 放纵" ->
+  // {phonetic: "əˈbændən", groups: [{pos: "v.", senses: ["抛弃", "离弃"]}, {pos: "n.", senses: ["放纵"]}]}
+  // Text that does not follow the pattern ends up as a single sense.
+  function parseDefinition(text) {
+    let rest = String(text ?? '').trim().replace(/^\d+\s+(?=\[)/, '');
+    let phonetic = null;
+    const ph = rest.match(/^\[([^\]]*)\]\s*/);
+    if (ph) {
+      phonetic = ph[1].trim() || null;
+      rest = rest.slice(ph[0].length);
+    }
+    const marks = [...rest.matchAll(POS_RE)];
+    const parts = [];
+    if (!marks.length || marks[0].index > 0) {
+      parts.push({pos: null, body: rest.slice(0, marks[0]?.index ?? rest.length)});
+    }
+    marks.forEach((m, i) => {
+      const start = m.index + m[0].length;
+      parts.push({pos: shortPos(m[1]), body: rest.slice(start, marks[i + 1]?.index ?? rest.length)});
+    });
+    const groups = parts.map(({pos, body}) => {
+      const senses = body.split(/(?:^|\s)\d+\.\s*/).map(s => s.trim()).filter(Boolean);
+      return {pos, senses};
+    }).filter(g => g.senses.length || g.pos);
+    return {phonetic, groups};
+  }
+
+  return {parseDefinition, isWord, normalizeWord, buildDictionary, stems, lookup, findMatches};
 })();
 
 if (typeof module !== 'undefined') module.exports = LexiBridge;

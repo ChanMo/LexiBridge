@@ -8,18 +8,22 @@
   "action": {
     "default_title": "LexiBridge",
     "default_popup": "popup.html",
-    "default_icon": "icon_96.png"
+    "default_icon": {
+      "16": "icon_16.png",
+      "32": "icon_32.png"
+    }
   },  
   "content_scripts": [
     {
     "matches": ["http://*/*", "https://*/*"],
-    "js": ["lexicon.js", "script.js"],
+    "js": ["lexicon.js", "ui.js", "script.js"],
     "css": ["app.css"]
   }
   ],
   "permissions": ["tabs", "storage", "tts"],
   "icons": {
     "16": "icon_16.png",
+    "32": "icon_32.png",
     "48": "icon_48.png",
     "128": "icon_128.png"
   },
