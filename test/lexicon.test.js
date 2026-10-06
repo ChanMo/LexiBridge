@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert');
-const {normalizeWord, buildDictionary, lookup, findMatches} = require('../lexicon.js');
+const {isWord, normalizeWord, buildDictionary, lookup, findMatches} = require('../lexicon.js');
 
 const dict = buildDictionary([
   ['a', 'art. 一'],
@@ -17,8 +17,13 @@ const dict = buildDictionary([
 const words = (text) => findMatches(text, dict).map(m => text.slice(m.start, m.end) + '=' + m.word);
 
 test('normalizeWord strips BOM, curly quotes and case', () => {
-  assert.strictEqual(normalizeWord('﻿A'), 'a');
-  assert.strictEqual(normalizeWord(' Don’t '), "don't");
+  assert.strictEqual(normalizeWord('\uFEFFA'), 'a');
+  assert.strictEqual(normalizeWord(' Don\u2019t '), "don't");
+});
+
+test('isWord accepts one word, rejects phrases and junk', () => {
+  for (const ok of ['Abandoned', 'well-known', "don't", 'teacher\u2019s']) assert.ok(isWord(ok), ok);
+  for (const bad of ['two words', 'abc1', '', '-x', 'a.b', 'x'.repeat(41)]) assert.ok(!isWord(bad), bad);
 });
 
 test('buildDictionary keeps the first definition and skips bad rows', () => {
@@ -55,7 +60,7 @@ test('hyphenated words match whole, or by part when unknown', () => {
 });
 
 test('possessives and contractions match the word before the apostrophe', () => {
-  assert.deepStrictEqual(words('the teacher’s desk'), ['teacher’s=teacher']);
+  assert.deepStrictEqual(words('the teacher\u2019s desk'), ['teacher\u2019s=teacher']);
   assert.deepStrictEqual(words("a teacher'll"), ['a=a', 'teacher=teacher']);
 });
 

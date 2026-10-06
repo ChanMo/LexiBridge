@@ -2,10 +2,16 @@
 // Plain script (no modules) so it can be listed in manifest content_scripts.
 const LexiBridge = (() => {
   // Words, optionally joined by hyphens or apostrophes: "well-known", "don't".
-  const TOKEN_RE = /[A-Za-z]+(?:['’-][A-Za-z]+)*/g;
+  const TOKEN_RE = /[A-Za-z]+(?:['\u2019-][A-Za-z]+)*/g;
+  const WORD_RE = /^[A-Za-z]+(?:['\u2019-][A-Za-z]+)*$/;
+
+  // True for a single word such as a text selection: "Abandoned", "well-known".
+  function isWord(text) {
+    return text.length <= 40 && WORD_RE.test(text);
+  }
 
   function normalizeWord(word) {
-    return String(word).replace(/^﻿/, '').replace(/’/g, "'").trim().toLowerCase();
+    return String(word).replace(/^\uFEFF/, '').replace(/\u2019/g, "'").trim().toLowerCase();
   }
 
   // words: [["word", "definition"], ...] -> Map(word -> definition)
@@ -74,7 +80,7 @@ const LexiBridge = (() => {
     return matches;
   }
 
-  return {normalizeWord, buildDictionary, stems, lookup, findMatches};
+  return {isWord, normalizeWord, buildDictionary, stems, lookup, findMatches};
 })();
 
 if (typeof module !== 'undefined') module.exports = LexiBridge;
