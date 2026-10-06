@@ -20,12 +20,12 @@
     const list = $("list");
     if(!blocked.length) {
       const empty = el('div', 'empty');
-      empty.append(el('b', '', '还没有禁用任何网站'), el('div', '', '在不需要标出生词的网站上，点击浏览器工具栏里的 LexiBridge 图标，关闭开关即可。'));
+      empty.append(el('b', '', '还没有禁用任何网站'), el('div', '', '在不需要标出生词的网站上，点击工具栏里的 LexiBridge 图标，关闭开关即可。'));
       list.replaceChildren(empty);
       return;
     }
     list.replaceChildren(...blocked.map(domain => {
-      const row = el('div', 'site-row');
+      const row = el('div', 'site');
       const remove = el('button', 'icon-btn danger');
       remove.type = 'button';
       remove.title = remove.ariaLabel = `移除 ${domain}`;
@@ -40,9 +40,7 @@
           await save(now);
         });
       });
-      const ic = icon('block');
-      ic.style.color = 'var(--muted)';
-      row.append(ic, el('span', 'domain', domain), remove);
+      row.append(icon('globe'), el('span', 'domain', domain), remove);
       return row;
     }));
   }

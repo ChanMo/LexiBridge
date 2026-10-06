@@ -2,6 +2,7 @@
   const $ = (id) => document.getElementById(id);
   const {el, icon, toast} = Page;
   const PAGE_SIZE = 50;
+  const fmt = (n) => n.toLocaleString('en-US');
   const isMac = navigator.platform.startsWith('Mac');
 
   let {words = [], level} = await chrome.storage.local.get(['words', 'level']);
@@ -40,21 +41,23 @@
     const {phonetic} = LexiBridge.parseDefinition(definition);
     const ph = row.querySelector(".phonetic");
     if(phonetic) ph.textContent = `/${phonetic}/`; else ph.remove();
-    row.querySelector(".def-slot").replaceWith(Page.definition(definition, query));
+    const def = Page.definition(definition, query);
+    def.title = def.textContent;
+    row.querySelector(".def-slot").replaceWith(def);
     row.querySelector(".edit").addEventListener("click", () => openWordDialog(word, definition));
     row.querySelector(".remove").addEventListener("click", () => removeWord(word));
     return row;
   }
 
   function emptyState() {
-    const box = el('div', 'empty');
+    const box = el('li', 'empty');
     if(!words.length) {
       box.append(el('b', '', '词库是空的'), el('div', '', '选择一个英语水平来生成词库，或在网页上选中生词加入。'));
       const actions = el('div', 'actions');
-      actions.style.cssText = 'justify-content:center;margin-top:16px';
-      const lv = el('a', 'btn primary', '选择水平');
+      const lv = el('a', 'btn primary', '选择英语水平');
       lv.href = 'level.html';
-      const add = el('button', 'btn', '添加单词');
+      lv.style.textDecoration = 'none';
+      const add = el('button', 'btn secondary', '添加单词');
       add.type = 'button';
       add.addEventListener('click', () => openWordDialog());
       actions.append(lv, add);
@@ -62,12 +65,13 @@
     } else {
       box.append(el('b', '', `没有找到「${query}」`), el('div', '', '换个拼写试试，或者直接把它加入词库。'));
       if(LexiBridge.isWord(query)) {
-        const add = el('button', 'btn', `添加「${query}」`);
+        const actions = el('div', 'actions');
+        const add = el('button', 'btn secondary', `添加「${query}」`);
         add.type = 'button';
-        add.style.marginTop = '16px';
         add.prepend(icon('add'));
         add.addEventListener('click', () => openWordDialog(null, '', query));
-        box.appendChild(add);
+        actions.appendChild(add);
+        box.appendChild(actions);
       }
     }
     return box;
@@ -77,13 +81,14 @@
     const rows = filtered();
     const pages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
     page = Math.min(page, pages);
-    $("total").textContent = words.length;
-    $("result-count").textContent = query ? `找到 ${rows.length} 个` : '';
+    $("total").textContent = fmt(words.length);
+    $("result-count").textContent = query ? ` · 找到 ${fmt(rows.length)} 个` : '';
     $("list").replaceChildren(...(rows.length
       ? rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map(rowFor)
       : [emptyState()]));
     $("pager").hidden = pages <= 1;
-    $("page-info").textContent = `第 ${page} / ${pages} 页`;
+    const first = (page - 1) * PAGE_SIZE;
+    $("page-info").textContent = `${fmt(first + 1)}–${fmt(Math.min(first + PAGE_SIZE, rows.length))}，共 ${fmt(rows.length)}`;
     $("prev").disabled = page <= 1;
     $("next").disabled = page >= pages;
     $("clear-open").disabled = !words.length;
@@ -170,9 +175,8 @@
     defInput.value = res.definition;
     hint.replaceChildren(res.definition ? '已从内置词库填入释义，可修改' : '内置词库中没有这个词，请输入释义');
     if(res.definition && res.word !== LexiBridge.normalizeWord(text)) {
-      const use = el('button', 'btn ghost', `改用原形 ${res.word}`);
+      const use = el('button', 'btn', `改用原形 ${res.word}`);
       use.type = 'button';
-      use.style.cssText = 'height:24px;padding:0 6px;margin-left:6px;font-size:12px;color:var(--accent)';
       use.addEventListener('click', () => { wordInput.value = res.word; use.remove(); });
       hint.append('。网页上的变形词会按原形识别，', use);
     }
@@ -202,6 +206,7 @@
   });
 
   $("add-open").addEventListener("click", () => openWordDialog());
+  Page.menu($("more-open"), $("more-menu"));
 
   // Import
 

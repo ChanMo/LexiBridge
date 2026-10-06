@@ -10,20 +10,18 @@
   <body data-page="blocked">
     <aside class="side"></aside>
     <main>
-      <header class="page-head">
-        <div>
-          <h1>禁用网站</h1>
-          <p class="sub">这些网站上不会标出生词。也可以在网站上点击扩展图标，直接关闭开关。</p>
+      <div class="col narrow">
+        <div class="head"><h1>禁用网站</h1></div>
+        <p class="meta">这些网站上不会标出生词。也可以在网站上点击扩展图标，直接关闭开关。</p>
+        <div class="group">
+          <form class="add-row" id="add-form">
+            <input class="input" id="domain" placeholder="输入域名或粘贴网址，如 www.bbc.com" aria-label="网站域名" autocomplete="off" spellcheck="false" />
+            <button type="submit" class="btn primary"><svg class="icon"><use href="icons/ui.svg#add"/></svg>添加</button>
+          </form>
+          <div id="list"></div>
         </div>
-      </header>
-      <section class="panel">
-        <form class="add-site" id="add-form">
-          <input class="input" id="domain" placeholder="example.com 或粘贴网址" aria-label="网站域名" autocomplete="off" spellcheck="false" />
-          <button type="submit" class="btn primary"><svg class="icon"><use href="icons/ui.svg#add"/></svg>添加</button>
-        </form>
-        <p class="hint" id="add-error" role="alert" style="color:var(--danger);padding:0 12px" hidden></p>
-        <div id="list"></div>
-      </section>
+        <p class="error" id="add-error" role="alert" hidden></p>
+      </div>
     </main>
     <script src="lexicon.js"></script>
     <script src="page.js"></script>

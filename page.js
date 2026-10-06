@@ -1,4 +1,4 @@
-// Shared helpers for the extension pages (word list, level, blocked sites).
+// Shared helpers for the extension pages (word list, English level, blocked sites).
 const Page = (() => {
   function el(tag, className, text) {
     const e = document.createElement(tag);
@@ -29,22 +29,15 @@ const Page = (() => {
     return frag;
   }
 
-  // Compact definition: part-of-speech chips with numbered senses inline.
+  // One line, dictionary style: "adj. 突然的；陡峭的   n. ..."
   function definition(text, query) {
     const {groups} = LexiBridge.parseDefinition(text);
-    const box = el('div', 'def');
+    const line = el('div', 'def');
     for(const g of groups) {
-      const row = el('div', 'group');
-      if(g.pos) row.appendChild(el('span', 'pos', g.pos));
-      const senses = el('span', 'senses');
-      g.senses.forEach((s, i) => {
-        if(g.senses.length > 1) senses.appendChild(el('span', 'n', `${i + 1}`));
-        senses.appendChild(highlighted(s, query));
-      });
-      row.appendChild(senses);
-      box.appendChild(row);
+      if(g.pos) line.appendChild(el('span', 'pos', g.pos));
+      line.appendChild(highlighted(g.senses.join('；'), query));
     }
-    return box;
+    return line;
   }
 
   let toastBox = null, toastTimer = null;
@@ -65,8 +58,31 @@ const Page = (() => {
     toastTimer = setTimeout(() => box.remove(), 5000);
   }
 
+  // A popover menu toggled by `button`, right-aligned under it. Placed in
+  // beforetoggle so its first frame is already in the right spot.
+  function menu(button, popover) {
+    button.popoverTargetElement = popover;
+    button.setAttribute('aria-haspopup', 'menu');
+    button.setAttribute('aria-expanded', 'false');
+    popover.addEventListener('beforetoggle', (e) => {
+      const open = e.newState === 'open';
+      button.setAttribute('aria-expanded', open);
+      if(!open) return;
+      const r = button.getBoundingClientRect();
+      const width = parseFloat(getComputedStyle(popover).width);
+      popover.style.top = `${r.bottom + 6}px`;
+      popover.style.left = `${Math.max(8, r.right - width)}px`;
+    });
+    popover.addEventListener('toggle', (e) => {
+      if(e.newState === 'open') popover.querySelector('button:not(:disabled)')?.focus();
+    });
+    popover.addEventListener('click', (e) => {
+      if(e.target.closest('button')) popover.hidePopover();
+    });
+  }
+
   // Sidebar, shared by every page; <body data-page="..."> marks the current one.
-  const PAGES = [['words', 'options.html', '单词库', 'book'], ['level', 'level.html', '选择水平', 'level'],
+  const PAGES = [['words', 'options.html', '单词库', 'book'], ['level', 'level.html', '英语水平', 'level'],
     ['blocked', 'blacklist.html', '禁用网站', 'block']];
   function sidebar() {
     const side = document.querySelector('aside.side');
@@ -82,24 +98,22 @@ const Page = (() => {
     for(const [id, href, label, iconName] of PAGES) {
       const a = el('a');
       a.href = href;
-      a.append(icon(iconName), label);
+      a.append(icon(iconName), el('span', '', label));
       if(document.body.dataset.page === id) a.setAttribute('aria-current', 'page');
       nav.appendChild(a);
     }
     const foot = el('div', 'side-foot');
-    for(const [href, label, iconName] of [['https://chanmo.github.io/LexiBridge/', '使用帮助', 'help'],
-      ['https://github.com/ChanMo/LexiBridge/issues', '反馈问题', 'bug']]) {
-      const a = el('a');
+    for(const [href, label] of [['https://chanmo.github.io/LexiBridge/', '帮助'], ['https://github.com/ChanMo/LexiBridge/issues', '反馈']]) {
+      const a = el('a', '', label);
       a.href = href;
       a.target = '_blank';
       a.rel = 'noopener';
-      a.append(icon(iconName), label);
       foot.appendChild(a);
     }
-    foot.appendChild(el('div', 'version', `v${chrome.runtime.getManifest().version}`));
+    foot.appendChild(el('span', 'version', `v${chrome.runtime.getManifest().version}`));
     side.replaceChildren(brand, nav, foot);
   }
   sidebar();
 
-  return {el, icon, definition, highlighted, toast};
+  return {el, icon, definition, highlighted, toast, menu};
 })();
