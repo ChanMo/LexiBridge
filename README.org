@@ -1,8 +1,9 @@
 * LexiBridge
 
-LexiBridge 是一个 Chrome 扩展程序，可帮助您阅读其他语言的网站。
-它会自动识别和翻译词汇，根据您的语言水平和网站的内容进行翻译。
-LexiBridge 非常适合旅行者、学生和任何想学习新语言的人。
+LexiBridge 是一个免费开源的 Chrome 扩展：读英文网页时，只标出你还不认识的词，
+点一下看释义，认识了就移出。不翻译整页，数据只保存在本地浏览器。
+
+官网：https://chanmo.github.io/LexiBridge/
 
 
 ** 名字来源
@@ -24,10 +25,22 @@ npm run package   # 生成 dist/lexibridge-<version>.zip，用于上传应用商
 - =ui.js=: 网页内的单词卡片、加词按钮、提示条 (Shadow DOM，不受网页样式影响)
 - =background.js=: 安装初始化、TTS 发音、从内置词库查释义
 - =popup.*=: 扩展图标弹出面板
-- =options.*=, =level.*=, =blacklist.*=: 管理页 (单词库、选择水平、禁用网站)，共用 =pages.css= 和 =page.js=
+- =options.*=, =level.*=, =blacklist.*=: 管理页 (单词库、英语水平、禁用网站)，共用 =pages.css= 和 =page.js=
 - =levels.js=: 水平定义，由内置词表做差集生成词库
 - =icons/=: 图标 SVG 源文件 (商店 128 / 满版 / 工具栏小尺寸) 和界面图标 =ui.svg=；
   =icons/render.js= 导出 PNG
+
+** 官网
+
+=docs/= 是 Jekyll 源文件，由 GitHub Pages 直接构建 (Settings → Pages → Deploy from a branch → =main= / =docs=)，
+不需要本地构建，也不提交构建产物。只用 GitHub Pages 自带的 Jekyll 功能，没有主题和插件。
+
+- =_config.yml=: 商店链接、GitHub 链接等站点变量
+- =index.html=: 首页，含可点击的演示 (=assets/demo.js=)
+- =install.md=, =privacy.md=: 安装说明、隐私政策
+- =assets/site.css=: 全站样式，品牌色与扩展一致，支持深色模式
+
+本地预览 (可选)：=jekyll serve --source docs=，然后打开 http://localhost:4000/LexiBridge/
 
 ** 品牌
 
@@ -41,7 +54,7 @@ npm run package   # 生成 dist/lexibridge-<version>.zip，用于上传应用商
 - [X] 单词卡片重新设计：贴近单词弹出、解析音标/词性/义项、深色模式、可撤销
 - [X] 首次使用选择水平，可随时一键切换 (已掌握词表与要学词表做差集)
 - [X] 管理页改为纯 HTML/CSS，去掉 Material Web 与 Google Fonts 依赖
-- [ ] 官网应用新品牌色
+- [X] 官网重新设计：品牌色、可交互演示、安装说明与隐私政策，去掉 Bulma
 - [X] 新图标与品牌色 (墨与荧光笔)，工具栏 16/32 单独绘制
 - [X] 在网页中选中单词添加到词库 (释义自动从内置词库查找)
 - [X] 词形还原 (abandoned -> abandon)、标点和连字符分词
