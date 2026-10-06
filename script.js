@@ -1,5 +1,5 @@
 (async() => {
-  let {words = [], blocked = [], highlightStyle = 'tint'} =
+  let {words = [], blocked = [], highlightStyle = 'underline'} =
     await chrome.storage.local.get(['words', 'blocked', 'highlightStyle']);
   let dict = LexiBridge.buildDictionary(words);
   words = null;
@@ -104,7 +104,7 @@
       return;
     }
     if(changes.highlightStyle) {
-      applyStyle(changes.highlightStyle.newValue ?? 'tint');
+      applyStyle(changes.highlightStyle.newValue ?? 'underline');
     }
     if(changes.blocked) {
       const on = !(changes.blocked.newValue ?? []).includes(location.hostname);
@@ -155,22 +155,25 @@
 
   const speak = (word) => chrome.runtime.sendMessage({action: 'speak', data: {word}});
 
-  // Click a highlighted word: show its card.
-  document.body.addEventListener("click", (e) => {
-    if(!enabled || !window.getSelection().isCollapsed || e.target.closest?.('.lexibridge-ui')) {
-      return;
-    }
-    const target = document.caretRangeFromPoint(e.clientX, e.clientY);
+  // The highlighted word under the pointer, if any.
+  function entryAt(x, y) {
+    const target = document.caretRangeFromPoint(x, y);
     if(!target) {
-      return;
+      return null;
     }
-    const entry = entries.find(i => i.range.isPointInRange(target.startContainer, target.startOffset));
-    if(!entry) {
-      return;
-    }
-    e.preventDefault();
+    // caretRangeFromPoint also answers for blank space next to a word.
+    const inside = (r) => x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+    return entries.find(i => i.range.isPointInRange(target.startContainer, target.startOffset) &&
+      [...i.range.getClientRects()].some(inside)) ?? null;
+  }
+
+  // Words inside links and buttons keep their click; their card opens on hover.
+  const interactive = 'a[href], button, [role="button"], [role="link"]';
+  const inInteractive = (entry) => !!entry.range.startContainer.parentElement?.closest(interactive);
+
+  function showWordCard(entry) {
     const {word, range} = entry;
-    LexiBridgeUI.showCard({
+    return LexiBridgeUI.showCard({
       word,
       surface: range.toString(),
       definition: dict.get(word),
@@ -183,7 +186,63 @@
 	LexiBridgeUI.toast(`已移出词库：${word}`, '撤销', undo);
       },
     });
+  }
+
+  // Click a highlighted word: show its card.
+  document.body.addEventListener("click", (e) => {
+    if(!enabled || !window.getSelection().isCollapsed || e.target.closest?.('.lexibridge-ui')) {
+      return;
+    }
+    const entry = entryAt(e.clientX, e.clientY);
+    if(!entry || inInteractive(entry)) {
+      return;
+    }
+    e.preventDefault();
+    showWordCard(entry);
   });
+
+  // Hover a highlighted word in a link: show its card after a pause, and
+  // close it once the pointer has left both the word and the card.
+  const HOVER_OPEN_MS = 500, HOVER_CLOSE_MS = 300;
+  let hoverEntry = null, hoverCard = null, openTimer = null, closeTimer = null;
+
+  function onPointer(e) {
+    const overCard = !!e.target.closest?.('.lexibridge-ui');
+    const entry = overCard || !e.target.closest?.(interactive) ? null : entryAt(e.clientX, e.clientY);
+    const candidate = entry && inInteractive(entry) ? entry : null;
+
+    if(hoverCard?.isConnected) {
+      const stay = overCard || candidate === hoverEntry;
+      if(stay) {
+	clearTimeout(closeTimer);
+	closeTimer = null;
+      } else if(!closeTimer) {
+	closeTimer = setTimeout(() => {
+	  hoverCard?.hidePopover();
+	  hoverCard = hoverEntry = closeTimer = null;
+	}, HOVER_CLOSE_MS);
+      }
+      return;
+    }
+    if(candidate === hoverEntry) {
+      return;
+    }
+    clearTimeout(openTimer);
+    hoverEntry = candidate;
+    if(candidate) {
+      openTimer = setTimeout(() => {
+	if(enabled && hoverEntry === candidate) hoverCard = showWordCard(candidate);
+      }, HOVER_OPEN_MS);
+    }
+  }
+  let pointerFrame = null;
+  document.addEventListener("mousemove", (e) => {
+    if(!enabled || pointerFrame) return;
+    pointerFrame = requestAnimationFrame(() => {
+      pointerFrame = null;
+      onPointer(e);
+    });
+  }, {passive: true});
 
   // Select a word that is not in the list yet: offer to add it.
   document.addEventListener("mouseup", (e) => {

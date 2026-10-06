@@ -1,9 +1,9 @@
 /* Highlight styles, picked in the popup (storage key highlightStyle). */
-::highlight(lexibridge-tint) {
-    background-color: rgba(30, 198, 165, 0.2);
-}
 ::highlight(lexibridge-underline) {
     text-decoration: underline 2px rgba(18, 168, 143, 0.85);
+}
+::highlight(lexibridge-tint) {
+    background-color: rgba(30, 198, 165, 0.2);
 }
 ::highlight(lexibridge-dotted) {
     text-decoration: underline dotted 2px rgba(18, 168, 143, 0.9);

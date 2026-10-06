@@ -7,7 +7,7 @@
     if(url.protocol === 'http:' || url.protocol === 'https:') domain = url.hostname;
   } catch {}
 
-  let {blocked = [], words = [], level, highlightStyle = 'tint'} =
+  let {blocked = [], words = [], level, highlightStyle = 'underline'} =
     await chrome.storage.local.get(['blocked', 'words', 'level', 'highlightStyle']);
 
   const levelName = LexiBridgeLevels.getLevel(level)?.name ?? '';
