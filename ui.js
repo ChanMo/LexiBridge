@@ -10,20 +10,23 @@ const LexiBridgeUI = (() => {
   const STYLE = `
     :host { all: initial; }
     * { box-sizing: border-box; }
+    /* Brand: ink (#1f2a44) and highlighter gold (#f5b83d) on paper. */
     .lb {
-      --bg: #ffffff;
-      --fg: #1f2328;
-      --muted: #656d76;
-      --line: rgba(31, 35, 40, 0.1);
-      --accent: #0d7d6c;
-      --accent-strong: #0d7d6c;
-      --on-accent: #ffffff;
-      --accent-soft: rgba(30, 198, 165, 0.14);
-      --hover: rgba(31, 35, 40, 0.06);
-      --shadow: 0 12px 32px rgba(15, 23, 42, 0.16), 0 2px 6px rgba(15, 23, 42, 0.08);
-      --toast-bg: #1f2328;
-      --toast-fg: #f6f8fa;
-      --toast-accent: #5ee0c4;
+      --bg: #fffdf8;
+      --fg: #1f2a44;
+      --muted: #5f6577;
+      --line: rgba(31, 42, 68, 0.12);
+      --accent: #8a5a00;
+      --accent-soft: rgba(245, 184, 61, 0.22);
+      --primary: #1f2a44;
+      --on-primary: #ffffff;
+      --marker: #f5b83d;
+      --focus: #c98400;
+      --hover: rgba(31, 42, 68, 0.06);
+      --shadow: 0 12px 32px rgba(24, 34, 61, 0.18), 0 2px 6px rgba(24, 34, 61, 0.08);
+      --toast-bg: #1f2a44;
+      --toast-fg: #f7f1e3;
+      --toast-accent: #f5b83d;
       font: 14px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB",
         "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
       color: var(--fg);
@@ -31,19 +34,21 @@ const LexiBridgeUI = (() => {
     }
     @media (prefers-color-scheme: dark) {
       .lb {
-        --bg: #1f2329;
-        --fg: #e6e8eb;
-        --muted: #9aa3ad;
-        --line: rgba(255, 255, 255, 0.1);
-        --accent: #4fd8bb;
-        --accent-strong: #1ec6a5;
-        --on-accent: #0b1f1b;
-        --accent-soft: rgba(79, 216, 187, 0.14);
-        --hover: rgba(255, 255, 255, 0.07);
-        --shadow: 0 12px 32px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.3);
-        --toast-bg: #e6e8eb;
-        --toast-fg: #1f2328;
-        --toast-accent: #0d7d6c;
+        --bg: #1b2236;
+        --fg: #ece8df;
+        --muted: #a7adbd;
+        --line: rgba(236, 232, 223, 0.12);
+        --accent: #f5b83d;
+        --accent-soft: rgba(245, 184, 61, 0.16);
+        --primary: #f5b83d;
+        --on-primary: #1b2236;
+        --marker: #1b2236;
+        --focus: #f5b83d;
+        --hover: rgba(236, 232, 223, 0.08);
+        --shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3);
+        --toast-bg: #f7f1e3;
+        --toast-fg: #1f2a44;
+        --toast-accent: #8a5a00;
       }
     }
     [popover] {
@@ -63,7 +68,7 @@ const LexiBridgeUI = (() => {
       -webkit-tap-highlight-color: transparent;
     }
     button:focus-visible {
-      outline: 2px solid var(--accent-strong);
+      outline: 2px solid var(--focus);
       outline-offset: 2px;
     }
     svg { width: 18px; height: 18px; fill: currentColor; flex: none; }
@@ -128,7 +133,7 @@ const LexiBridgeUI = (() => {
     }
     textarea:focus-visible {
       outline: none;
-      border-color: var(--accent-strong);
+      border-color: var(--focus);
       box-shadow: 0 0 0 3px var(--accent-soft);
     }
     textarea {
@@ -155,7 +160,7 @@ const LexiBridgeUI = (() => {
       font-size: 13px;
       color: var(--muted);
     }
-    .foot .status { display: inline-flex; align-items: center; gap: 4px; color: var(--accent); }
+    .foot .status { display: inline-flex; align-items: center; gap: 4px; color: var(--accent); font-weight: 500; }
     .btn {
       display: inline-flex;
       align-items: center;
@@ -170,7 +175,7 @@ const LexiBridgeUI = (() => {
       color: var(--fg);
     }
     .btn:hover { background: var(--hover); }
-    .btn.primary { background: var(--accent-strong); color: var(--on-accent); }
+    .btn.primary { background: var(--primary); color: var(--on-primary); }
     .btn.primary:hover { filter: brightness(0.95); }
     .btn svg { width: 16px; height: 16px; }
 
@@ -183,16 +188,16 @@ const LexiBridgeUI = (() => {
       padding: 0 12px 0 8px;
       border: 0;
       border-radius: 15px;
-      background: var(--accent-strong);
-      color: var(--on-accent);
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+      background: var(--primary);
+      color: var(--on-primary);
+      box-shadow: 0 4px 12px rgba(24, 34, 61, 0.25);
       font-size: 13px;
       font-weight: 500;
       white-space: nowrap;
       animation: lb-in 120ms ease-out;
     }
     .pill:hover { filter: brightness(0.95); }
-    .pill svg { width: 16px; height: 16px; }
+    .pill svg { width: 16px; height: 16px; color: var(--marker); }
 
     /* Toast */
     .toast {

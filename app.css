@@ -1,10 +1,11 @@
-/* Highlight styles, picked in the popup (storage key highlightStyle). */
+/* Highlight styles, picked in the popup (storage key highlightStyle).
+   Brand highlighter gold; never blue/purple (links) or red (spelling). */
 ::highlight(lexibridge-underline) {
-    text-decoration: underline 2px rgba(18, 168, 143, 0.85);
+    text-decoration: underline 2px #c98400;
 }
 ::highlight(lexibridge-tint) {
-    background-color: rgba(30, 198, 165, 0.2);
+    background-color: rgba(245, 184, 61, 0.32);
 }
 ::highlight(lexibridge-dotted) {
-    text-decoration: underline dotted 2px rgba(18, 168, 143, 0.9);
+    text-decoration: underline dotted 2px #c98400;
 }

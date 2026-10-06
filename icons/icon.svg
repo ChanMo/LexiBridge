@@ -1,0 +1,21 @@
+<!-- LexiBridge icon, Chrome Web Store / 128px: 96px art with 16px padding.
+     Ink tile, paper-coloured serif A, highlighter stroke underneath. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="ink" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b3a63"/>
+      <stop offset="1" stop-color="#18223d"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(16 16)">
+    <rect width="96" height="96" rx="22" fill="url(#ink)"/>
+    <g fill="#f7f1e3">
+      <path d="M44.5 15 H48 L31.6 64 H27.6 Z"/>
+      <path d="M44 15 H51.5 L70.5 64 H57.5 Z"/>
+      <rect x="35.5" y="46.5" width="20" height="3.6"/>
+      <path d="M19.5 64 H38 V68 H19.5 Z"/>
+      <path d="M51.5 64 H78 V68 H51.5 Z"/>
+    </g>
+    <rect x="17" y="74" width="62" height="9" rx="4.5" fill="#f5b83d" transform="rotate(-2 48 78)"/>
+  </g>
+</svg>

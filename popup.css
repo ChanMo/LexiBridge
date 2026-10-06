@@ -1,30 +1,31 @@
 :root {
-  --bg: #ffffff;
-  --fg: #1f2328;
-  --muted: #656d76;
-  --line: rgba(31, 35, 40, 0.1);
-  --surface: #f6f8fa;
-  --hover: rgba(31, 35, 40, 0.06);
-  --accent: #0d7d6c;
-  --accent-strong: #0d7d6c;
-  --on-accent: #ffffff;
-  --accent-soft: rgba(30, 198, 165, 0.14);
-  --off: #d0d7de;
+  /* Brand: ink (#1f2a44) and highlighter gold (#f5b83d) on paper. */
+  --bg: #fffdf8;
+  --fg: #1f2a44;
+  --muted: #5f6577;
+  --line: rgba(31, 42, 68, 0.12);
+  --surface: #f5f2ea;
+  --hover: rgba(31, 42, 68, 0.06);
+  --accent: #8a5a00;
+  --primary: #1f2a44;
+  --focus: #c98400;
+  --off: #cfd2da;
+  --underline: #c98400;
+  --tint: rgba(245, 184, 61, 0.32);
   color-scheme: light dark;
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #1f2329;
-    --fg: #e6e8eb;
-    --muted: #9aa3ad;
-    --line: rgba(255, 255, 255, 0.1);
-    --surface: #282d34;
-    --hover: rgba(255, 255, 255, 0.07);
-    --accent: #4fd8bb;
-    --accent-strong: #1ec6a5;
-    --on-accent: #0b1f1b;
-    --accent-soft: rgba(79, 216, 187, 0.14);
-    --off: #4b535d;
+    --bg: #1b2236;
+    --fg: #ece8df;
+    --muted: #a7adbd;
+    --line: rgba(236, 232, 223, 0.12);
+    --surface: #242c44;
+    --hover: rgba(236, 232, 223, 0.08);
+    --accent: #f5b83d;
+    --primary: #f5b83d;
+    --focus: #f5b83d;
+    --off: #4a5370;
   }
 }
 * { box-sizing: border-box; }
@@ -38,7 +39,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 button { font: inherit; color: inherit; cursor: pointer; }
-:focus-visible { outline: 2px solid var(--accent-strong); outline-offset: 2px; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 
 .brand {
   display: flex;
@@ -88,9 +89,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
   transition: transform 150ms;
 }
-.switch input:checked + .track { background: var(--accent-strong); }
+.switch input:checked + .track { background: var(--primary); }
 .switch input:checked + .track .thumb { transform: translateX(16px); }
-.switch input:focus-visible + .track { outline: 2px solid var(--accent-strong); outline-offset: 2px; }
+.switch input:focus-visible + .track { outline: 2px solid var(--focus); outline-offset: 2px; }
 .switch input:disabled + .track { opacity: 0.4; }
 .site.is-unsupported .switch { cursor: default; }
 
@@ -112,20 +113,20 @@ button { font: inherit; color: inherit; cursor: pointer; }
 }
 .segmented label:hover span { background: var(--hover); }
 .segmented input:checked + span {
-  border-color: var(--accent-strong);
-  box-shadow: inset 0 0 0 1px var(--accent-strong);
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
   color: var(--fg);
 }
-.segmented input:focus-visible + span { outline: 2px solid var(--accent-strong); outline-offset: 2px; }
+.segmented input:focus-visible + span { outline: 2px solid var(--focus); outline-offset: 2px; }
 .sample {
   font: 400 16px/1.4 Georgia, "Times New Roman", serif;
   color: var(--fg);
   padding: 0 2px;
 }
 /* Same values as the in-page highlights in app.css */
-.sample.tint { background-color: rgba(30, 198, 165, 0.2); }
-.sample.underline { text-decoration: underline 2px rgba(18, 168, 143, 0.85); }
-.sample.dotted { text-decoration: underline dotted 2px rgba(18, 168, 143, 0.9); }
+.sample.tint { background-color: var(--tint); }
+.sample.underline { text-decoration: underline 2px var(--underline); }
+.sample.dotted { text-decoration: underline dotted 2px var(--underline); }
 
 .links {
   margin: 10px 10px 10px;

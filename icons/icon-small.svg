@@ -1,0 +1,13 @@
+<!-- LexiBridge icon, toolbar 16/32px: heavier A without serifs, thicker
+     stroke, slightly lighter tile so it separates from dark toolbars. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
+  <defs>
+    <linearGradient id="ink" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#34467a"/>
+      <stop offset="1" stop-color="#1f2a44"/>
+    </linearGradient>
+  </defs>
+  <rect width="96" height="96" rx="20" fill="url(#ink)"/>
+  <path d="M40 12h16l22 54H62l-4-11H38l-4 11H18z M42 44h12l-6-17z" fill="#f7f1e3" fill-rule="evenodd"/>
+  <rect x="13" y="72" width="70" height="13" rx="6.5" fill="#f5b83d" transform="rotate(-2 48 78)"/>
+</svg>
