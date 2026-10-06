@@ -1,143 +1,94 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LexiBridge: Bridge the Gap Between Languages</title>
-    <link rel="stylesheet" href="assets/css/styles.css" />
-    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">    
-  </head>
-  <body>
-    <section class="hero is-medium is-bold is-primary">
-  <div class="hero-head">
-    <nav class="navbar">
-  <div class="container">
-    <div class="navbar-brand">
-      <a href="index.html" class="navbar-item has-text-weight-bold is-size-5">LexiBridge</a>
-      <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navMenu">
-	<span aria-hidden="true"></span>
-	<span aria-hidden="true"></span>
-	<span aria-hidden="true"></span>
-      </a>
+---
+layout: default
+---
+<main>
+  <div class="wrap hero">
+    <div>
+      <p class="eyebrow">Chrome 扩展 · 免费 · 开源</p>
+      <h1>读英文的时候，<br>顺手认识<span class="marked">生词</span>。</h1>
+      <p class="lede">LexiBridge 在你读的每个英文网页上，只标出你还不认识的词。点一下看释义，认识了就移出。不翻译整页，不打断阅读。</p>
+      <div class="cta">
+        <a class="btn primary" href="{{ site.store_url }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14 M5 12h14"/></svg>添加到 Chrome</a>
+        <a class="btn link" href="#how">看看怎么用 →</a>
+      </div>
+      <p class="fine">不需要账号 · 词库只存在你的浏览器里</p>
     </div>
-    <div class="navbar-menu" id="navMenu">
-      <div class="navbar-end">
-	<a href="install.html" class="navbar-item">安装</a>
-	<a href="about.html" class="navbar-item">关于我们</a>
-	<a href="privacy.html" class="navbar-item">隐私政策</a>
-        <a target="_blank" href="https://github.com/ChanMo/LexiBridge/" class="navbar-item">GITHUB</a>
+
+    <div class="demo" id="demo">
+      <span class="hint" aria-hidden="true">点一下带下划线的词</span>
+      <div class="window">
+        <div class="chrome" aria-hidden="true"><i></i><i></i><i></i><span class="url">news.example.com/environment</span><img src="{{ '/assets/icon_32.png' | relative_url }}" alt=""></div>
+        <div class="article" lang="en">
+          <div class="kicker">ENVIRONMENT</div>
+          <h3>Farmers adapt as rainfall becomes harder to predict</h3>
+          <p>Across the valley, growers say the <button type="button" class="w" data-w="abrupt">abrupt</button> shifts in <button type="button" class="w" data-w="humidity">humidity</button> have made old planting calendars almost useless.</p>
+          <p>Economists warn the region remains <button type="button" class="w" data-w="vulnerable">vulnerable</button>: crop prices <button type="button" class="w" data-w="fluctuate">fluctuate</button> sharply, and the policy signals are <button type="button" class="w" data-w="ambiguous">ambiguous</button>.</p>
+        </div>
       </div>
     </div>
   </div>
-</nav>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
 
-  // Get all "navbar-burger" elements
-  const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
-
-  // Add a click event on each of them
-  $navbarBurgers.forEach( el => {
-    el.addEventListener('click', () => {
-
-      // Get the target from the "data-target" attribute
-      const target = el.dataset.target;
-      const $target = document.getElementById(target);
-
-      // Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
-      el.classList.toggle('is-active');
-      $target.classList.toggle('is-active');
-
-    });
-  });
-}); 
-</script>
-
-  </div>
-  <div class="hero-body">
-    <div class="container has-text-centered">
-      <h1 class="title is-1 is-spaced">LexiBridge</h1>
-      <h2 class="subtitle is-4" style="line-height:1.5;">LexiBridge 是一个开源、无服务器的英语学习应用程序，<br/>帮助英语学习者在阅读网页时学习新词汇，提升阅读流畅度。</h2>
-      <!-- <p class="has-text-centered mb-6"></p> -->
-      <div class="buttons is-centered mt-6">
-	<a target="_blank" href="https://chromewebstore.google.com/detail/lexibridge-%E8%8B%B1%E8%AF%AD%E5%AD%A6%E4%B9%A0%EF%BC%8C%E4%BB%8E%E9%98%85%E8%AF%BB%E5%BC%80%E5%A7%8B/mnhdbmjfgoohoajakjkeminblgnbmlhp?hl=zh-CN&utm_source=ext_sidebar" class="button is-white is-medium">Chrome应用商店</a>
-	<a href="install.html" class="button is-white is-medium">手动安装</a>
+  <section class="band" id="how">
+    <div class="wrap">
+      <h2>三步，融进你本来的阅读</h2>
+      <p class="sub">不用另开词典，也不用背单词表。LexiBridge 只在你读英文的地方出现。</p>
+      <div class="steps">
+        <div class="step">
+          <div class="n">1</div>
+          <h3>选好你的水平</h3>
+          <p>从入门到 GRE 四档。你已经掌握的词不会被标出来。</p>
+          <div class="mini" aria-hidden="true">
+            <div class="opt"><span class="r"></span>入门<span>5,546 词</span></div>
+            <div class="opt on"><span class="r"></span>大学四级<span>1,177 词</span></div>
+            <div class="opt"><span class="r"></span>大学六级<span>4,306 词</span></div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="n">2</div>
+          <h3>照常阅读</h3>
+          <p>生词下面有一道金色笔划，点一下就能看到音标、词性和释义。</p>
+          <div class="mini read" lang="en" aria-hidden="true">The policy signals so far are <span class="u">ambiguous</span>, and prices <span class="u">fluctuate</span> sharply.</div>
+        </div>
+        <div class="step">
+          <div class="n">3</div>
+          <h3>认识了就移出</h3>
+          <p>词库会随着你变小。遇到新的生词，选中它就能加入。</p>
+          <div class="mini read" aria-hidden="true"><span lang="en">Prices still fluctuate sharply.</span><br><span class="toast">已移出词库：fluctuate <b>撤销</b></span></div>
+        </div>
       </div>
     </div>
-  </div>
-</section>
-<section class="section has-text-centered" id="features">
-  <div class="container py-6">
-    <h2 class="title is-3">打开知识世界的大门</h2>
-    <div class="columns py-6">
-      <div class="column is-4">
-	<img src="assets/images/undraw_smiley-face.svg" class="mb-5" />
-        <h3 class="subtitle is-4 mb-3">轻松查看定义，流畅阅读</h3>
-        <p>在阅读网页时，LexiBridge 会自动标记出生词，并提供详细的词汇解释。您只需点击即可查看单词含义，无需切换页面或翻找词典，让您流畅阅读，轻松学习新词汇。</p>
-      </div>
-      <div class="column is-4">
-	<img src="assets/images/undraw_star.svg" class="mb-5" />
-        <h3 class="subtitle is-4 mb-3">定制专属生词库</h3>
-        <p>LexiBridge为您提供了多个词汇库，您可以根据自己的英文能力选择合适的生词，并根据自己的学习需求进行定制，让您学习更高效。</p>
-      </div>
-      <div class="column is-4">
-	<img src="assets/images/undraw_code.svg" class="mb-5" />
-        <h3 class="subtitle is-4 mb-3">开源，无服务端</h3>
-        <p>LexiBridge 是开源的，无需服务器即可运行。这保证了您的隐私安全，并提供更快的响应速度。</p>
-      </div>
-    </div>
-  </div>
-</section>
-<section class="section is-light has-text-centered has-background-info-light">
-  <div class="container py-6">
-    <h2 class="title is-3">他们怎么说</h2>
-    <div class="columns py-6">
-      <div class="column is-half is-offset-3">
-        <blockquote>
-          <p>“这个软件非常好用，它让你更沉浸于英语阅读，对提升英语思维和英语单词帮助很大，而且是完全开源免费的。”</p>
-          <footer>Dong xu</footer>
-        </blockquote>
-      </div>
-    </div>
-    <a href="/reviews" class="button is-info is-outlined is-primary">查看更多评价</a>
-  </div>
-</section>
-<section class="section is-light has-text-centered">
-  <div class="container py-6">
-    <h2 class="title is-3">联系我们</h2>
-    <p class="mb-5">如果您有任何问题或建议，请随时与我们联系。我们期待您的反馈！</p>
-    <div class="columns is-align-items-center">
-      <div class="column is-half">
-	<figure class="image">
-	  <img src="assets/images/undraw_contact_us_re_4qqt.svg" style="height:200px;" />
-	</figure>
-      </div>
-      <div class="column is-half">
-	<div class="content has-text-left">
-	  <ul>
-            <li class="mb-3">
-              <strong>邮箱：</strong> <a href="mailto:chan.mo@outlook.com">chan.mo@outlook.com</a>
-            </li>
-            <li class="mb-3">
-              <strong>微信号：</strong> chanmo1937
-            </li>
-            <li class="mb-3">
-              <strong>GitHub 地址：</strong> <a target="_blank" href="https://github.com/ChanMo/LexiBridge/">https://github.com/ChanMo/LexiBridge/</a>
-            </li>
-	  </ul>	  
-	</div>
-      </div>
-    </div>
-  </div>
-</section>
+  </section>
 
-    <footer class="footer has-text-centered">
-  <div class="container">
-    <div class="content">
-      <p class="has-text-centered">Copyright &copy; 2023 LexiBridge. All rights reserved.</p>
+  <section>
+    <div class="wrap">
+      <h2>为读原文的人设计</h2>
+      <p class="sub">保留原文的语感，只补上你缺的那几个词。</p>
+      <div class="points">
+        <div class="point"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16 M4 12h10 M4 18h7"/></svg><div><h3>不翻译整页</h3><p>原文一字不改。只有你不认识的词才会被标出，读得懂的部分不打扰你。</p></div></div>
+        <div class="point"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/></svg><div><h3>数据只在本地</h3><p>词库存在你的浏览器里，不需要账号。LexiBridge 没有服务器，也不上传任何数据。</p></div></div>
+        <div class="point"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h9a4 4 0 0 1 0 8H8 M8 11l-3 4 3 4"/></svg><div><h3>认得变形词</h3><p>abandoned、studies、making 都能找回原形，词库里只需要存一个词。</p></div></div>
+        <div class="point"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5 M16 7l5 5-5 5"/></svg><div><h3>免费开源</h3><p>MIT 协议，代码在 GitHub 上，可以自由使用、修改和分发。</p></div></div>
+      </div>
     </div>
-  </div>
-</footer>
+  </section>
 
-  </body>
-</html>
+  <section class="band" id="about">
+    <div class="wrap story">
+      <h2>为什么做 LexiBridge</h2>
+      <div>
+        <p>读英文原文时，常见两种做法：英文好的人遇到生词就跳过去，英文没那么好的人干脆整页翻译。前一种读完了，词没学到；后一种看懂了，读原文的能力却没练到。</p>
+        <p>LexiBridge 想走中间那条路：保留原文，只把你缺的那几个词补上。每读一篇文章，就顺手认识几个词；认识了，它就不再出现。</p>
+        <p>这是一个开源项目，欢迎在 <a href="{{ site.github_url }}/issues">GitHub</a> 上提建议或参与开发。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="closing">
+    <div class="wrap">
+      <h2>从下一篇英文文章开始</h2>
+      <p class="sub">装好后打开任意英文网页，生词会自己出现。</p>
+      <a class="btn primary" href="{{ site.store_url }}">添加到 Chrome</a>
+    </div>
+  </section>
+</main>
+<script src="{{ '/assets/demo.js' | relative_url }}"></script>

@@ -1,51 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>禁用域名 | LexiBridge</title>
-    <link rel="stylesheet" href="theme.css" />
-    <link rel="stylesheet" href="global.css" />
-    <link rel="stylesheet" href="md-layout.css" />
-    <script type="module" src="./bundle.js"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&amp;display=swap">
+    <title>禁用网站 | LexiBridge</title>
+    <link rel="icon" href="icon_32.png" />
+    <link rel="stylesheet" href="pages.css" />
   </head>
-  <body>
-    <nav-drawer>
-      <top-app-bar slot="top-app-bar"></top-app-bar>
-      <md-list role="menubar" class="nav">
-	<md-list-item type="link" href="options.html">单词库</md-list-item>
-	<md-list-item type="link" href="level.html">选择水平</md-list-item>
-	<md-list-item selected="selected" type="link" href="blacklist.html">禁用域名</md-list-item>
-      </md-list>
-      <main slot="app-content">
-	<h2>禁用域名</h2>
-	<div id="main" class="table-container">
-	  <div class="scroll-wrapper">
-	  <table>
-	    <thead>
-	      <tr>
-		<th>域名</th>
-		<th style="width:1px;"></th>
-	      </tr>
-	    </thead>
-	    <tbody>
-	    </tbody>
-	  </table>
-	  </div>
-	</div>
-      </main>
-    </nav-drawer>
-    <template id="row">
-      <tr>
-	<td></td>
-	<td>
-	  <div>
-	    <md-text-button>删除</md-text-button>
-	  </div>
-	</td>
-      </tr>
-    </template>
+  <body data-page="blocked">
+    <aside class="side"></aside>
+    <main>
+      <div class="col narrow">
+        <div class="head"><h1>禁用网站</h1></div>
+        <p class="meta">这些网站上不会标出生词。也可以在网站上点击扩展图标，直接关闭开关。</p>
+        <div class="group">
+          <form class="add-row" id="add-form">
+            <input class="input" id="domain" placeholder="输入域名或粘贴网址，如 www.bbc.com" aria-label="网站域名" autocomplete="off" spellcheck="false" />
+            <button type="submit" class="btn primary"><svg class="icon"><use href="icons/ui.svg#add"/></svg>添加</button>
+          </form>
+          <div id="list"></div>
+        </div>
+        <p class="error" id="add-error" role="alert" hidden></p>
+      </div>
+    </main>
+    <script src="lexicon.js"></script>
+    <script src="page.js"></script>
     <script src="blacklist.js"></script>
   </body>
 </html>

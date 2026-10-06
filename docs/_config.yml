@@ -1,0 +1,12 @@
+# LexiBridge website. GitHub Pages builds this folder with Jekyll;
+# nothing needs to be built or committed by hand.
+title: LexiBridge
+description: 免费开源的 Chrome 扩展：读英文网页时，只标出你还不认识的词，点一下看释义，认识了就移出。
+lang: zh-CN
+url: https://chanmo.github.io
+baseurl: /LexiBridge
+store_url: https://chromewebstore.google.com/detail/mnhdbmjfgoohoajakjkeminblgnbmlhp
+github_url: https://github.com/ChanMo/LexiBridge
+markdown: kramdown
+kramdown:
+  input: GFM

@@ -1,0 +1,20 @@
+<!-- UI icons for the extension pages: 24px grid, drawn as strokes.
+     Use as <svg class="icon"><use href="icons/ui.svg#search"/></svg>;
+     pages.css sets fill:none, stroke:currentColor, stroke-width:1.6. -->
+<svg xmlns="http://www.w3.org/2000/svg">
+  <symbol id="book" viewBox="0 0 24 24"><path d="M3 5.5h5.5A3.5 3.5 0 0 1 12 9v10.5a2.5 2.5 0 0 0-2.5-2.5H3z M21 5.5h-5.5A3.5 3.5 0 0 0 12 9v10.5a2.5 2.5 0 0 1 2.5-2.5H21z"/></symbol>
+  <symbol id="level" viewBox="0 0 24 24"><path d="M6 19v-4 M12 19v-8 M18 19V5"/></symbol>
+  <symbol id="block" viewBox="0 0 24 24"><path d="M12 3.5a8.5 8.5 0 1 0 0 17a8.5 8.5 0 1 0 0-17z M6 6l12 12"/></symbol>
+  <symbol id="search" viewBox="0 0 24 24"><path d="M10.5 4a6.5 6.5 0 1 0 0 13a6.5 6.5 0 1 0 0-13z M15.5 15.5L20 20"/></symbol>
+  <symbol id="add" viewBox="0 0 24 24"><path d="M12 5v14 M5 12h14"/></symbol>
+  <symbol id="more" viewBox="0 0 24 24"><path d="M5 12h.01 M12 12h.01 M19 12h.01" stroke-width="3"/></symbol>
+  <symbol id="upload" viewBox="0 0 24 24"><path d="M12 15V4 M7.5 8.5L12 4l4.5 4.5 M5 20h14"/></symbol>
+  <symbol id="download" viewBox="0 0 24 24"><path d="M12 4v11 M7.5 10.5L12 15l4.5-4.5 M5 20h14"/></symbol>
+  <symbol id="edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z M13.5 6.5l4 4"/></symbol>
+  <symbol id="delete" viewBox="0 0 24 24"><path d="M4 7h16 M9 7V4.5h6V7 M6.5 7l1 13h9l1-13"/></symbol>
+  <symbol id="close" viewBox="0 0 24 24"><path d="M6 6l12 12 M18 6L6 18"/></symbol>
+  <symbol id="check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="prev" viewBox="0 0 24 24"><path d="M14.5 6l-6 6 6 6"/></symbol>
+  <symbol id="next" viewBox="0 0 24 24"><path d="M9.5 6l6 6-6 6"/></symbol>
+  <symbol id="globe" viewBox="0 0 24 24"><path d="M12 3.5a8.5 8.5 0 1 0 0 17a8.5 8.5 0 1 0 0-17z M3.5 12h17 M12 3.5c2.5 2.6 3.5 5.4 3.5 8.5s-1 5.9-3.5 8.5c-2.5-2.6-3.5-5.4-3.5-8.5s1-5.9 3.5-8.5z"/></symbol>
+</svg>

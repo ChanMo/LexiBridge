@@ -1,133 +1,131 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>单词库 | LexiBridge</title>
-    <link rel="stylesheet" href="theme.css" />
-    <link rel="stylesheet" href="global.css" />
-    <link rel="stylesheet" href="md-layout.css" />
-    <style>
-     .buttons {
-       display: flex;
-       margin-bottom: 1.5rem;
-       overflow: hidden;
-       gap: 8px;
-       align-items: center;
-     }
-     #search-input {
-       --md-outlined-text-field-top-space: 8px;
-       --md-outlined-text-field-bottom-space: 8px;       
-     }
-     #clear-btn {
-       /* --md-sys-color-on-surface-variant: var(--md-sys-color-error); */
-     }
-    </style>
-    <script type="module" src="./bundle.js"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&amp;display=swap">
+    <link rel="icon" href="icon_32.png" />
+    <link rel="stylesheet" href="pages.css" />
   </head>
-  <body>
-    <nav-drawer>
-      <top-app-bar slot="top-app-bar"></top-app-bar>
-      <md-list role="menubar" class="nav">
-	<md-list-item selected="selected" type="link" href="options.html">单词库</md-list-item>
-	<md-list-item type="link" href="level.html">选择水平</md-list-item>
-	<md-list-item type="link" href="blacklist.html">禁用域名</md-list-item>
-      </md-list>
-      <main slot="app-content">
-	<h2 class="mb-0">我的词库 (当前总数:<span id="total-words">0</span>)</h2>
+  <body data-page="words">
+    <aside class="side"></aside>
+    <main>
+      <div class="col">
+        <div class="head">
+          <h1>单词库</h1>
+          <button type="button" class="btn primary" id="add-open"><svg class="icon"><use href="icons/ui.svg#add"/></svg>添加单词</button>
+          <button type="button" class="icon-btn" id="more-open" title="更多" aria-label="更多"><svg class="icon"><use href="icons/ui.svg#more"/></svg></button>
+        </div>
+        <p class="meta"><span id="total">0</span> 个单词<span id="level-info" hidden> · 水平 <a href="level.html" id="level-name"></a></span><span id="result-count"></span></p>
 
-	<div class="buttons">
-	  <md-outlined-text-field id="search-input" name="search" placeholder="搜索单词或释义" type="search">
-	    <md-icon slot="leading-icon">search</md-icon>
-	  </md-outlined-text-field>
-	  <md-filled-button id="search-btn">搜索</md-filled-button>
-	  <div style="flex-grow:1;"></div>
-	  <md-icon-button title="手动添加" aria-label="手动添加" id="open-add-modal">
-	    <md-icon>add</md-icon>
-	  </md-icon-button>
-	  <md-icon-button title="导入" aria-label="导入" id="open-modal">
-	    <md-icon>file_upload</md-icon>
-	  </md-icon-button>
-	  <md-icon-button title="导出" aria-label="导出" id="export-btn">
-	    <md-icon>file_download</md-icon>
-	  </md-icon-button>
-	  <md-icon-button title="清空词库" aria-label="清空词库" id="clear-btn">
-	    <md-icon>delete_forever</md-icon>
-	  </md-icon-button>
-	</div>
-	<div class="table-container">
-	  <div class="scroll-wrapper">	  
-	    <table>
-	      <thead>
-		<tr>
-		  <th>单词</th>
-		  <th>释义</th>
-		  <th style="width:1px;"></th>
-		</tr>
-	      </thead>
-	      <tbody>
-	      </tbody>
-	    </table>
-	  </div>
-	</div>
-      </main>
-    </nav-drawer>
-    <template id="pagination">
-      <div class="pagination">
-	<md-outlined-button link class="previous-page">上一页</md-outlined-button>
-	<md-outlined-button class="current-page" disabled></md-outlined-button>
-	<md-outlined-button link class="next-page">下一页</md-outlined-button>
+        <label class="search">
+          <svg class="icon"><use href="icons/ui.svg#search"/></svg>
+          <input class="input" type="search" id="search" placeholder="搜索单词或释义" aria-label="搜索单词或释义" autocomplete="off" />
+          <span class="kbd" aria-hidden="true">/</span>
+        </label>
+        <ul class="list" id="list"></ul>
+        <nav class="pager" id="pager" aria-label="分页">
+          <span id="page-info"></span>
+          <button type="button" class="icon-btn" id="prev" aria-label="上一页" title="上一页"><svg class="icon"><use href="icons/ui.svg#prev"/></svg></button>
+          <button type="button" class="icon-btn" id="next" aria-label="下一页" title="下一页"><svg class="icon"><use href="icons/ui.svg#next"/></svg></button>
+        </nav>
       </div>
-    </template>
+    </main>
+
+    <div class="menu" id="more-menu" popover role="menu">
+      <button type="button" role="menuitem" id="import-open"><svg class="icon"><use href="icons/ui.svg#upload"/></svg>导入…</button>
+      <button type="button" role="menuitem" id="export-btn"><svg class="icon"><use href="icons/ui.svg#download"/></svg>导出</button>
+      <hr>
+      <button type="button" role="menuitem" class="danger" id="clear-open"><svg class="icon"><use href="icons/ui.svg#delete"/></svg>清空词库…</button>
+    </div>
+
     <template id="row">
-      <tr>
-	<td></td>
-	<td></td>
-	<td>
-	  <md-text-button>删除</md-text-button>
-	</td>
-      </tr>
+      <li class="item">
+        <div class="body">
+          <div><span class="word"></span><span class="phonetic"></span></div>
+          <div class="def-slot"></div>
+        </div>
+        <div class="row-actions">
+          <button type="button" class="icon-btn edit" title="编辑" aria-label="编辑"><svg class="icon"><use href="icons/ui.svg#edit"/></svg></button>
+          <button type="button" class="icon-btn remove" title="删除" aria-label="删除"><svg class="icon"><use href="icons/ui.svg#delete"/></svg></button>
+        </div>
+      </li>
     </template>
-    <md-dialog id="add-modal">
-      <p slot="headline">手动添加</p>
-      <div slot="content" style="width:560px;">
-	<div class="field">
-	  <md-outlined-text-field label="单词" name="key" type="text"></md-outlined-text-field>
-	</div>
-	<div class="field">
-	  <md-outlined-text-field label="释义" rows="3" name="value" type="textarea"></md-outlined-text-field>
-	</div>
-      </div>
-      <footer slot="actions">
-	<md-text-button disabled id="add-btn">添加</md-text-button>
-	<md-text-button id="cancel-add-btn">取消</md-text-button>
-      </footer>     
-    </md-dialog>
-    <md-dialog id="import-modal">
-      <div slot="headline">从文件导入</div>
-      <div slot="content" method="dialog">
-	<input type="file" accept=".json" name="source" id="id-file" />
-	<p>
-	  <label>
-	    <md-checkbox id="replace-checkbox"></md-checkbox>
-	    替换现有词库（默认合并到现有词库）
-	  </label>
-	</p>
-	<p>示例文件:
-	  <a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/CET4_edited.json">大学四级(4615)</a>,
-	  <a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/CET6_edited.json">大学六级(2270)</a>,
-	  <a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/GRE_8000_Words.json">GRE(7744)</a>,
-	  <a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/GRE_abridged.json">GRE 精简(4333)</a>,
-	  <a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/OALD8_abridged_edited.json">牛津高阶英语词典第八版(13653)</a>
-	</p>
-      </div>
-      <div slot="actions">
-	<md-text-button disabled id="import-btn">导入</md-text-button>
-	<md-text-button id="cancel-btn">取消</md-text-button>
-      </div>
-    </md-dialog>
+
+    <dialog id="word-dialog" aria-labelledby="word-dialog-title">
+      <form method="dialog" id="word-form">
+        <div class="dialog-head">
+          <h2 id="word-dialog-title">添加单词</h2>
+          <button type="submit" value="cancel" class="icon-btn" aria-label="关闭" formnovalidate><svg class="icon"><use href="icons/ui.svg#close"/></svg></button>
+        </div>
+        <div class="dialog-body">
+          <label class="field"><span>单词</span>
+            <input class="input" name="word" required autocomplete="off" spellcheck="false" />
+          </label>
+          <label class="field"><span>释义</span>
+            <textarea class="input" name="definition" required placeholder="如：[əˈbrʌpt] adj. 突然的；陡峭的"></textarea>
+            <p class="hint" id="definition-hint">输入单词后，会自动从内置词库填入释义</p>
+          </label>
+        </div>
+        <div class="dialog-foot">
+          <span class="grow" id="save-shortcut"></span>
+          <button type="submit" value="cancel" class="btn secondary" formnovalidate>取消</button>
+          <button type="submit" value="save" class="btn primary">保存</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="import-dialog" aria-labelledby="import-dialog-title">
+      <form method="dialog" id="import-form">
+        <div class="dialog-head">
+          <h2 id="import-dialog-title">导入单词</h2>
+          <button type="submit" value="cancel" class="icon-btn" aria-label="关闭"><svg class="icon"><use href="icons/ui.svg#close"/></svg></button>
+        </div>
+        <div class="dialog-body">
+          <label class="drop" id="drop">
+            <svg class="icon"><use href="icons/ui.svg#upload"/></svg>
+            <b id="file-name">选择 JSON 文件，或拖到这里</b>
+            <span>格式：[["word", "释义"], ...]</span>
+            <input type="file" accept=".json,application/json" id="file" />
+          </label>
+          <label class="check"><input type="checkbox" id="replace" />替换现有词库（默认合并，同名单词以导入的为准）</label>
+          <ul class="samples" aria-label="示例词表">
+            <li><a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/CET4_edited.json">大学四级</a></li>
+            <li><a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/CET6_edited.json">大学六级</a></li>
+            <li><a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/GRE_8000_Words.json">GRE</a></li>
+            <li><a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/GRE_abridged.json">GRE 精简</a></li>
+            <li><a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/OALD8_abridged_edited.json">牛津高阶</a></li>
+          </ul>
+          <p class="error" id="import-error" role="alert"></p>
+        </div>
+        <div class="dialog-foot">
+          <span class="grow">示例词表可下载后导入</span>
+          <button type="submit" value="cancel" class="btn secondary">取消</button>
+          <button type="submit" value="import" class="btn primary" id="import-btn" disabled>导入</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="clear-dialog" aria-labelledby="clear-dialog-title">
+      <form method="dialog">
+        <div class="dialog-head">
+          <h2 id="clear-dialog-title">清空词库？</h2>
+        </div>
+        <div class="dialog-body">
+          <p>将删除全部 <b id="clear-count">0</b> 个单词，网页上不会再有标记。清空后可以立即撤销；如需长期保留，建议先导出。</p>
+        </div>
+        <div class="dialog-foot">
+          <button type="submit" value="export" class="btn">先导出</button>
+          <span class="grow"></span>
+          <button type="submit" value="cancel" class="btn secondary">取消</button>
+          <button type="submit" value="clear" class="btn danger" id="clear-btn">清空</button>
+        </div>
+      </form>
+    </dialog>
+
     <script src="lexicon.js"></script>
+    <script src="levels.js"></script>
+    <script src="page.js"></script>
     <script src="options.js"></script>
   </body>
 </html>
