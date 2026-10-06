@@ -1,4 +1,4 @@
-importScripts('lexicon.js');
+importScripts('lexicon.js', 'levels.js');
 
 chrome.runtime.onInstalled.addListener(async({reason}) => {
   // Also fired on extension and Chrome updates; only greet new installs.
@@ -7,12 +7,12 @@ chrome.runtime.onInstalled.addListener(async({reason}) => {
   }
   const words = (await chrome.storage.local.get(["words"])).words??[];
   if(words.length <= 0) {
-    const url = chrome.runtime.getURL("words/CET6_edited.json");
-    const res = await fetch(url);
-    const resJson = await res.json();
-    await chrome.storage.local.set({"words":resJson})
+    // A sensible default until the learner picks a level on the welcome page.
+    const level = LexiBridgeLevels.getLevel(LexiBridgeLevels.DEFAULT_LEVEL);
+    const lists = await LexiBridgeLevels.loadLists(LexiBridgeLevels.listsFor(level));
+    await chrome.storage.local.set({words: LexiBridgeLevels.levelWords(level, lists), level: level.id});
   }
-  chrome.tabs.create({url: 'options.html'});
+  chrome.tabs.create({url: 'level.html?welcome=1'});
 });
 
 // Bundled word lists used to look up definitions for words added from a
@@ -21,14 +21,8 @@ const REFERENCE_LISTS = ['CET4_edited', 'CET6_edited', 'GRE_8000_Words', 'GRE_ab
 let reference = null;
 
 function loadReference() {
-  reference ??= (async() => {
-    const rows = [];
-    for(const name of REFERENCE_LISTS) {
-      const res = await fetch(chrome.runtime.getURL(`words/${name}.json`));
-      for(const row of await res.json()) rows.push(row);
-    }
-    return LexiBridge.buildDictionary(rows);
-  })();
+  reference ??= LexiBridgeLevels.loadLists(REFERENCE_LISTS)
+    .then(lists => LexiBridge.buildDictionary(REFERENCE_LISTS.flatMap(n => lists[n])));
   return reference;
 }
 

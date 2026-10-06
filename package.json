@@ -9,7 +9,7 @@
   "scripts": {
     "build": "rollup -c",
     "test": "node --test test/*.test.js",
-    "package": "mkdir -p dist && zip -r dist/lexibridge-$npm_package_version.zip manifest.json background.js lexicon.js script.js app.css popup.html popup.js popup.css options.html options.js blacklist.html blacklist.js bundle.js theme.css global.css md-layout.css icon*.png fonts words/*.json"
+    "package": "mkdir -p dist && zip -r dist/lexibridge-$npm_package_version.zip manifest.json background.js lexicon.js levels.js script.js app.css popup.html popup.js popup.css options.html options.js blacklist.html blacklist.js level.html level.js bundle.js theme.css global.css md-layout.css icon*.png fonts words/*.json"
   },
   "keywords": [],
   "author": "",

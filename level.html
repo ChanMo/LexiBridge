@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>选择水平 | LexiBridge</title>
+    <link rel="stylesheet" href="theme.css" />
+    <link rel="stylesheet" href="global.css" />
+    <link rel="stylesheet" href="md-layout.css" />
+    <style>
+     .levels {
+       display: grid;
+       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+       gap: 16px;
+       margin-block: 1.5rem;
+     }
+     .level-card {
+       display: flex;
+       flex-direction: column;
+       align-items: flex-start;
+       gap: 6px;
+       padding: 20px;
+       text-align: left;
+       font: inherit;
+       color: var(--md-sys-color-on-surface);
+       background: var(--md-sys-color-surface-container);
+       border: 2px solid transparent;
+       border-radius: 16px;
+       cursor: pointer;
+     }
+     .level-card:hover {
+       background: var(--md-sys-color-surface-container-high);
+     }
+     .level-card.is-current {
+       border-color: var(--md-sys-color-primary);
+     }
+     .level-card .name {
+       font-size: 1.25rem;
+       font-weight: bold;
+     }
+     .level-card .current {
+       display: none;
+       font-size: 0.8rem;
+       color: var(--md-sys-color-primary);
+     }
+     .level-card.is-current .current {
+       display: inline;
+     }
+     .level-card .known,
+     .level-card .learn {
+       font-size: 0.9rem;
+       color: var(--md-sys-color-on-surface-variant);
+     }
+     .level-card .count {
+       margin-top: 8px;
+       font-weight: bold;
+       color: var(--md-sys-color-primary);
+     }
+     [hidden] {
+       display: none !important;
+     }
+     #welcome {
+       padding: 16px 20px;
+       border-radius: 16px;
+       background: var(--md-sys-color-primary-container);
+       color: var(--md-sys-color-on-primary-container);
+     }
+    </style>
+    <script type="module" src="./bundle.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&amp;display=swap">
+  </head>
+  <body>
+    <nav-drawer>
+      <top-app-bar slot="top-app-bar"></top-app-bar>
+      <md-list role="menubar" class="nav">
+	<md-list-item type="link" href="options.html">单词库</md-list-item>
+	<md-list-item selected="selected" type="link" href="level.html">选择水平</md-list-item>
+	<md-list-item type="link" href="blacklist.html">禁用域名</md-list-item>
+      </md-list>
+      <main slot="app-content">
+	<h2>选择你的英语水平</h2>
+	<p id="welcome" hidden>欢迎使用 LexiBridge！已按「大学四级」为你准备好词库。选择更符合你的水平，之后浏览英文网页时，你还不认识的词会被高亮。</p>
+	<p>LexiBridge 会从内置词表中去掉你已掌握的词，只把要学的词放进词库。之后在网页上可以随时删除已认识的词、加入新词。</p>
+	<div id="levels" class="levels"></div>
+	<p id="status" role="status"></p>
+      </main>
+    </nav-drawer>
+    <template id="level-card">
+      <button type="button" class="level-card">
+	<span><span class="name"></span> <span class="current">当前</span></span>
+	<span class="known"></span>
+	<span class="learn"></span>
+	<span class="count"></span>
+      </button>
+    </template>
+    <script src="lexicon.js"></script>
+    <script src="levels.js"></script>
+    <script src="level.js"></script>
+  </body>
+</html>
