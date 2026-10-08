@@ -169,7 +169,7 @@ def definition(row):
     kept = ([l for l in lines if not DOMAIN_RE.match(l) and not INFLECTION_RE.match(l)]
             or [DOMAIN_RE.sub('', lines[0]).strip() or lines[0]])
     text = ' '.join(shorten(l.replace(', ', '；')) for l in kept[:MAX_LINES])
-    phonetic = row['phonetic'].strip().replace('ә', 'ə')  # Cyrillic ә -> IPA ə
+    phonetic = row['phonetic'].strip().replace('\u04d9', '\u0259')  # Cyrillic ә -> IPA ə
     return f'[{phonetic}] {text}' if phonetic else text
 
 
@@ -244,8 +244,8 @@ def check():
 
 def normalize_word(word):
     """Same as normalizeWord() in lexicon.js."""
-    word = word[1:] if word.startswith('﻿') else word
-    return word.replace('’', "'").strip().lower()
+    word = word[1:] if word.startswith('\ufeff') else word
+    return word.replace('\u2019', "'").strip().lower()
 
 
 def legacy():
