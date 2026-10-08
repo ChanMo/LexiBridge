@@ -1,6 +1,9 @@
 ---
 layout: default
 ---
+{%- comment -%} Page content renders before the layout, so it looks up its own text. {%- endcomment -%}
+{%- assign lang = page.lang | default: site.lang -%}
+{%- assign t = site.data.ui[lang] -%}
 <main>
   <div class="wrap hero">
     <div>
@@ -8,7 +11,8 @@ layout: default
       <h1>读英文的时候，<br>顺手认识<span class="marked">生词</span>。</h1>
       <p class="lede">LexiBridge 在你读的每个英文网页上，只标出你还不认识的词。点一下看释义，认识了就移出。不翻译整页，不打断阅读。</p>
       <div class="cta">
-        <a class="btn primary" href="{{ site.store_url }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14 M5 12h14"/></svg>添加到 Chrome</a>
+        <a class="btn primary" href="{{ site.store_url }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14 M5 12h14"/></svg>{{ t.add_chrome }}</a>
+        {% if site.edge_store_url %}<a class="btn secondary" href="{{ site.edge_store_url }}">{{ t.add_edge }}</a>{% endif %}
         <a class="btn link" href="#how">看看怎么用 →</a>
       </div>
       <p class="fine">不需要账号 · 词库只存在你的浏览器里</p>
@@ -36,11 +40,11 @@ layout: default
         <div class="step">
           <div class="n">1</div>
           <h3>选好你的水平</h3>
-          <p>从入门到 GRE 四档。你已经掌握的词不会被标出来。</p>
+          <p>从入门到 GRE 五档。你已经掌握的词不会被标出来。</p>
           <div class="mini" aria-hidden="true">
-            <div class="opt"><span class="r"></span>入门<span>5,546 词</span></div>
-            <div class="opt on"><span class="r"></span>大学四级<span>1,177 词</span></div>
-            <div class="opt"><span class="r"></span>大学六级<span>4,306 词</span></div>
+            <div class="opt"><span class="r"></span>入门<span>3,725 词</span></div>
+            <div class="opt on"><span class="r"></span>大学四级<span>1,741 词</span></div>
+            <div class="opt"><span class="r"></span>四级 · 备考研<span>2,045 词</span></div>
           </div>
         </div>
         <div class="step">
@@ -66,7 +70,7 @@ layout: default
       <div class="points">
         <div class="point"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16 M4 12h10 M4 18h7"/></svg><div><h3>不翻译整页</h3><p>原文一字不改。只有你不认识的词才会被标出，读得懂的部分不打扰你。</p></div></div>
         <div class="point"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/></svg><div><h3>数据只在本地</h3><p>词库存在你的浏览器里，不需要账号。LexiBridge 没有服务器，也不上传任何数据。</p></div></div>
-        <div class="point"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h9a4 4 0 0 1 0 8H8 M8 11l-3 4 3 4"/></svg><div><h3>认得变形词</h3><p>abandoned、studies、making 都能找回原形，词库里只需要存一个词。</p></div></div>
+        <div class="point"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h9a4 4 0 0 1 0 8H8 M8 11l-3 4 3 4"/></svg><div><h3>认得变形词</h3><p>studies、making、went 都能找回原形，词库里只需要存一个词。</p></div></div>
         <div class="point"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5 M16 7l5 5-5 5"/></svg><div><h3>免费开源</h3><p>MIT 协议，代码在 GitHub 上，可以自由使用、修改和分发。</p></div></div>
       </div>
     </div>
@@ -87,7 +91,10 @@ layout: default
     <div class="wrap">
       <h2>从下一篇英文文章开始</h2>
       <p class="sub">装好后打开任意英文网页，生词会自己出现。</p>
-      <a class="btn primary" href="{{ site.store_url }}">添加到 Chrome</a>
+      <div class="cta center">
+        <a class="btn primary" href="{{ site.store_url }}">{{ t.add_chrome }}</a>
+        {% if site.edge_store_url %}<a class="btn secondary" href="{{ site.edge_store_url }}">{{ t.add_edge }}</a>{% endif %}
+      </div>
     </div>
   </section>
 </main>

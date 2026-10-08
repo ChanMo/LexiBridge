@@ -1,10 +1,10 @@
 <footer class="site-foot">
   <div class="wrap">
-    <a class="logo" href="{{ '/' | relative_url }}"><img src="{{ '/assets/icon.png' | relative_url }}" alt="">LexiBridge</a>
-    <a href="{{ '/install.html' | relative_url }}">安装</a>
-    <a href="{{ '/privacy.html' | relative_url }}">隐私政策</a>
+    <a class="logo" href="{{ t.base | append: '/' | relative_url }}"><img src="{{ '/assets/icon.png' | relative_url }}" alt="">LexiBridge</a>
+    <a href="{{ t.base | append: '/install.html' | relative_url }}">{{ t.install }}</a>
+    <a href="{{ t.base | append: '/privacy.html' | relative_url }}">{{ t.privacy_policy }}</a>
     <a href="{{ site.github_url }}">GitHub</a>
-    <a href="{{ site.github_url }}/issues">反馈问题</a>
-    <span>© {{ site.time | date: '%Y' }} <a href="https://chanmo.github.io/" rel="author">ChanMo</a> · MIT 协议</span>
+    <a href="{{ site.github_url }}/issues">{{ t.feedback }}</a>
+    <span>© {{ site.time | date: '%Y' }} <a href="https://chanmo.github.io/" rel="author">ChanMo</a> · {{ t.license }}</span>
   </div>
 </footer>

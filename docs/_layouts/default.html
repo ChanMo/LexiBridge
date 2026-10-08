@@ -1,13 +1,20 @@
+{%- assign lang = page.lang | default: site.lang -%}
+{%- assign t = site.data.ui[lang] -%}
+{%- assign path = page.url | remove_first: '/zh-TW' -%}
 <!doctype html>
-<html lang="{{ site.lang }}">
+<html lang="{{ lang }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% if page.title %}{{ page.title }} · {{ site.title }}{% else %}{{ site.title }} · 读英文时，只标出你不认识的词{% endif %}</title>
-  <meta name="description" content="{{ page.description | default: site.description }}">
+  <title>{% if page.title %}{{ page.title }} · {{ site.title }}{% else %}{{ site.title }} · {{ t.tagline }}{% endif %}</title>
+  <meta name="description" content="{{ page.description | default: t.description }}">
   <meta property="og:title" content="{{ page.title | default: site.title }}">
-  <meta property="og:description" content="{{ page.description | default: site.description }}">
+  <meta property="og:description" content="{{ page.description | default: t.description }}">
   <meta property="og:image" content="{{ '/assets/icon.png' | absolute_url }}">
+  <link rel="canonical" href="{{ page.url | absolute_url }}">
+  <link rel="alternate" hreflang="zh-CN" href="{{ path | absolute_url }}">
+  <link rel="alternate" hreflang="zh-TW" href="{{ path | prepend: '/zh-TW' | absolute_url }}">
+  <link rel="alternate" hreflang="x-default" href="{{ path | absolute_url }}">
   <link rel="icon" href="{{ '/assets/icon_32.png' | relative_url }}">
   <link rel="stylesheet" href="{{ '/assets/site.css' | relative_url }}">
 </head>

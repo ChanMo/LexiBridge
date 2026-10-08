@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Written by hand; add new pages here. about.html only redirects and is left out. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://chanmo.github.io/LexiBridge/</loc></url>
+  <url><loc>https://chanmo.github.io/LexiBridge/install.html</loc></url>
+  <url><loc>https://chanmo.github.io/LexiBridge/privacy.html</loc></url>
+  <url><loc>https://chanmo.github.io/LexiBridge/zh-TW/</loc></url>
+  <url><loc>https://chanmo.github.io/LexiBridge/zh-TW/install.html</loc></url>
+  <url><loc>https://chanmo.github.io/LexiBridge/zh-TW/privacy.html</loc></url>
+</urlset>

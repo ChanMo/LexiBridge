@@ -1,13 +1,25 @@
 // Homepage demo: the extension's word card, without the extension.
-// Definitions are copied from the word lists bundled with LexiBridge.
+// Definitions are copied from the dictionaries bundled with LexiBridge
+// (packs/en-zh-Hans and en-zh-Hant), in the page's language.
 (() => {
   const DEFS = {
-    abrupt: ['əˈbrʌpt', 'adj.', ['突然的，出其不意的', '陡峭的', '粗鲁的，无礼的']],
-    humidity: ['hjuːˈmɪdətɪ', 'n.', ['湿度，湿气']],
-    vulnerable: ['ˈvʌlnərəbl', 'adj.', ['易受攻击的，有弱点的', '(指人)易受伤害的，脆弱的']],
-    fluctuate: ['ˈflʌktʃʊeɪt', 'v.', ['波动，变动，涨落']],
-    ambiguous: ['æmˈbɪɡjʊəs', 'adj.', ['模棱两可的，意义不明确的']],
+    'zh-CN': {
+      abrupt: ["ə'brʌpt", 'adj.', ['突然的', '唐突的', '陡峭的']],
+      humidity: ["hju:'miditi", 'n.', ['湿气', '潮湿', '湿度']],
+      vulnerable: ["'vʌlnərəbl", 'adj.', ['易受伤害的', '有弱点的', '脆弱的']],
+      fluctuate: ["'flʌktʃueit", 'vi.', ['变动', '起伏', '动摇']],
+      ambiguous: ["æm'bigjuəs", 'adj.', ['不明确的', '模棱两可的']],
+    },
+    'zh-TW': {
+      abrupt: ["ə'brʌpt", 'adj.', ['突然的', '唐突的', '陡峭的']],
+      humidity: ["hju:'miditi", 'n.', ['溼氣', '潮溼', '溼度']],
+      vulnerable: ["'vʌlnərəbl", 'adj.', ['易受傷害的', '有弱點的', '脆弱的']],
+      fluctuate: ["'flʌktʃueit", 'vi.', ['變動', '起伏', '動搖']],
+      ambiguous: ["æm'bigjuəs", 'adj.', ['不明確的', '模稜兩可的']],
+    },
   };
+  const KNOWN = {'zh-CN': '✓ 认识了', 'zh-TW': '✓ 認識了'};
+  const lang = DEFS[document.documentElement.lang] ? document.documentElement.lang : 'zh-CN';
   const demo = document.getElementById('demo');
   if (!demo) return;
   let card = null;
@@ -26,7 +38,7 @@
 
   function show(word) {
     close();
-    const [phonetic, pos, senses] = DEFS[word.dataset.w];
+    const [phonetic, pos, senses] = DEFS[lang][word.dataset.w];
     card = el('div', 'card');
     card.setAttribute('role', 'dialog');
     card.setAttribute('aria-label', word.dataset.w);
@@ -37,7 +49,7 @@
     senses.forEach(s => list.appendChild(el('li', '', s)));
     body.append(el('span', 'pos', pos), list);
     const foot = el('div', 'foot');
-    const known = el('button', '', '✓ 认识了');
+    const known = el('button', '', KNOWN[lang]);
     known.type = 'button';
     known.addEventListener('click', () => {
       word.classList.add('known');

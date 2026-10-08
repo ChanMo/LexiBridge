@@ -1,0 +1,5 @@
+# Crawlers only read robots.txt at the domain root (chanmo.github.io/robots.txt), so
+# this file is informational; submit the sitemap in Search Console and Bing Webmaster.
+User-agent: *
+Allow: /
+Sitemap: https://chanmo.github.io/LexiBridge/sitemap.xml

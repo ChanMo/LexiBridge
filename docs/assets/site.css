@@ -22,6 +22,11 @@
   --serif: "Iowan Old Style", Georgia, "Times New Roman", serif;
   color-scheme: light dark;
 }
+/* Traditional Chinese pages (/zh-TW/) use Traditional glyphs. */
+:root:lang(zh-TW) {
+  --sans: -apple-system, BlinkMacSystemFont, "PingFang TC", "Segoe UI", "Microsoft JhengHei",
+    "Noto Sans CJK TC", sans-serif;
+}
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #161c2d;
@@ -79,6 +84,8 @@ a { color: inherit; }
 .btn.primary { background: var(--primary); color: var(--on-primary); }
 .btn.primary:hover { filter: brightness(1.18); }
 .btn.small { height: 36px; padding: 0 14px; border-radius: 9px; font-size: 14px; }
+.btn.secondary { box-shadow: inset 0 0 0 1px var(--line); color: var(--ink); }
+.btn.secondary:hover { background: var(--surface); }
 .btn.link { padding: 0 6px; color: var(--ink-2); }
 .btn.link:hover { color: var(--ink); }
 .btn svg { width: 18px; height: 18px; }
@@ -89,6 +96,7 @@ a { color: inherit; }
 h1 { margin: 0 0 20px; font: 700 48px/1.22 var(--sans); letter-spacing: 0.01em; }
 .lede { margin: 0 0 32px; max-width: 30em; color: var(--ink-2); font-size: 17px; line-height: 1.85; }
 .cta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.cta.center { justify-content: center; }
 .fine { margin: 18px 0 0; color: var(--ink-3); font-size: 13.5px; }
 
 /* Demo: an article with the extension running */

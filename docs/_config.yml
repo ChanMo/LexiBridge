@@ -6,6 +6,8 @@ lang: zh-CN
 url: https://chanmo.github.io
 baseurl: /LexiBridge
 store_url: https://chromewebstore.google.com/detail/mnhdbmjfgoohoajakjkeminblgnbmlhp
+# Fill in once the Edge Add-ons listing is live; the "Add to Edge" buttons show up then.
+edge_store_url:
 github_url: https://github.com/ChanMo/LexiBridge
 markdown: kramdown
 kramdown:
