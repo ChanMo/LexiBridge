@@ -1,7 +1,8 @@
 {
-  "name": "LexiBridge: 英语学习，从阅读开始",
-  "version": "1.4.0",
-  "description": "LexiBridge 是一个开源、无服务器的英语学习应用程序，帮助英语学习者在阅读网页时学习新词汇，提升阅读流畅度。",
+  "name": "__MSG_extName__",
+  "version": "1.5.0",
+  "description": "__MSG_extDescription__",
+  "default_locale": "zh_CN",
   "manifest_version": 3,
   "author": "chan.mo@outlook.com",
   "homepage_url": "https://chanmo.github.io/LexiBridge/",
@@ -16,7 +17,7 @@
   "content_scripts": [
     {
     "matches": ["http://*/*", "https://*/*"],
-    "js": ["engines/en-irregular.js", "lexicon.js", "ui.js", "script.js"],
+    "js": ["engines/en-irregular.js", "lexicon.js", "packs.js", "i18n.js", "ui.js", "script.js"],
     "css": ["app.css"]
   }
   ],

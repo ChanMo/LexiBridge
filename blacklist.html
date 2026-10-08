@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>禁用网站 | LexiBridge</title>
+    <title data-i18n="blocked_title">禁用网站 | LexiBridge</title>
     <link rel="icon" href="icon_32.png" />
     <link rel="stylesheet" href="pages.css" />
   </head>
@@ -11,12 +11,12 @@
     <aside class="side"></aside>
     <main>
       <div class="col narrow">
-        <div class="head"><h1>禁用网站</h1></div>
-        <p class="meta">这些网站上不会标出生词。也可以在网站上点击扩展图标，直接关闭开关。</p>
+        <div class="head"><h1 data-i18n="common_blocked">禁用网站</h1></div>
+        <p class="meta" data-i18n="blocked_meta">这些网站上不会标出生词。也可以在网站上点击扩展图标，直接关闭开关。</p>
         <div class="group">
           <form class="add-row" id="add-form">
-            <input class="input" id="domain" placeholder="输入域名或粘贴网址，如 www.bbc.com" aria-label="网站域名" autocomplete="off" spellcheck="false" />
-            <button type="submit" class="btn primary"><svg class="icon"><use href="icons/ui.svg#add"/></svg>添加</button>
+            <input class="input" id="domain" data-i18n-attr="placeholder:blocked_input;aria-label:blocked_inputLabel" autocomplete="off" spellcheck="false" />
+            <button type="submit" class="btn primary"><svg class="icon"><use href="icons/ui.svg#add"/></svg><span data-i18n="blocked_add">添加</span></button>
           </form>
           <div id="list"></div>
         </div>
@@ -24,6 +24,7 @@
       </div>
     </main>
     <script src="lexicon.js"></script>
+    <script src="i18n.js"></script>
     <script src="page.js"></script>
     <script src="blacklist.js"></script>
   </body>

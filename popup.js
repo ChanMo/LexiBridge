@@ -1,5 +1,7 @@
 (async() => {
   const $ = (id) => document.getElementById(id);
+  const {t, num} = LexiBridgeI18n;
+  LexiBridgeI18n.localize();
   const [tab] = await chrome.tabs.query({active: true, lastFocusedWindow: true});
   let domain = null;
   try {
@@ -11,8 +13,8 @@
     await chrome.storage.local.get(['blocked', 'words', 'pack', 'level', 'highlightStyle']);
 
   const levelName = LexiBridgePacks.getLevel(pack, level)?.name ?? '';
-  $("level-name").textContent = levelName || '未选择';
-  $("word-count").textContent = `${words.length} 个单词`;
+  $("level-name").textContent = levelName || t('popup_noLevel');
+  $("word-count").textContent = t('common_wordCount', num(words.length));
 
   // Site switch
   const site = $("site"), toggle = $("site-toggle"), status = $("status");
@@ -28,11 +30,11 @@
     toggle.checked = on;
     site.classList.toggle("is-on", on);
     if(!on) {
-      status.textContent = '已在此网站停用';
+      status.textContent = t('popup_siteOff');
       return;
     }
     const stats = await pageStats();
-    status.textContent = stats ? `已启用 · 本页 ${stats.count} 个生词` : '已启用';
+    status.textContent = stats ? t('popup_siteOnCount', num(stats.count)) : t('popup_siteOn');
   }
   if(domain) {
     $("domain").textContent = domain;
@@ -45,8 +47,8 @@
     render();
   } else {
     site.classList.add("is-unsupported");
-    $("domain").textContent = '此页面不支持高亮';
-    status.textContent = '仅在普通网页 (http/https) 上可用';
+    $("domain").textContent = t('popup_unsupported');
+    status.textContent = t('popup_unsupportedHint');
     toggle.disabled = true;
   }
 

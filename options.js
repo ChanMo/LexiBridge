@@ -1,8 +1,9 @@
 (async() => {
   const $ = (id) => document.getElementById(id);
   const {el, icon, toast} = Page;
+  const {t, num, tNodes} = LexiBridgeI18n;
+  const P = LexiBridgePacks;
   const PAGE_SIZE = 50;
-  const fmt = (n) => n.toLocaleString('en-US');
   const isMac = navigator.platform.startsWith('Mac');
 
   let {words = [], pack, level} = await chrome.storage.local.get(['words', 'pack', 'level']);
@@ -14,10 +15,15 @@
   const save = (list) => chrome.storage.local.set({words: list});
   const sameWord = (a, b) => LexiBridge.normalizeWord(a) === LexiBridge.normalizeWord(b);
 
+  // Definitions are in the pack's language, which may differ from the UI's.
   function showLevel() {
-    const name = LexiBridgePacks.getLevel(pack, level)?.name;
+    const name = P.getLevel(pack, level)?.name;
+    const link = el('a', '', name ?? '');
+    link.href = 'level.html';
+    link.lang = P.getPack(pack).defLang;
+    $("level-info").replaceChildren(...tNodes('words_levelInfo', link));
     $("level-info").hidden = !name;
-    $("level-name").textContent = name ?? '';
+    $("list").lang = defInput.lang = P.getPack(pack).defLang;
   }
 
   // List
@@ -52,21 +58,21 @@
   function emptyState() {
     const box = el('li', 'empty');
     if(!words.length) {
-      box.append(el('b', '', '词库是空的'), el('div', '', '选择一个英语水平来生成词库，或在网页上选中生词加入。'));
+      box.append(el('b', '', t('words_emptyTitle')), el('div', '', t('words_emptyHint')));
       const actions = el('div', 'actions');
-      const lv = el('a', 'btn primary', '选择英语水平');
+      const lv = el('a', 'btn primary', t('words_chooseLevel'));
       lv.href = 'level.html';
       lv.style.textDecoration = 'none';
-      const add = el('button', 'btn secondary', '添加单词');
+      const add = el('button', 'btn secondary', t('words_add'));
       add.type = 'button';
       add.addEventListener('click', () => openWordDialog());
       actions.append(lv, add);
       box.appendChild(actions);
     } else {
-      box.append(el('b', '', `没有找到「${query}」`), el('div', '', '换个拼写试试，或者直接把它加入词库。'));
+      box.append(el('b', '', t('words_notFoundTitle', query)), el('div', '', t('words_notFoundHint')));
       if(LexiBridge.isWord(query)) {
         const actions = el('div', 'actions');
-        const add = el('button', 'btn secondary', `添加「${query}」`);
+        const add = el('button', 'btn secondary', t('words_addQuery', query));
         add.type = 'button';
         add.prepend(icon('add'));
         add.addEventListener('click', () => openWordDialog(null, '', query));
@@ -81,14 +87,14 @@
     const rows = filtered();
     const pages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
     page = Math.min(page, pages);
-    $("total").textContent = fmt(words.length);
-    $("result-count").textContent = query ? ` · 找到 ${fmt(rows.length)} 个` : '';
+    $("total").textContent = t('common_wordCount', num(words.length));
+    $("result-count").textContent = query ? t('words_found', num(rows.length)) : '';
     $("list").replaceChildren(...(rows.length
       ? rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map(rowFor)
       : [emptyState()]));
     $("pager").hidden = pages <= 1;
     const first = (page - 1) * PAGE_SIZE;
-    $("page-info").textContent = `${fmt(first + 1)}–${fmt(Math.min(first + PAGE_SIZE, rows.length))}，共 ${fmt(rows.length)}`;
+    $("page-info").textContent = t('words_pageInfo', num(first + 1), num(Math.min(first + PAGE_SIZE, rows.length)), num(rows.length));
     $("prev").disabled = page <= 1;
     $("next").disabled = page >= pages;
     $("clear-open").disabled = !words.length;
@@ -127,8 +133,9 @@
       words = changes.words.newValue ?? [];
       render();
     }
-    if(changes.level) {
-      level = changes.level.newValue;
+    if(changes.level || changes.pack) {
+      if(changes.level) level = changes.level.newValue;
+      if(changes.pack) pack = changes.pack.newValue;
       showLevel();
     }
   });
@@ -138,7 +145,7 @@
     if(index < 0) return;
     const row = words[index];
     await save(words.filter((_, i) => i !== index));
-    toast(`已删除：${word}`, '撤销', async() => {
+    toast(t('words_deleted', word), t('common_undo'), async() => {
       const now = (await chrome.storage.local.get(['words'])).words ?? [];
       if(now.some(w => sameWord(w[0], word))) return;
       now.splice(Math.min(index, now.length), 0, row);
@@ -150,17 +157,16 @@
 
   const wordDialog = $("word-dialog"), wordForm = $("word-form");
   const wordInput = wordForm.elements.word, defInput = wordForm.elements.definition, hint = $("definition-hint");
-  const HINT = '输入单词后，会自动从内置词库填入释义';
   let editing = null, defTouched = false, lookupTimer = null;
-  $("save-shortcut").textContent = isMac ? '⌘ + Enter 保存' : 'Ctrl + Enter 保存';
+  $("save-shortcut").textContent = t(isMac ? 'common_saveShortcutMac' : 'common_saveShortcut');
 
   function openWordDialog(word = null, definition = '', prefill = '') {
     editing = word;
     defTouched = !!word;
-    $("word-dialog-title").textContent = word ? '编辑单词' : '添加单词';
+    $("word-dialog-title").textContent = t(word ? 'words_editTitle' : 'words_add');
     wordInput.value = word ?? prefill;
     defInput.value = definition;
-    hint.textContent = HINT;
+    hint.textContent = t('words_definitionHint');
     wordDialog.showModal();
     (word ? defInput : wordInput).focus();
     if(prefill) lookup();
@@ -173,12 +179,15 @@
     const res = await chrome.runtime.sendMessage({action: 'lookup', data: {word: text}});
     if(defTouched || wordInput.value.trim() !== text) return;
     defInput.value = res.definition;
-    hint.replaceChildren(res.definition ? '已从内置词库填入释义，可修改' : '内置词库中没有这个词，请输入释义');
-    if(res.definition && res.word !== LexiBridge.normalizeWord(text)) {
-      const use = el('button', 'btn', `改用原形 ${res.word}`);
+    if(!res.definition) {
+      hint.textContent = t('common_notInDictionary');
+    } else if(res.word !== LexiBridge.normalizeWord(text)) {
+      const use = el('button', 'btn', t('words_useBase', res.word));
       use.type = 'button';
       use.addEventListener('click', () => { wordInput.value = res.word; use.remove(); });
-      hint.append('。网页上的变形词会按原形识别，', use);
+      hint.replaceChildren(...tNodes('words_filledBase', use));
+    } else {
+      hint.textContent = t('words_filled');
     }
   }
   wordInput.addEventListener("input", () => {
@@ -202,7 +211,7 @@
     rest.splice(Math.min(at, rest.length), 0, [word, definition]);
     await save(rest);
     wordDialog.close();
-    toast(editing ? `已更新：${word}` : `已添加：${word}`);
+    toast(t(editing ? 'words_updated' : 'words_added', word));
   });
 
   $("add-open").addEventListener("click", () => openWordDialog());
@@ -213,14 +222,14 @@
   const importDialog = $("import-dialog"), fileInput = $("file"), drop = $("drop");
   function resetImport() {
     fileInput.value = '';
-    $("file-name").textContent = '选择 JSON 文件，或拖到这里';
+    $("file-name").textContent = t('words_importDrop');
     $("import-error").textContent = '';
     $("import-btn").disabled = true;
   }
   $("import-open").addEventListener("click", () => { resetImport(); importDialog.showModal(); });
   fileInput.addEventListener("change", () => {
     const file = fileInput.files[0];
-    $("file-name").textContent = file ? file.name : '选择 JSON 文件，或拖到这里';
+    $("file-name").textContent = file ? file.name : t('words_importDrop');
     $("import-error").textContent = '';
     $("import-btn").disabled = !file;
   });
@@ -233,34 +242,44 @@
     fileInput.dispatchEvent(new Event("change"));
   });
 
-  // Valid rows of an imported file, keys normalized; null if not a word list.
-  function parseWords(text) {
+  // An imported file: an export ({format: "lexibridge", pack, words}) or a plain
+  // [["word", "definition"], ...] list. Returns {pack, rows} with keys normalized,
+  // pack null for a plain list; null if the file is neither.
+  function parseFile(text) {
     let data;
     try {
       data = JSON.parse(text);
     } catch {
       return null;
     }
-    if(!Array.isArray(data)) return null;
+    const list = Array.isArray(data) ? data : data?.format === 'lexibridge' && Array.isArray(data.words) ? data.words : null;
+    if(!list) return null;
     const rows = new Map();
-    for(const i of data) {
+    for(const i of list) {
       if(!Array.isArray(i) || typeof i[0] !== 'string') continue;
       const key = LexiBridge.normalizeWord(i[0]);
       if(key && !rows.has(key)) rows.set(key, String(i[1] ?? ''));
     }
-    return [...rows];
+    return {pack: Array.isArray(data) ? null : data.pack ?? null, rows: [...rows]};
   }
+  const packLabel = (id) => P.PACKS.find(p => p.id === id)?.label ?? id;
 
   $("import-form").addEventListener("submit", async(e) => {
     if(e.submitter?.value !== 'import') return;
     e.preventDefault();
     const file = fileInput.files[0];
     if(!file) return;
-    const imported = parseWords(await file.text());
-    if(!imported) {
-      $("import-error").textContent = '文件格式不对：需要 [["word", "释义"], ...] 格式的 JSON';
+    const parsed = parseFile(await file.text());
+    if(!parsed) {
+      $("import-error").textContent = t('words_importError');
       return;
     }
+    const current = P.getPack(pack).id;
+    if(parsed.pack && parsed.pack !== current &&
+       !confirm(t('words_importOtherPack', packLabel(parsed.pack), packLabel(current)))) {
+      return;
+    }
+    const imported = parsed.rows;
     let next = imported;
     if(!$("replace").checked) {
       // Merge: imported definitions win, existing order is kept.
@@ -270,13 +289,15 @@
     const before = words;
     await save(next);
     importDialog.close();
-    toast(`已导入 ${imported.length} 个单词，词库共 ${next.length} 个`, '撤销', () => save(before));
+    toast(t('words_imported', num(imported.length), num(next.length)), t('common_undo'), () => save(before));
   });
 
   // Export
 
   function exportWords() {
-    const blob = new Blob([JSON.stringify(words)], {type: 'application/json'});
+    const data = {format: 'lexibridge', version: 2, pack: P.getPack(pack).id, level: level ?? null,
+      exportedAt: new Date().toISOString(), words};
+    const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = `lexibridge-words-${new Date().toISOString().slice(0, 10)}.json`;
@@ -289,7 +310,7 @@
 
   const clearDialog = $("clear-dialog");
   $("clear-open").addEventListener("click", () => {
-    $("clear-count").textContent = words.length;
+    $("clear-text").replaceChildren(...tNodes('words_clearText', el('b', '', num(words.length))));
     clearDialog.returnValue = '';
     clearDialog.showModal();
   });
@@ -299,7 +320,7 @@
     } else if(clearDialog.returnValue === 'clear') {
       const before = words;
       await save([]);
-      toast(`已清空 ${before.length} 个单词`, '撤销', () => save(before));
+      toast(t('words_cleared', num(before.length)), t('common_undo'), () => save(before));
     }
   });
 

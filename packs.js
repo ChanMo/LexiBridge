@@ -18,6 +18,18 @@ const LexiBridgePacks = (() => {
     return PACKS.find(p => p.id === id) ?? PACKS[0];
   }
 
+  // The pack for a learner whose browser languages are `languages` (most preferred
+  // first): Traditional Chinese for Taiwan, Hong Kong and Macau, else Simplified.
+  // Only packs that exist are picked.
+  function pickPack(languages) {
+    for(const language of languages) {
+      const tag = String(language).toLowerCase().replace('_', '-');
+      if(!/^zh\b/.test(tag)) continue;
+      return getPack(/^zh-(tw|hk|mo|hant)\b/.test(tag) ? 'en-zh-Hant' : 'en-zh-Hans');
+    }
+    return PACKS[0];
+  }
+
   function getLevel(packId, levelId) {
     return getPack(packId).levels.find(l => l.id === levelId);
   }
@@ -35,7 +47,7 @@ const LexiBridgePacks = (() => {
     return (data.levels[levelId] ?? []).map(word => [word, data.dict.get(word)]);
   }
 
-  return {PACKS, getPack, getLevel, loadPack, levelWords};
+  return {PACKS, getPack, pickPack, getLevel, loadPack, levelWords};
 })();
 
 if (typeof module !== 'undefined') module.exports = LexiBridgePacks;

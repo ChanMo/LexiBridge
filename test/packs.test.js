@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert');
 const {COMMON_WORDS, parseDefinition} = require('../lexicon.js');
-const {PACKS, getPack, getLevel, levelWords} = require('../packs.js');
+const {PACKS, getPack, pickPack, getLevel, levelWords} = require('../packs.js');
 const IRREGULAR = require('../engines/en-irregular.js');
 
 const load = (pack) => ({
@@ -17,6 +17,21 @@ test('missing or unknown pack ids fall back to the first pack', () => {
   assert.strictEqual(getPack('nope'), PACKS[0]);
   assert.strictEqual(getLevel(undefined, 'cet4').name, '大学四级');
   assert.strictEqual(getLevel(undefined, 'nope'), undefined);
+});
+
+test('the pack follows the browser language, among packs that exist', () => {
+  const pick = (...languages) => pickPack(languages).id;
+  assert.strictEqual(pick('zh-CN'), 'en-zh-Hans');
+  assert.strictEqual(pick('en-US', 'fr'), 'en-zh-Hans');
+  PACKS.push({id: 'en-zh-Hant', levels: []});
+  try {
+    for (const tag of ['zh-TW', 'zh_TW', 'zh-HK', 'zh-MO', 'zh-Hant-TW']) assert.strictEqual(pick(tag), 'en-zh-Hant', tag);
+    assert.strictEqual(pick('en-US', 'zh-TW', 'zh-CN'), 'en-zh-Hant');
+    assert.strictEqual(pick('zh', 'zh-TW'), 'en-zh-Hans');
+    assert.strictEqual(pick('zhx-TW'), 'en-zh-Hans');
+  } finally {
+    PACKS.pop();
+  }
 });
 
 for (const pack of PACKS) {
@@ -36,7 +51,7 @@ for (const pack of PACKS) {
     const {dict} = load(pack);
     for (const key of dict.keys()) assert.match(key, /^[a-z]+(?:['-][a-z]+)*$/);
     // A leading "[计]" tag would show up on the card as the phonetic.
-    for (const [w, d] of dict) assert.doesNotMatch(parseDefinition(d).phonetic ?? '', /[぀-鿿]/, w);
+    for (const [w, d] of dict) assert.doesNotMatch(parseDefinition(d).phonetic ?? '', /[\u3040-\u9fff]/, w);
     for (const w of ['found', 'left', 'ground', 'bound', 'wound']) assert.ok(dict.get(w), w);
   });
 }

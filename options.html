@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>单词库 | LexiBridge</title>
+    <title data-i18n="words_title">单词库 | LexiBridge</title>
     <link rel="icon" href="icon_32.png" />
     <link rel="stylesheet" href="pages.css" />
   </head>
@@ -12,31 +12,31 @@
     <main>
       <div class="col">
         <div class="head">
-          <h1>单词库</h1>
-          <button type="button" class="btn primary" id="add-open"><svg class="icon"><use href="icons/ui.svg#add"/></svg>添加单词</button>
-          <button type="button" class="icon-btn" id="more-open" title="更多" aria-label="更多"><svg class="icon"><use href="icons/ui.svg#more"/></svg></button>
+          <h1 data-i18n="common_wordList">单词库</h1>
+          <button type="button" class="btn primary" id="add-open"><svg class="icon"><use href="icons/ui.svg#add"/></svg><span data-i18n="words_add">添加单词</span></button>
+          <button type="button" class="icon-btn" id="more-open" data-i18n-attr="title:words_more;aria-label:words_more"><svg class="icon"><use href="icons/ui.svg#more"/></svg></button>
         </div>
-        <p class="meta"><span id="total">0</span> 个单词<span id="level-info" hidden> · 水平 <a href="level.html" id="level-name"></a></span><span id="result-count"></span></p>
+        <p class="meta"><span id="total"></span><span id="level-info" hidden></span><span id="result-count"></span></p>
 
         <label class="search">
           <svg class="icon"><use href="icons/ui.svg#search"/></svg>
-          <input class="input" type="search" id="search" placeholder="搜索单词或释义" aria-label="搜索单词或释义" autocomplete="off" />
+          <input class="input" type="search" id="search" data-i18n-attr="placeholder:words_search;aria-label:words_search" autocomplete="off" />
           <span class="kbd" aria-hidden="true">/</span>
         </label>
         <ul class="list" id="list"></ul>
-        <nav class="pager" id="pager" aria-label="分页">
+        <nav class="pager" id="pager" data-i18n-attr="aria-label:words_pager">
           <span id="page-info"></span>
-          <button type="button" class="icon-btn" id="prev" aria-label="上一页" title="上一页"><svg class="icon"><use href="icons/ui.svg#prev"/></svg></button>
-          <button type="button" class="icon-btn" id="next" aria-label="下一页" title="下一页"><svg class="icon"><use href="icons/ui.svg#next"/></svg></button>
+          <button type="button" class="icon-btn" id="prev" data-i18n-attr="aria-label:words_prev;title:words_prev"><svg class="icon"><use href="icons/ui.svg#prev"/></svg></button>
+          <button type="button" class="icon-btn" id="next" data-i18n-attr="aria-label:words_next;title:words_next"><svg class="icon"><use href="icons/ui.svg#next"/></svg></button>
         </nav>
       </div>
     </main>
 
     <div class="menu" id="more-menu" popover role="menu">
-      <button type="button" role="menuitem" id="import-open"><svg class="icon"><use href="icons/ui.svg#upload"/></svg>导入…</button>
-      <button type="button" role="menuitem" id="export-btn"><svg class="icon"><use href="icons/ui.svg#download"/></svg>导出</button>
+      <button type="button" role="menuitem" id="import-open"><svg class="icon"><use href="icons/ui.svg#upload"/></svg><span data-i18n="words_import">导入…</span></button>
+      <button type="button" role="menuitem" id="export-btn"><svg class="icon"><use href="icons/ui.svg#download"/></svg><span data-i18n="words_export">导出</span></button>
       <hr>
-      <button type="button" role="menuitem" class="danger" id="clear-open"><svg class="icon"><use href="icons/ui.svg#delete"/></svg>清空词库…</button>
+      <button type="button" role="menuitem" class="danger" id="clear-open"><svg class="icon"><use href="icons/ui.svg#delete"/></svg><span data-i18n="words_clear">清空词库…</span></button>
     </div>
 
     <template id="row">
@@ -46,8 +46,8 @@
           <div class="def-slot"></div>
         </div>
         <div class="row-actions">
-          <button type="button" class="icon-btn edit" title="编辑" aria-label="编辑"><svg class="icon"><use href="icons/ui.svg#edit"/></svg></button>
-          <button type="button" class="icon-btn remove" title="删除" aria-label="删除"><svg class="icon"><use href="icons/ui.svg#delete"/></svg></button>
+          <button type="button" class="icon-btn edit" data-i18n-attr="title:words_edit;aria-label:words_edit"><svg class="icon"><use href="icons/ui.svg#edit"/></svg></button>
+          <button type="button" class="icon-btn remove" data-i18n-attr="title:words_delete;aria-label:words_delete"><svg class="icon"><use href="icons/ui.svg#delete"/></svg></button>
         </div>
       </li>
     </template>
@@ -55,22 +55,22 @@
     <dialog id="word-dialog" aria-labelledby="word-dialog-title">
       <form method="dialog" id="word-form">
         <div class="dialog-head">
-          <h2 id="word-dialog-title">添加单词</h2>
-          <button type="submit" value="cancel" class="icon-btn" aria-label="关闭" formnovalidate><svg class="icon"><use href="icons/ui.svg#close"/></svg></button>
+          <h2 id="word-dialog-title" data-i18n="words_add">添加单词</h2>
+          <button type="submit" value="cancel" class="icon-btn" data-i18n-attr="aria-label:common_close" formnovalidate><svg class="icon"><use href="icons/ui.svg#close"/></svg></button>
         </div>
         <div class="dialog-body">
-          <label class="field"><span>单词</span>
+          <label class="field"><span data-i18n="words_word">单词</span>
             <input class="input" name="word" required autocomplete="off" spellcheck="false" />
           </label>
-          <label class="field"><span>释义</span>
-            <textarea class="input" name="definition" required placeholder="如：[əˈbrʌpt] adj. 突然的；陡峭的"></textarea>
-            <p class="hint" id="definition-hint">输入单词后，会自动从内置词库填入释义</p>
+          <label class="field"><span data-i18n="common_definition">释义</span>
+            <textarea class="input" name="definition" required data-i18n-attr="placeholder:words_definitionPlaceholder"></textarea>
+            <p class="hint" id="definition-hint" data-i18n="words_definitionHint">输入单词后，会自动从内置词库填入释义</p>
           </label>
         </div>
         <div class="dialog-foot">
           <span class="grow" id="save-shortcut"></span>
-          <button type="submit" value="cancel" class="btn secondary" formnovalidate>取消</button>
-          <button type="submit" value="save" class="btn primary">保存</button>
+          <button type="submit" value="cancel" class="btn secondary" formnovalidate data-i18n="common_cancel">取消</button>
+          <button type="submit" value="save" class="btn primary" data-i18n="common_save">保存</button>
         </div>
       </form>
     </dialog>
@@ -78,22 +78,22 @@
     <dialog id="import-dialog" aria-labelledby="import-dialog-title">
       <form method="dialog" id="import-form">
         <div class="dialog-head">
-          <h2 id="import-dialog-title">导入单词</h2>
-          <button type="submit" value="cancel" class="icon-btn" aria-label="关闭"><svg class="icon"><use href="icons/ui.svg#close"/></svg></button>
+          <h2 id="import-dialog-title" data-i18n="words_importTitle">导入单词</h2>
+          <button type="submit" value="cancel" class="icon-btn" data-i18n-attr="aria-label:common_close"><svg class="icon"><use href="icons/ui.svg#close"/></svg></button>
         </div>
         <div class="dialog-body">
           <label class="drop" id="drop">
             <svg class="icon"><use href="icons/ui.svg#upload"/></svg>
-            <b id="file-name">选择 JSON 文件，或拖到这里</b>
-            <span>格式：[["word", "释义"], ...]</span>
+            <b id="file-name" data-i18n="words_importDrop">选择 JSON 文件，或拖到这里</b>
+            <span data-i18n="words_importFormat">LexiBridge 导出的文件，或 [["word", "释义"], ...] 格式的 JSON</span>
             <input type="file" accept=".json,application/json" id="file" />
           </label>
-          <label class="check"><input type="checkbox" id="replace" />替换现有词库（默认合并，同名单词以导入的为准）</label>
+          <label class="check"><input type="checkbox" id="replace" /><span data-i18n="words_importReplace">替换现有词库（默认合并，同名单词以导入的为准）</span></label>
           <p class="error" id="import-error" role="alert"></p>
         </div>
         <div class="dialog-foot">
-          <button type="submit" value="cancel" class="btn secondary">取消</button>
-          <button type="submit" value="import" class="btn primary" id="import-btn" disabled>导入</button>
+          <button type="submit" value="cancel" class="btn secondary" data-i18n="common_cancel">取消</button>
+          <button type="submit" value="import" class="btn primary" id="import-btn" disabled data-i18n="words_importButton">导入</button>
         </div>
       </form>
     </dialog>
@@ -101,22 +101,23 @@
     <dialog id="clear-dialog" aria-labelledby="clear-dialog-title">
       <form method="dialog">
         <div class="dialog-head">
-          <h2 id="clear-dialog-title">清空词库？</h2>
+          <h2 id="clear-dialog-title" data-i18n="words_clearTitle">清空词库？</h2>
         </div>
         <div class="dialog-body">
-          <p>将删除全部 <b id="clear-count">0</b> 个单词，网页上不会再有标记。清空后可以立即撤销；如需长期保留，建议先导出。</p>
+          <p id="clear-text"></p>
         </div>
         <div class="dialog-foot">
-          <button type="submit" value="export" class="btn">先导出</button>
+          <button type="submit" value="export" class="btn" data-i18n="words_exportFirst">先导出</button>
           <span class="grow"></span>
-          <button type="submit" value="cancel" class="btn secondary">取消</button>
-          <button type="submit" value="clear" class="btn danger" id="clear-btn">清空</button>
+          <button type="submit" value="cancel" class="btn secondary" data-i18n="common_cancel">取消</button>
+          <button type="submit" value="clear" class="btn danger" id="clear-btn" data-i18n="words_clearButton">清空</button>
         </div>
       </form>
     </dialog>
 
     <script src="lexicon.js"></script>
     <script src="packs.js"></script>
+    <script src="i18n.js"></script>
     <script src="page.js"></script>
     <script src="options.js"></script>
   </body>

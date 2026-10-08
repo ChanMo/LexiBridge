@@ -27,6 +27,7 @@ npm run package   # 生成 dist/lexibridge-<version>.zip，用于上传应用商
 - =popup.*=: 扩展图标弹出面板
 - =options.*=, =level.*=, =blacklist.*=: 管理页 (单词库、英语水平、禁用网站)，共用 =pages.css= 和 =page.js=
 - =packs.js=: 语言包和水平定义，读取 =packs/= 下生成的词典和分级词表
+- =i18n.js=, =_locales/=: 界面文案 (=chrome.i18n=，跟随浏览器语言)；页面上用 =data-i18n=，脚本里用 =t()=
 - =migrate.js=: 从 v1.3 升级时刷新内置旧释义 (v1.5 之后删除)
 - =engines/en-irregular.js=, =packs/=: 由 =tools/build_packs.py= 生成的数据，不要手改
 - =icons/=: 图标 SVG 源文件 (商店 128 / 满版 / 工具栏小尺寸) 和界面图标 =ui.svg=；

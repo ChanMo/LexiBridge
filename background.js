@@ -19,12 +19,13 @@ chrome.runtime.onInstalled.addListener(async({reason}) => {
   if(reason !== chrome.runtime.OnInstalledReason.INSTALL) {
     return;
   }
-  const {words = [], pack: packId} = await chrome.storage.local.get(['words', 'pack']);
+  const {words = []} = await chrome.storage.local.get(['words']);
   if(words.length <= 0) {
-    // A sensible default until the learner picks a level on the welcome page.
-    const pack = P.getPack(packId);
+    // A sensible default until the learner picks a level on the welcome page:
+    // definitions in the browser's language.
+    const pack = P.pickPack([chrome.i18n.getUILanguage(), ...navigator.languages]);
     const data = await packData(pack.id);
-    await chrome.storage.local.set({words: P.levelWords(data, pack.defaultLevel), level: pack.defaultLevel});
+    await chrome.storage.local.set({pack: pack.id, words: P.levelWords(data, pack.defaultLevel), level: pack.defaultLevel});
   }
   chrome.tabs.create({url: 'level.html?welcome=1'});
 });

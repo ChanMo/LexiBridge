@@ -1,5 +1,8 @@
 // Shared helpers for the extension pages (word list, English level, blocked sites).
 const Page = (() => {
+  const {t} = LexiBridgeI18n;
+  LexiBridgeI18n.localize();
+
   function el(tag, className, text) {
     const e = document.createElement(tag);
     if(className) e.className = className;
@@ -82,8 +85,8 @@ const Page = (() => {
   }
 
   // Sidebar, shared by every page; <body data-page="..."> marks the current one.
-  const PAGES = [['words', 'options.html', '单词库', 'book'], ['level', 'level.html', '英语水平', 'level'],
-    ['blocked', 'blacklist.html', '禁用网站', 'block']];
+  const PAGES = [['words', 'options.html', 'common_wordList', 'book'], ['level', 'level.html', 'common_level', 'level'],
+    ['blocked', 'blacklist.html', 'common_blocked', 'block']];
   function sidebar() {
     const side = document.querySelector('aside.side');
     if(!side) return;
@@ -94,17 +97,17 @@ const Page = (() => {
     logo.alt = '';
     brand.append(logo, 'LexiBridge');
     const nav = el('nav', 'nav');
-    nav.setAttribute('aria-label', '页面');
+    nav.setAttribute('aria-label', t('page_nav'));
     for(const [id, href, label, iconName] of PAGES) {
       const a = el('a');
       a.href = href;
-      a.append(icon(iconName), el('span', '', label));
+      a.append(icon(iconName), el('span', '', t(label)));
       if(document.body.dataset.page === id) a.setAttribute('aria-current', 'page');
       nav.appendChild(a);
     }
     const foot = el('div', 'side-foot');
-    for(const [href, label] of [['https://chanmo.github.io/LexiBridge/', '帮助'], ['https://github.com/ChanMo/LexiBridge/issues', '反馈']]) {
-      const a = el('a', '', label);
+    for(const [href, label] of [['https://chanmo.github.io/LexiBridge/', 'page_help'], ['https://github.com/ChanMo/LexiBridge/issues', 'page_feedback']]) {
+      const a = el('a', '', t(label));
       a.href = href;
       a.target = '_blank';
       a.rel = 'noopener';

@@ -1,6 +1,7 @@
 // In-page UI: the word card, the "add word" pill and the undo toast.
 // Rendered in a shadow root so the page's styles cannot leak in.
 const LexiBridgeUI = (() => {
+  const {t} = LexiBridgeI18n;
   const ICONS = {
     speak: 'M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z',
     check: 'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z',
@@ -27,8 +28,7 @@ const LexiBridgeUI = (() => {
       --toast-bg: #1f2a44;
       --toast-fg: #f7f1e3;
       --toast-accent: #f5b83d;
-      font: 14px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB",
-        "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+      font: 14px/1.6 var(--sans);
       color: var(--fg);
       -webkit-font-smoothing: antialiased;
     }
@@ -51,6 +51,16 @@ const LexiBridgeUI = (() => {
         --toast-accent: #8a5a00;
       }
     }
+    /* Chinese glyphs follow the language: the UI's on the card, the definitions' in its body. */
+    .lb, :lang(zh-Hans), :lang(zh-CN) {
+      --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB",
+        "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+    }
+    :lang(zh-Hant), :lang(zh-TW), :lang(zh-HK) {
+      --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei",
+        "Noto Sans CJK TC", sans-serif;
+    }
+    [lang] { font-family: var(--sans); }
     [popover] {
       position: fixed;
       inset: auto;
@@ -266,6 +276,7 @@ const LexiBridgeUI = (() => {
   // A popover in the top layer, wrapped so the theme variables apply.
   function layer(type, className) {
     const wrap = el('div', 'lb ' + className);
+    wrap.lang = LexiBridgeI18n.lang;
     wrap.popover = type;
     getRoot().appendChild(wrap);
     return wrap;
@@ -285,8 +296,9 @@ const LexiBridgeUI = (() => {
     box.style.left = `${Math.max(12, Math.min(left, vw - w - 12))}px`;
   }
 
-  function definitionBody(definition) {
+  function definitionBody(definition, lang) {
     const body = el('div', 'body');
+    body.lang = lang;
     for(const g of LexiBridge.parseDefinition(definition).groups) {
       const row = el('div', 'group');
       if(g.pos) row.appendChild(el('span', 'pos', g.pos));
@@ -306,21 +318,22 @@ const LexiBridgeUI = (() => {
 
   // state: "known" (in the word list), "added" (just added) or "new"
   // (not in any list yet: ask for a definition).
-  function showCard({word, surface, definition, anchor, state, onKnown, onUndoAdd, onSave, onSpeak}) {
+  // lang: language of the definition, e.g. "zh-Hans".
+  function showCard({word, surface, definition, lang, anchor, state, onKnown, onUndoAdd, onSave, onSpeak}) {
     current?.box.remove();
     const box = layer('auto', 'card');
     const head = el('div', 'head');
     const title = el('div', 'title');
     title.appendChild(el('div', 'word', word));
     const speak = button('', 'icon-btn', onSpeak, 'speak');
-    speak.title = '发音';
-    speak.setAttribute('aria-label', '发音');
+    speak.title = t('card_speak');
+    speak.setAttribute('aria-label', t('card_speak'));
     title.appendChild(speak);
     head.appendChild(title);
     const {phonetic} = LexiBridge.parseDefinition(definition);
     const subParts = [];
     if(phonetic) subParts.push(`/${phonetic}/`);
-    if(surface && surface.toLowerCase() !== word) subParts.push(`原文 ${surface}`);
+    if(surface && surface.toLowerCase() !== word) subParts.push(t('card_surface', surface));
     if(subParts.length) {
       const sub = el('div', 'sub');
       subParts.forEach((t, i) => {
@@ -336,8 +349,9 @@ const LexiBridgeUI = (() => {
     if(state === 'new') {
       const body = el('div', 'body');
       const textarea = el('textarea');
-      textarea.placeholder = '内置词库中没有这个词，请输入释义';
-      textarea.setAttribute('aria-label', '释义');
+      textarea.lang = lang;
+      textarea.placeholder = t('common_notInDictionary');
+      textarea.setAttribute('aria-label', t('common_definition'));
       body.appendChild(textarea);
       box.appendChild(body);
       const save = async() => {
@@ -349,21 +363,21 @@ const LexiBridgeUI = (() => {
       textarea.addEventListener('keydown', (e) => {
 	if(e.key === 'Enter' && (e.metaKey || e.ctrlKey)) save();
       });
-      foot.appendChild(el('span', '', navigator.platform.startsWith('Mac') ? '⌘ + Enter 保存' : 'Ctrl + Enter 保存'));
-      foot.appendChild(button('加入词库', 'btn primary', save));
+      foot.appendChild(el('span', '', t(navigator.platform.startsWith('Mac') ? 'common_saveShortcutMac' : 'common_saveShortcut')));
+      foot.appendChild(button(t('common_addToList'), 'btn primary', save));
       box.appendChild(foot);
       requestAnimationFrame(() => textarea.focus());
     } else {
-      box.appendChild(definitionBody(definition));
+      box.appendChild(definitionBody(definition, lang));
       if(state === 'added') {
 	const status = el('span', 'status');
-	status.append(icon('check'), '已加入词库');
+	status.append(icon('check'), t('card_added'));
 	foot.appendChild(status);
-	foot.appendChild(button('撤销', 'btn', async() => { await onUndoAdd(); close(); }));
+	foot.appendChild(button(t('common_undo'), 'btn', async() => { await onUndoAdd(); close(); }));
       } else {
 	foot.appendChild(el('span', '', ''));
-	const known = button('认识了', 'btn', async() => { close(); await onKnown(); }, 'check');
-	known.title = '移出词库，不再高亮这个词';
+	const known = button(t('card_known'), 'btn', async() => { close(); await onKnown(); }, 'check');
+	known.title = t('card_knownTitle');
 	foot.appendChild(known);
       }
       box.appendChild(foot);
@@ -385,7 +399,7 @@ const LexiBridgeUI = (() => {
   function showPill(rect, onClick) {
     hidePill();
     pill = layer('manual', 'pill-wrap');
-    const b = button('加入词库', 'pill', () => { hidePill(); onClick(); }, 'add');
+    const b = button(t('common_addToList'), 'pill', () => { hidePill(); onClick(); }, 'add');
     // Keep the page selection while clicking.
     b.addEventListener('mousedown', (e) => e.preventDefault());
     pill.appendChild(b);

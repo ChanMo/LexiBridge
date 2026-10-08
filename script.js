@@ -1,7 +1,9 @@
 (async() => {
-  let {words = [], blocked = [], highlightStyle = 'underline'} =
-    await chrome.storage.local.get(['words', 'blocked', 'highlightStyle']);
+  const {t} = LexiBridgeI18n;
+  let {words = [], blocked = [], pack, highlightStyle = 'underline'} =
+    await chrome.storage.local.get(['words', 'blocked', 'pack', 'highlightStyle']);
   let dict = LexiBridge.buildDictionary(words);
+  let defLang = LexiBridgePacks.getPack(pack).defLang;
   words = null;
   let enabled = !blocked.includes(location.hostname);
 
@@ -106,6 +108,9 @@
     if(changes.highlightStyle) {
       applyStyle(changes.highlightStyle.newValue ?? 'underline');
     }
+    if(changes.pack) {
+      defLang = LexiBridgePacks.getPack(changes.pack.newValue).defLang;
+    }
     if(changes.blocked) {
       const on = !(changes.blocked.newValue ?? []).includes(location.hostname);
       if(on !== enabled) setEnabled(on);
@@ -177,13 +182,14 @@
       word,
       surface: range.toString(),
       definition: dict.get(word),
+      lang: defLang,
       anchor: () => range.getBoundingClientRect(),
       state: 'known',
       onSpeak: () => speak(word),
       // Highlights are removed by the storage.onChanged listener, in every tab.
       onKnown: async() => {
 	const undo = await removeWord(word);
-	LexiBridgeUI.toast(`已移出词库：${word}`, '撤销', undo);
+	LexiBridgeUI.toast(t('card_removed', word), t('common_undo'), undo);
       },
     });
   }
@@ -277,6 +283,7 @@
     const card = {
       word,
       surface: text,
+      lang: defLang,
       anchor: () => range.getBoundingClientRect(),
       onSpeak: () => speak(word),
     };

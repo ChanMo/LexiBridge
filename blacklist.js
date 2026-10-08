@@ -1,6 +1,7 @@
 (async() => {
   const $ = (id) => document.getElementById(id);
   const {el, icon, toast} = Page;
+  const {t} = LexiBridgeI18n;
   let blocked = (await chrome.storage.local.get(['blocked'])).blocked ?? [];
   const save = (list) => chrome.storage.local.set({blocked: list});
 
@@ -20,7 +21,7 @@
     const list = $("list");
     if(!blocked.length) {
       const empty = el('div', 'empty');
-      empty.append(el('b', '', '还没有禁用任何网站'), el('div', '', '在不需要标出生词的网站上，点击工具栏里的 LexiBridge 图标，关闭开关即可。'));
+      empty.append(el('b', '', t('blocked_emptyTitle')), el('div', '', t('blocked_emptyHint')));
       list.replaceChildren(empty);
       return;
     }
@@ -28,12 +29,12 @@
       const row = el('div', 'site');
       const remove = el('button', 'icon-btn danger');
       remove.type = 'button';
-      remove.title = remove.ariaLabel = `移除 ${domain}`;
+      remove.title = remove.ariaLabel = t('blocked_remove', domain);
       remove.appendChild(icon('close'));
       remove.addEventListener('click', async() => {
         const index = blocked.indexOf(domain);
         await save(blocked.filter(d => d !== domain));
-        toast(`已在 ${domain} 重新启用`, '撤销', async() => {
+        toast(t('blocked_enabled', domain), t('common_undo'), async() => {
           const now = (await chrome.storage.local.get(['blocked'])).blocked ?? [];
           if(now.includes(domain)) return;
           now.splice(Math.min(index, now.length), 0, domain);
@@ -50,14 +51,14 @@
     const host = hostnameOf($("domain").value);
     const error = $("add-error");
     if(!host) {
-      error.textContent = '请输入有效的域名，例如 www.bbc.com';
+      error.textContent = t('blocked_invalid');
       error.hidden = false;
       return;
     }
     error.hidden = true;
     $("domain").value = '';
     if(!blocked.includes(host)) await save([...blocked, host]);
-    toast(`已在 ${host} 停用`);
+    toast(t('blocked_disabled', host));
   });
 
   // The popup switch updates this list too.

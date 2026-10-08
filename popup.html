@@ -15,27 +15,28 @@
       <div class="domain" id="domain"></div>
       <div class="status" id="status"></div>
     </div>
-    <label class="switch" title="在此网站高亮生词">
-      <input type="checkbox" role="switch" id="site-toggle" aria-label="在此网站高亮生词" />
+    <label class="switch" data-i18n-attr="title:popup_siteToggle">
+      <input type="checkbox" role="switch" id="site-toggle" data-i18n-attr="aria-label:popup_siteToggle" />
       <span class="track"><span class="thumb"></span></span>
     </label>
   </section>
 
   <section class="styles">
-    <div class="label">高亮样式</div>
-    <div class="segmented" role="radiogroup" aria-label="高亮样式">
-      <label><input type="radio" name="style" value="underline" /><span><b class="sample underline">word</b>下划线</span></label>
-      <label><input type="radio" name="style" value="tint" /><span><b class="sample tint">word</b>底色</span></label>
-      <label><input type="radio" name="style" value="dotted" /><span><b class="sample dotted">word</b>点线</span></label>
+    <div class="label" data-i18n="popup_highlightStyle">高亮样式</div>
+    <div class="segmented" role="radiogroup" data-i18n-attr="aria-label:popup_highlightStyle">
+      <label><input type="radio" name="style" value="underline" /><span><b class="sample underline">word</b><span data-i18n="popup_styleUnderline">下划线</span></span></label>
+      <label><input type="radio" name="style" value="tint" /><span><b class="sample tint">word</b><span data-i18n="popup_styleTint">底色</span></span></label>
+      <label><input type="radio" name="style" value="dotted" /><span><b class="sample dotted">word</b><span data-i18n="popup_styleDotted">点线</span></span></label>
     </div>
   </section>
 
   <footer class="links">
-    <button type="button" id="words-link"><span>单词库</span><span class="count" id="word-count"></span></button>
-    <button type="button" id="level-link"><span>英语水平</span><span class="count" id="level-name"></span></button>
+    <button type="button" id="words-link"><span data-i18n="common_wordList">单词库</span><span class="count" id="word-count"></span></button>
+    <button type="button" id="level-link"><span data-i18n="common_level">英语水平</span><span class="count" id="level-name"></span></button>
   </footer>
   <script src="lexicon.js"></script>
   <script src="packs.js"></script>
+  <script src="i18n.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

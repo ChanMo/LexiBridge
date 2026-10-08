@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>英语水平 | LexiBridge</title>
+    <title data-i18n="level_title">英语水平 | LexiBridge</title>
     <link rel="icon" href="icon_32.png" />
     <link rel="stylesheet" href="pages.css" />
   </head>
@@ -11,11 +11,15 @@
     <aside class="side"></aside>
     <main>
       <div class="col narrow">
-        <div class="head"><h1>英语水平</h1></div>
-        <p class="meta">LexiBridge 只标出比你的水平更难的词。</p>
-        <p class="lead" id="welcome" hidden>欢迎！已按 <b class="marked">大学四级</b> 准备好词库，可以换成更合适的水平。</p>
-        <div class="group" id="levels" role="radiogroup" aria-label="英语水平"></div>
-        <p class="note">切换水平会替换整个词库；之后可以在网页上随时移出认识的词、加入新词。</p>
+        <div class="head"><h1 data-i18n="common_level">英语水平</h1></div>
+        <p class="meta" data-i18n="level_meta">LexiBridge 只标出比你的水平更难的词。</p>
+        <p class="lead" id="welcome" hidden></p>
+        <div class="packs" id="packs" hidden>
+          <span data-i18n="level_definitionLanguage">释义语言</span>
+          <div class="tabs" id="pack-tabs" role="radiogroup" data-i18n-attr="aria-label:level_definitionLanguage"></div>
+        </div>
+        <div class="group" id="levels" role="radiogroup" data-i18n-attr="aria-label:common_level"></div>
+        <p class="note" data-i18n="level_note">切换水平会替换整个词库；之后可以在网页上随时移出认识的词、加入新词。</p>
       </div>
     </main>
 
@@ -30,17 +34,18 @@
 
     <dialog id="confirm-dialog" aria-labelledby="confirm-title">
       <form method="dialog">
-        <div class="dialog-head"><h2 id="confirm-title">替换当前词库？</h2></div>
+        <div class="dialog-head"><h2 id="confirm-title" data-i18n="level_confirmTitle">替换当前词库？</h2></div>
         <div class="dialog-body"><p id="confirm-text"></p></div>
         <div class="dialog-foot">
-          <button type="submit" value="cancel" class="btn secondary">取消</button>
-          <button type="submit" value="ok" class="btn primary">替换</button>
+          <button type="submit" value="cancel" class="btn secondary" data-i18n="common_cancel">取消</button>
+          <button type="submit" value="ok" class="btn primary" data-i18n="level_replace">替换</button>
         </div>
       </form>
     </dialog>
 
     <script src="lexicon.js"></script>
     <script src="packs.js"></script>
+    <script src="i18n.js"></script>
     <script src="page.js"></script>
     <script src="level.js"></script>
   </body>

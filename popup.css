@@ -28,14 +28,23 @@
     --off: #4a5370;
   }
 }
+/* Chinese glyphs follow the language of the element: the UI's, or the definitions'. */
+:root, :lang(zh-Hans), :lang(zh-CN) {
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+}
+:lang(zh-Hant), :lang(zh-TW), :lang(zh-HK) {
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei",
+    "Noto Sans CJK TC", sans-serif;
+}
+[lang] { font-family: var(--sans); }
 * { box-sizing: border-box; }
 body {
   width: 300px;
   margin: 0;
   background: var(--bg);
   color: var(--fg);
-  font: 13px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB",
-    "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  font: 13px/1.5 var(--sans);
   -webkit-font-smoothing: antialiased;
 }
 button { font: inherit; color: inherit; cursor: pointer; }
@@ -100,7 +109,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .segmented { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 .segmented label { position: relative; cursor: pointer; }
 .segmented input { position: absolute; opacity: 0; }
-.segmented span {
+.segmented label > span {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -111,7 +120,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   color: var(--muted);
   font-size: 12px;
 }
-.segmented label:hover span { background: var(--hover); }
+.segmented label:hover > span { background: var(--hover); }
 .segmented input:checked + span {
   border-color: var(--primary);
   box-shadow: inset 0 0 0 1px var(--primary);
