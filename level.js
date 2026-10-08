@@ -55,6 +55,8 @@
     const pack = shown;
     const levels = await levelsOf(pack);
     if(pack !== shown) return; // another tab was picked meanwhile
+    $("credit").textContent = pack.credit;
+    $("credit").lang = pack.defLang;
     const template = $("level-row");
     container.replaceChildren(...levels.map((level, index) => {
       const row = document.importNode(template.content, true).firstElementChild;

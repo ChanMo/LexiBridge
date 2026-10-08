@@ -1092,6 +1092,8 @@ const LexiBridgeIrregular = new Map(Object.entries({
 "rebuilt":"rebuild",
 "red-hottest":"red-hot",
 "redder":"red",
+"redid":"redo",
+"redone":"redo",
 "redrawn":"redraw",
 "reedier":"reedy",
 "remade":"remake",

@@ -12,5 +12,12 @@
     "sha256": "f8552dd246f61a4e064569eae6194a01c6b3d63b03bf27c6ca863593c549ed0f",
     "license": "MIT",
     "retrieved": "2026-10-08"
+  },
+  "cefrj": {
+    "file": "CEFRJ_wordlist_ver1.6.zip",
+    "url": "https://www.cefr-j.org/data/CEFRJ_wordlist_ver1.6.zip",
+    "sha256": "c837d2c00ab8954ed8db48e79afd8ef37099570295fec36950dbf9322303a37a",
+    "license": "Free for research, education and commercial use with citation (Tono Laboratory, TUFS)",
+    "retrieved": "2026-10-08"
   }
 }

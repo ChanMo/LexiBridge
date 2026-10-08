@@ -1,0 +1,49 @@
+# Taiwan usage applied to OpenCC s2tw output for packs/en-zh-Hant (see tools/build_packs.py).
+# Columns: s2tw output, Taiwan usage. Longest match wins; one pass, so replacements are not re-matched.
+# Only terms that mean the same everywhere: 程序、支持、文件、信息、数据、质量 stay as they are,
+# since replacing them depends on context (design doc 3.2).
+# Review: not yet reviewed by a Taiwanese speaker.
+# Left out: 比特→位元 (hits names: 朱比特、科比特), 短信→簡訊 (no hits).
+# 科技
+軟件	軟體
+硬件	硬體
+網絡	網路
+鼠標	滑鼠
+打印機	印表機
+激光	雷射
+光盤	光碟
+硅	矽
+字節	位元組
+博客	部落格
+視頻	影片
+數據庫	資料庫
+默認	預設
+屏幕	螢幕
+# 生活
+出租車	計程車
+自行車	腳踏車
+公共汽車	公車
+土豆	馬鈴薯
+菠蘿	鳳梨
+西紅柿	番茄
+# 地名
+意大利	義大利
+新西蘭	紐西蘭
+塞浦路斯	塞普勒斯
+也門	葉門
+新澤西	紐澤西
+尼日利亞	奈及利亞
+贊比亞	尚比亞
+斯洛文尼亞	斯洛維尼亞
+加納	迦納
+老撾	寮國
+阿塞拜疆	亞塞拜然
+克羅地亞	克羅埃西亞
+肯尼亞	肯亞
+津巴布韋	辛巴威
+厄瓜多爾	厄瓜多
+利比里亞	賴比瑞亞
+馬薩諸塞	麻薩諸塞
+康涅狄格	康乃狄克
+悉尼	雪梨
+伊斯坦布爾	伊斯坦堡
