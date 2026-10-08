@@ -89,17 +89,9 @@
             <input type="file" accept=".json,application/json" id="file" />
           </label>
           <label class="check"><input type="checkbox" id="replace" />替换现有词库（默认合并，同名单词以导入的为准）</label>
-          <ul class="samples" aria-label="示例词表">
-            <li><a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/CET4_edited.json">大学四级</a></li>
-            <li><a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/CET6_edited.json">大学六级</a></li>
-            <li><a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/GRE_8000_Words.json">GRE</a></li>
-            <li><a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/GRE_abridged.json">GRE 精简</a></li>
-            <li><a download href="https://raw.githubusercontent.com/ChanMo/LexiBridge/main/words/OALD8_abridged_edited.json">牛津高阶</a></li>
-          </ul>
           <p class="error" id="import-error" role="alert"></p>
         </div>
         <div class="dialog-foot">
-          <span class="grow">示例词表可下载后导入</span>
           <button type="submit" value="cancel" class="btn secondary">取消</button>
           <button type="submit" value="import" class="btn primary" id="import-btn" disabled>导入</button>
         </div>
@@ -124,7 +116,7 @@
     </dialog>
 
     <script src="lexicon.js"></script>
-    <script src="levels.js"></script>
+    <script src="packs.js"></script>
     <script src="page.js"></script>
     <script src="options.js"></script>
   </body>

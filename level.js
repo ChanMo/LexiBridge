@@ -1,13 +1,15 @@
 (async() => {
-  const L = LexiBridgeLevels;
+  const P = LexiBridgePacks;
   const welcome = new URL(window.location.href).searchParams.has('welcome');
   document.getElementById("welcome").hidden = !welcome;
   const container = document.getElementById("levels");
   const dialog = document.getElementById("confirm-dialog");
 
-  const lists = await L.loadLists([...new Set(L.LEVELS.flatMap(L.listsFor))]);
-  const levels = L.LEVELS.map(level => ({...level, words: L.levelWords(level, lists)}));
-  let current = (await chrome.storage.local.get(['level'])).level;
+  const stored = await chrome.storage.local.get(['pack', 'level']);
+  const pack = P.getPack(stored.pack);
+  const data = await P.loadPack(pack);
+  const levels = pack.levels.map(level => ({...level, words: P.levelWords(data, level.id)}));
+  let current = stored.level;
 
   // True when the stored list is exactly what a level generated, i.e. the
   // learner has not deleted or added any word since.
@@ -15,16 +17,13 @@
     return !!level && words.length === level.words.length && words.every((w, i) => w[0] === level.words[i][0]);
   }
 
-  // Joins Chinese and Latin text with a space between them: "标出 GRE".
-  const spaced = (a, b) => /[\u4e00-\u9fff]$/.test(a) && /^[A-Za-z0-9]/.test(b) ? `${a} ${b}` : a + b;
-
   function render() {
     const t = document.getElementById("level-row");
     container.replaceChildren(...levels.map((level, index) => {
       const row = document.importNode(t.content, true).firstElementChild;
       const on = level.id === current;
       row.querySelector(".name").textContent = level.name;
-      row.querySelector(".desc").textContent = `${spaced('掌握', level.knownLabel)} · ${spaced('标出', level.learnLabel)}`;
+      row.querySelector(".desc").textContent = level.desc;
       row.querySelector(".count").textContent = `${level.words.length.toLocaleString('en-US')} 词`;
       row.querySelectorAll(".bars i").forEach((bar, i) => bar.classList.toggle("on", i <= index));
       row.classList.toggle("is-current", on);

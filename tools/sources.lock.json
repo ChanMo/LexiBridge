@@ -1,0 +1,16 @@
+{
+  "ecdict": {
+    "file": "ecdict.csv",
+    "url": "https://raw.githubusercontent.com/skywind3000/ECDICT/bc015ed2e24a7abef49fc6dbbb7fe32c1dadaf8b/ecdict.csv",
+    "sha256": "1a6947e04785db63613a92e14903cdae7954f7e84860b10e68e5c7cbb3f9c3cf",
+    "license": "MIT",
+    "retrieved": "2026-10-08"
+  },
+  "ecdict-license": {
+    "file": "ecdict-LICENSE",
+    "url": "https://raw.githubusercontent.com/skywind3000/ECDICT/bc015ed2e24a7abef49fc6dbbb7fe32c1dadaf8b/LICENSE",
+    "sha256": "f8552dd246f61a4e064569eae6194a01c6b3d63b03bf27c6ca863593c549ed0f",
+    "license": "MIT",
+    "retrieved": "2026-10-08"
+  }
+}

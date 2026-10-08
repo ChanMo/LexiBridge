@@ -54,6 +54,18 @@ test('inflected forms map to the base word', () => {
   assert.strictEqual(lookup(dict, 'cat'), null);
 });
 
+test('irregular forms map to their base, homographs do not', () => {
+  const d = buildDictionary([['give', ''], ['go', ''], ['man', ''], ['child', ''], ['tooth', ''],
+    ['grind', ''], ['bind', ''], ['lie', ''], ['rise', ''], ['rose', '']]);
+  for (const [form, base] of [['gave', 'give'], ['went', 'go'], ['men', 'man'], ['children', 'child'], ['teeth', 'tooth']]) {
+    assert.strictEqual(lookup(d, form), base, form);
+  }
+  // "ground" is a word of its own, not just a form of "grind".
+  for (const w of ['ground', 'bound', 'lay']) assert.strictEqual(lookup(d, w), null, w);
+  assert.strictEqual(lookup(d, 'rose'), 'rose');
+  assert.strictEqual(lookup(d, 'ams'), null);
+});
+
 test('hyphenated words match whole, or by part when unknown', () => {
   assert.deepStrictEqual(words('a well-known name'), ['a=a', 'well-known=well-known']);
   assert.deepStrictEqual(words('self-esteem'), ['esteem=esteem']);
@@ -64,12 +76,11 @@ test('possessives and contractions match the word before the apostrophe', () => 
   assert.deepStrictEqual(words("a teacher'll"), ['a=a', 'teacher=teacher']);
 });
 
-test('bundled word lists have no BOM or blank keys', () => {
-  for (const name of ['CET4_edited', 'CET6_edited', 'GRE_8000_Words', 'GRE_abridged', 'OALD8_abridged_edited']) {
-    const rows = require(`../words/${name}.json`);
-    for (const [key] of rows) {
-      assert.ok(key.trim() && !key.startsWith('\uFEFF'), `${name}: ${JSON.stringify(key)}`);
-    }
-    assert.ok(buildDictionary(rows).size > 0);
+test('bundled dictionaries load as word lists, keys already normalized', () => {
+  for (const {id} of require('../packs.js').PACKS) {
+    const rows = Object.entries(require(`../packs/${id}/dict.json`));
+    const dict = buildDictionary(rows);
+    assert.strictEqual(dict.size, rows.length, id);
+    assert.ok(rows.every(([key]) => key === normalizeWord(key)), id);
   }
 });

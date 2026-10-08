@@ -1,29 +1,43 @@
-importScripts('lexicon.js', 'levels.js');
+importScripts('engines/en-irregular.js', 'lexicon.js', 'packs.js', 'migrate.js');
+
+const P = LexiBridgePacks;
+
+// Pack data, loaded once per pack: definitions for words added from a page.
+const loaded = new Map();
+function packData(id) {
+  const pack = P.getPack(id);
+  if(!loaded.has(pack.id)) loaded.set(pack.id, P.loadPack(pack));
+  return loaded.get(pack.id);
+}
 
 chrome.runtime.onInstalled.addListener(async({reason}) => {
-  // Also fired on extension and Chrome updates; only greet new installs.
+  // Also fired on Chrome updates, which need nothing.
+  if(reason === chrome.runtime.OnInstalledReason.UPDATE) {
+    await upgrade();
+    return;
+  }
   if(reason !== chrome.runtime.OnInstalledReason.INSTALL) {
     return;
   }
-  const words = (await chrome.storage.local.get(["words"])).words??[];
+  const {words = [], pack: packId} = await chrome.storage.local.get(['words', 'pack']);
   if(words.length <= 0) {
     // A sensible default until the learner picks a level on the welcome page.
-    const level = LexiBridgeLevels.getLevel(LexiBridgeLevels.DEFAULT_LEVEL);
-    const lists = await LexiBridgeLevels.loadLists(LexiBridgeLevels.listsFor(level));
-    await chrome.storage.local.set({words: LexiBridgeLevels.levelWords(level, lists), level: level.id});
+    const pack = P.getPack(packId);
+    const data = await packData(pack.id);
+    await chrome.storage.local.set({words: P.levelWords(data, pack.defaultLevel), level: pack.defaultLevel});
   }
   chrome.tabs.create({url: 'level.html?welcome=1'});
 });
 
-// Bundled word lists used to look up definitions for words added from a
-// page. Simplified Chinese lists first; OALD (traditional) as a fallback.
-const REFERENCE_LISTS = ['CET4_edited', 'CET6_edited', 'GRE_8000_Words', 'GRE_abridged', 'OALD8_abridged_edited'];
-let reference = null;
-
-function loadReference() {
-  reference ??= LexiBridgeLevels.loadLists(REFERENCE_LISTS)
-    .then(lists => LexiBridge.buildDictionary(REFERENCE_LISTS.flatMap(n => lists[n])));
-  return reference;
+// Refreshes definitions left over from the v1.3 word lists (migrate.js).
+async function upgrade() {
+  const stored = await chrome.storage.local.get(['words', 'level', 'pack', 'backup_v13']);
+  const [{dict}, legacy] = await Promise.all([
+    packData(stored.pack),
+    fetch(chrome.runtime.getURL('packs/legacy-v13.json')).then(res => res.json()),
+  ]);
+  const changes = await LexiBridgeMigrate.upgrade(stored, dict, new Set(legacy));
+  if(Object.keys(changes).length) await chrome.storage.local.set(changes);
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -32,7 +46,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     chrome.tts.speak(request.data.word, {lang: 'en-US'});
   } else if(request.action == 'lookup') {
     const word = LexiBridge.normalizeWord(request.data.word);
-    loadReference().then(dict => {
+    chrome.storage.local.get(['pack']).then(({pack}) => packData(pack)).then(({dict}) => {
       const key = LexiBridge.lookup(dict, word);
       sendResponse(key ? {word: key, definition: dict.get(key)} : {word, definition: ''});
     });

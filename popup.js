@@ -7,10 +7,10 @@
     if(url.protocol === 'http:' || url.protocol === 'https:') domain = url.hostname;
   } catch {}
 
-  let {blocked = [], words = [], level, highlightStyle = 'underline'} =
-    await chrome.storage.local.get(['blocked', 'words', 'level', 'highlightStyle']);
+  let {blocked = [], words = [], pack, level, highlightStyle = 'underline'} =
+    await chrome.storage.local.get(['blocked', 'words', 'pack', 'level', 'highlightStyle']);
 
-  const levelName = LexiBridgeLevels.getLevel(level)?.name ?? '';
+  const levelName = LexiBridgePacks.getLevel(pack, level)?.name ?? '';
   $("level-name").textContent = levelName || '未选择';
   $("word-count").textContent = `${words.length} 个单词`;
 

@@ -7,7 +7,7 @@ description: LexiBridge 不收集任何个人信息，所有数据只保存在�
 
 ## 保存在你浏览器里的数据
 
-LexiBridge 用浏览器的扩展存储（`chrome.storage.local`）保存以下内容，它们不会离开你的设备：
+LexiBridge 用浏览器提供的扩展存储保存以下内容，它们不会离开你的设备：
 
 - 你的词库：单词和释义
 - 你选择的英语水平
@@ -27,9 +27,13 @@ LexiBridge 用浏览器的扩展存储（`chrome.storage.local`）保存以下�
 
 ## 网络请求
 
-LexiBridge 自己不发出任何网络请求，释义来自扩展内置的词表。只有在你点击导入对话框里的示例词表链接时，浏览器才会从 GitHub 下载对应的文件。
+LexiBridge 不发出任何网络请求，释义和分级都来自扩展内置的词典。
 
 LexiBridge 不包含广告，也不包含任何统计或分析代码。
+
+## 数据来源
+
+扩展内置的英汉词典、音标和考试分级来自开源项目 [ECDICT](https://github.com/skywind3000/ECDICT)，按 MIT 许可证使用。完整的第三方许可证见扩展包和 [GitHub 仓库]({{ site.github_url }}) 里的 `THIRD_PARTY_NOTICES.md`。
 
 ## 本网站
 

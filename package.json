@@ -1,11 +1,11 @@
 {
   "name": "lexibridge",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "LexiBridge Chrome extension",
   "main": "background.js",
   "scripts": {
     "test": "node --test test/*.test.js",
-    "package": "mkdir -p dist && zip -r dist/lexibridge-$npm_package_version.zip manifest.json background.js lexicon.js levels.js ui.js script.js app.css popup.html popup.js popup.css options.html options.js blacklist.html blacklist.js level.html level.js page.js pages.css icon*.png icons/ui.svg words/*.json"
+    "package": "mkdir -p dist && zip -r dist/lexibridge-$npm_package_version.zip manifest.json background.js engines/en-irregular.js lexicon.js packs.js migrate.js packs/legacy-v13.json packs/en-zh-Hans/dict.json packs/en-zh-Hans/levels.json packs/en-zh-Hans/LICENSE ui.js script.js app.css popup.html popup.js popup.css options.html options.js blacklist.html blacklist.js level.html level.js page.js pages.css icon*.png icons/ui.svg LICENSE THIRD_PARTY_NOTICES.md"
   },
   "keywords": [],
   "author": "",

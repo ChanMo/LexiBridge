@@ -5,7 +5,7 @@
   const fmt = (n) => n.toLocaleString('en-US');
   const isMac = navigator.platform.startsWith('Mac');
 
-  let {words = [], level} = await chrome.storage.local.get(['words', 'level']);
+  let {words = [], pack, level} = await chrome.storage.local.get(['words', 'pack', 'level']);
   const params = new URL(window.location.href).searchParams;
   let query = (params.get('search') ?? '').trim();
   let page = Math.max(1, parseInt(params.get('page')) || 1);
@@ -15,7 +15,7 @@
   const sameWord = (a, b) => LexiBridge.normalizeWord(a) === LexiBridge.normalizeWord(b);
 
   function showLevel() {
-    const name = LexiBridgeLevels.getLevel(level)?.name;
+    const name = LexiBridgePacks.getLevel(pack, level)?.name;
     $("level-info").hidden = !name;
     $("level-name").textContent = name ?? '';
   }

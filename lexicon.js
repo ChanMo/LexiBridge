@@ -1,6 +1,33 @@
 // Word matching shared by the content script, the options page and tests.
 // Plain script (no modules) so it can be listed in manifest content_scripts.
 const LexiBridge = (() => {
+  // Irregular forms ("gave" -> "give") from engines/en-irregular.js, loaded before
+  // this script where words are looked up (content script, service worker).
+  // Pages that only parse definitions do without it.
+  const IRREGULAR = typeof LexiBridgeIrregular !== 'undefined' ? LexiBridgeIrregular
+    : typeof require !== 'undefined' ? require('./engines/en-irregular.js') : new Map();
+
+  // Function words every level knows: never highlighted, even when a word
+  // list contains them. tools/build_packs.py reads this list too.
+  const COMMON_WORDS = new Set(`
+    a an the this that these those some any each every no all both either neither
+    many much more most few little other another such what which whose
+    i me my mine myself you your yours yourself he him his himself she her hers
+    herself it its itself we us our ours ourselves they them their theirs themselves
+    who whom one
+    about above across after against along among around as at before behind below
+    beside between beyond but by down during except for from in inside into like
+    near of off on onto out outside over past since through till to toward towards
+    under until up upon with within without
+    and or nor so yet because if unless while when where whether than though
+    although once
+    be am is are was were been being have has had having do does did done
+    can could may might must shall should will would
+    not very too also just only even still already again ever never always often
+    here there now then how why yes well
+    two three four five six seven eight nine ten hundred thousand first second
+  `.trim().split(/\s+/));
+
   // Words, optionally joined by hyphens or apostrophes: "well-known", "don't".
   const TOKEN_RE = /[A-Za-z]+(?:['\u2019-][A-Za-z]+)*/g;
   const WORD_RE = /^[A-Za-z]+(?:['\u2019-][A-Za-z]+)*$/;
@@ -49,8 +76,11 @@ const LexiBridge = (() => {
     return res;
   }
 
+  // Dictionary key for a word: the word itself, its irregular base, or a stem.
   function lookup(dict, word) {
     if (dict.has(word)) return word;
+    const base = IRREGULAR.get(word);
+    if (base && dict.has(base)) return base;
     for (const s of stems(word)) {
       if (dict.has(s)) return s;
     }
@@ -120,7 +150,7 @@ const LexiBridge = (() => {
     return {phonetic, groups};
   }
 
-  return {parseDefinition, isWord, normalizeWord, buildDictionary, stems, lookup, findMatches};
+  return {COMMON_WORDS, parseDefinition, isWord, normalizeWord, buildDictionary, stems, lookup, findMatches};
 })();
 
 if (typeof module !== 'undefined') module.exports = LexiBridge;

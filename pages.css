@@ -326,8 +326,9 @@ button.opt:hover { background: var(--fill); }
 .opt .count { color: var(--ink-2); font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .bars { display: flex; align-items: flex-end; gap: 2px; height: 14px; }
 .bars i { width: 3px; border-radius: 1px; background: var(--fill-2); }
-.bars i:nth-child(1) { height: 5px; } .bars i:nth-child(2) { height: 8px; }
-.bars i:nth-child(3) { height: 11px; } .bars i:nth-child(4) { height: 14px; }
+.bars i:nth-child(1) { height: 4px; } .bars i:nth-child(2) { height: 6px; }
+.bars i:nth-child(3) { height: 9px; } .bars i:nth-child(4) { height: 11px; }
+.bars i:nth-child(5) { height: 14px; }
 .bars i.on { background: var(--ink-3); }
 .opt.is-current .bars i.on { background: var(--gold); }
 .add-row { display: flex; gap: 8px; padding: 10px; }
@@ -377,9 +378,6 @@ dialog[open] { animation: rise 160ms ease-out; }
 .drop .icon { width: 22px; height: 22px; margin-bottom: 4px; color: var(--ink-2); }
 .drop b { color: var(--ink); font-size: 14px; font-weight: 500; }
 .drop input { position: absolute; width: 1px; height: 1px; opacity: 0; }
-.samples { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 10px 0 0; padding: 0; list-style: none; font-size: 12.5px; }
-.samples a { color: var(--ink-2); text-decoration: none; border-bottom: 1px solid var(--line); }
-.samples a:hover { color: var(--ink); border-color: var(--ink-3); }
 
 /* Toast */
 .toast {
