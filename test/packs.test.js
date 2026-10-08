@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert');
-const {COMMON_WORDS} = require('../lexicon.js');
+const {COMMON_WORDS, parseDefinition} = require('../lexicon.js');
 const {PACKS, getPack, getLevel, levelWords} = require('../packs.js');
 const IRREGULAR = require('../engines/en-irregular.js');
 
@@ -35,6 +35,8 @@ for (const pack of PACKS) {
   test(`${pack.id}: dictionary keys are clean and words with meanings of their own are kept`, () => {
     const {dict} = load(pack);
     for (const key of dict.keys()) assert.match(key, /^[a-z]+(?:['-][a-z]+)*$/);
+    // A leading "[计]" tag would show up on the card as the phonetic.
+    for (const [w, d] of dict) assert.doesNotMatch(parseDefinition(d).phonetic ?? '', /[぀-鿿]/, w);
     for (const w of ['found', 'left', 'ground', 'bound', 'wound']) assert.ok(dict.get(w), w);
   });
 }

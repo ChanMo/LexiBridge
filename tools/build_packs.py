@@ -30,7 +30,7 @@ FORMS = 'pdi3srt'  # ECDICT exchange keys of inflected forms
 
 # Lines dropped from a translation when other lines remain:
 # "[计] 程序", "[网络] 胡德", "bend的过去式和过去分词".
-DOMAIN_RE = re.compile(r'^\[[^\]]*\]')
+DOMAIN_RE = re.compile(r'^(?:\[[^\]]*\]\s*)+')
 INFLECTION_RE = re.compile(r"^[a-z'-]+\s*的\S*(过去式|分词|复数|单数|比较级|最高级)\S*$", re.I)
 MAX_LINES, MAX_LINE = 4, 48
 
@@ -165,7 +165,9 @@ def shorten(line):
 def definition(row):
     """"[əˈbændən] vt. 放弃；抛弃 n. 放任", the format parseDefinition() reads."""
     lines = [l.strip() for l in row['translation'].split('\\n') if l.strip()]
-    kept = [l for l in lines if not DOMAIN_RE.match(l) and not INFLECTION_RE.match(l)] or lines[:1]
+    # A lone "[计] 累加器" keeps its text but not the tag, which would read as a phonetic.
+    kept = ([l for l in lines if not DOMAIN_RE.match(l) and not INFLECTION_RE.match(l)]
+            or [DOMAIN_RE.sub('', lines[0]).strip() or lines[0]])
     text = ' '.join(shorten(l.replace(', ', '；')) for l in kept[:MAX_LINES])
     phonetic = row['phonetic'].strip().replace('ә', 'ə')  # Cyrillic ә -> IPA ə
     return f'[{phonetic}] {text}' if phonetic else text
