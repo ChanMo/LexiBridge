@@ -22,6 +22,7 @@
   "card_added": {"message": "已加入词库"},
   "card_known": {"message": "认识了"},
   "card_knownTitle": {"message": "移出词库，不再高亮这个词"},
+  "card_knownDone": {"message": "已认识"},
   "card_removed": {"message": "已移出词库：$1", "description": "$1 word"},
 
   "popup_siteToggle": {"message": "在此网站高亮生词"},

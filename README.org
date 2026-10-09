@@ -22,7 +22,7 @@ npm run package   # 生成 dist/lexibridge-<version>.zip，用于上传应用商
 
 - =lexicon.js=: 分词、词形还原、释义解析，内容脚本、管理页和测试共用
 - =script.js=: 内容脚本，负责高亮和交互
-- =ui.js=: 网页内的单词卡片、加词按钮、提示条 (Shadow DOM，不受网页样式影响)
+- =ui.js=: 网页内的单词卡片、加词按钮、认识后的擦除动画和撤销 (Shadow DOM，不受网页样式影响)
 - =background.js=: 安装和升级、TTS 发音、从内置词典查释义
 - =popup.*=: 扩展图标弹出面板
 - =options.*=, =level.*=, =blacklist.*=: 管理页 (单词库、英语水平、禁用网站)，共用 =pages.css= 和 =page.js=

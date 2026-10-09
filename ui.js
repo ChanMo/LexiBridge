@@ -1,4 +1,5 @@
-// In-page UI: the word card, the "add word" pill and the undo toast.
+// In-page UI: the word card, the "add word" pill, and the pass over a word
+// marked known with its undo chip.
 // Rendered in a shadow root so the page's styles cannot leak in.
 const LexiBridgeUI = (() => {
   const {t} = LexiBridgeI18n;
@@ -25,9 +26,7 @@ const LexiBridgeUI = (() => {
       --focus: #c98400;
       --hover: rgba(31, 42, 68, 0.06);
       --shadow: 0 12px 32px rgba(24, 34, 61, 0.18), 0 2px 6px rgba(24, 34, 61, 0.08);
-      --toast-bg: #1f2a44;
-      --toast-fg: #f7f1e3;
-      --toast-accent: #f5b83d;
+      --shadow-sm: 0 0 0 1px var(--line), 0 4px 14px rgba(24, 34, 61, 0.12);
       font: 14px/1.6 var(--sans);
       color: var(--fg);
       -webkit-font-smoothing: antialiased;
@@ -46,9 +45,7 @@ const LexiBridgeUI = (() => {
         --focus: #f5b83d;
         --hover: rgba(236, 232, 223, 0.08);
         --shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3);
-        --toast-bg: #f7f1e3;
-        --toast-fg: #1f2a44;
-        --toast-accent: #8a5a00;
+        --shadow-sm: 0 0 0 1px var(--line), 0 4px 14px rgba(0, 0, 0, 0.35);
       }
     }
     /* Chinese glyphs follow the language: the UI's on the card, the definitions' in its body. */
@@ -211,27 +208,44 @@ const LexiBridgeUI = (() => {
     .pill:hover { filter: brightness(0.95); }
     .pill svg { width: 16px; height: 16px; color: var(--marker); }
 
-    /* Toast */
-    .toast {
+    /* Marking a word known: a highlighter pass over the word (main) and a
+       glow over its other visible occurrences (also), which hide the
+       highlights going; then a quiet undo below the word. */
+    .erase { left: 0; top: 0; pointer-events: none; }
+    .erase i { position: absolute; border-radius: 3px; background: rgba(245, 184, 61, 0.4); }
+    .erase .main { animation: lb-sweep 560ms cubic-bezier(0.3, 0.7, 0.2, 1) forwards; }
+    .erase .also { animation: lb-glow 560ms ease-out forwards; }
+    .chip {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 8px 8px 8px 16px;
-      border-radius: 10px;
-      background: var(--toast-bg);
-      color: var(--toast-fg);
-      box-shadow: var(--shadow);
-      font-size: 13px;
-      animation: lb-in 160ms ease-out;
+      gap: 4px;
+      height: 28px;
+      padding: 0 3px 0 9px;
+      border-radius: 14px;
+      background: var(--bg);
+      box-shadow: var(--shadow-sm);
+      color: var(--muted);
+      font-size: 12.5px;
+      white-space: nowrap;
+      animation: lb-in 180ms ease-out 100ms backwards;
     }
-    .toast .btn { color: var(--toast-accent); }
-    .toast .btn:hover { background: rgba(127, 127, 127, 0.18); }
+    .chip svg { width: 14px; height: 14px; color: var(--accent); }
+    .chip .btn { height: 22px; padding: 0 9px; border-radius: 11px; font-size: 12.5px; color: var(--accent); }
 
+    @keyframes lb-sweep {
+      0% { clip-path: inset(0 100% 0 0); }
+      38% { clip-path: inset(0); }
+      100% { clip-path: inset(0 0 0 100%); }
+    }
+    @keyframes lb-glow {
+      38% { opacity: 1; }
+      0%, 100% { opacity: 0; }
+    }
     @keyframes lb-in {
       from { opacity: 0; transform: translateY(4px); }
     }
     @media (prefers-reduced-motion: reduce) {
-      .card, .pill, .toast { animation: none; }
+      .card, .pill, .chip { animation: none; }
     }
   `;
 
@@ -312,10 +326,15 @@ const LexiBridgeUI = (() => {
     return body;
   }
 
-  // Follows the anchor while the page scrolls.
+  // Follow their anchors while the page scrolls; the chip goes once its word is out of view.
   let current = null;
   window.addEventListener('scroll', () => {
     if(current?.box.isConnected) place(current.box, current.anchor());
+    if(chipBox) {
+      const r = chipBox.anchor();
+      if(r.bottom < 0 || r.top > window.innerHeight) hideChip();
+      else place(chipBox, r, 'below', 6);
+    }
   }, {capture: true, passive: true});
 
   // state: "known" (in the word list), "added" (just added) or "new"
@@ -420,32 +439,58 @@ const LexiBridgeUI = (() => {
     pill = null;
   }
 
-  let toastBox = null, toastTimer = null;
-  function toast(message, actionLabel, onAction) {
-    toastBox?.remove();
-    clearTimeout(toastTimer);
-    toastBox = layer('manual', 'toast-wrap');
-    const t = el('div', 'toast');
-    t.setAttribute('role', 'status');
-    t.appendChild(el('span', '', message));
-    if(actionLabel) {
-      t.appendChild(button(actionLabel, 'btn', () => { toastBox?.remove(); onAction(); }));
+  // The pass over a word marked known: main and also are the rects of the
+  // clicked occurrence and of the other visible ones. Resolves once they are
+  // covered (38% in), when the highlights can go unseen.
+  function erase(main, also) {
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches) return Promise.resolve();
+    const wrap = layer('manual', 'erase');
+    for(const [rects, kind] of [[main, 'main'], [also, 'also']]) {
+      for(const r of rects) {
+        const i = el('i', kind);
+        Object.assign(i.style, {left: `${r.left - 2}px`, top: `${r.top}px`, width: `${r.width + 4}px`, height: `${r.height + 2}px`});
+        wrap.appendChild(i);
+      }
     }
-    toastBox.appendChild(t);
-    toastBox.showPopover();
-    const vw = document.documentElement.clientWidth;
-    toastBox.style.left = `${(vw - toastBox.offsetWidth) / 2}px`;
-    toastBox.style.top = `${window.innerHeight - toastBox.offsetHeight - 24}px`;
-    const box = toastBox;
-    toastTimer = setTimeout(() => box.remove(), 5000);
+    wrap.showPopover();
+    setTimeout(() => wrap.remove(), 560);
+    return new Promise(resolve => setTimeout(resolve, 210));
   }
+
+  // A quiet undo below the word: gone after a while, on a click elsewhere,
+  // or once the word scrolls out of view; kept while the pointer is on it.
+  let chipBox = null, chipTimer = null;
+  function chip(anchor, message, label, actionLabel, onAction) {
+    hideChip();
+    const box = chipBox = layer('manual', 'chip-wrap');
+    const c = el('div', 'chip');
+    c.setAttribute('role', 'status');
+    c.setAttribute('aria-label', label);
+    c.append(icon('check'), el('span', '', message), button(actionLabel, 'btn', () => { hideChip(); onAction(); }));
+    box.appendChild(c);
+    box.anchor = anchor;
+    box.showPopover();
+    place(box, anchor(), 'below', 6);
+    const later = (ms) => { clearTimeout(chipTimer); chipTimer = setTimeout(hideChip, ms); };
+    later(4000);
+    box.addEventListener('pointerenter', () => clearTimeout(chipTimer));
+    box.addEventListener('pointerleave', () => later(1500));
+  }
+  function hideChip() {
+    clearTimeout(chipTimer);
+    chipBox?.remove();
+    chipBox = null;
+  }
+  window.addEventListener('pointerdown', (e) => {
+    if(chipBox && !e.composedPath().includes(chipBox)) hideChip();
+  }, true);
 
   function closeAll() {
     current?.box.remove();
     current = null;
     hidePill();
-    toastBox?.remove();
+    hideChip();
   }
 
-  return {showCard, showPill, hidePill, toast, closeAll};
+  return {showCard, showPill, hidePill, erase, chip, closeAll};
 })();

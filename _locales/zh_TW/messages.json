@@ -20,6 +20,7 @@
   "card_added": {"message": "已加入單字庫"},
   "card_known": {"message": "認識了"},
   "card_knownTitle": {"message": "移出單字庫，不再標示這個字"},
+  "card_knownDone": {"message": "已認識"},
   "card_removed": {"message": "已移出單字庫：$1", "description": "$1 word"},
   "popup_siteToggle": {"message": "在此網站標示生字"},
   "popup_highlightStyle": {"message": "標示樣式"},

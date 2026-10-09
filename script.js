@@ -215,10 +215,22 @@
       anchor: () => range.getBoundingClientRect(),
       state: 'known',
       onSpeak: () => speak(word),
-      // Highlights are removed by the storage.onChanged listener, in every tab.
+      // The pass over the word hides its highlights going, here and wherever
+      // else it is in view; other tabs follow through storage.onChanged.
       onKnown: async() => {
+	// Only where the text shows: clipped, off-canvas or covered text (screen
+	// reader headings, closed menus) has rects too.
+	const shown = (r, parent) => {
+	  if(!r.width || r.bottom <= 0 || r.top >= window.innerHeight) return false;
+	  const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+	  return !!hit && (hit === parent || parent.contains(hit));
+	};
+	const rects = (e) => [...e.range.getClientRects()].filter(r => shown(r, e.range.startContainer.parentElement));
+	const also = entries.filter(e => e.word === word && e !== entry).flatMap(rects).slice(0, 40);
+	await LexiBridgeUI.erase(rects(entry), also);
+	removeEntries(e => e.word === word);
 	const undo = await removeWord(word);
-	LexiBridgeUI.toast(t('card_removed', word), t('common_undo'), undo);
+	LexiBridgeUI.chip(() => range.getBoundingClientRect(), t('card_knownDone'), t('card_removed', word), t('common_undo'), undo);
       },
     });
   }
