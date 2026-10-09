@@ -40,23 +40,24 @@ DOMAIN_RE = re.compile(r'^(?:\[[^\]]*\]\s*)+')
 INFLECTION_RE = re.compile(r"^[a-z'-]+\s*的\S*(过去式|分词|复数|单数|比较级|最高级)\S*$", re.I)
 MAX_LINES, MAX_LINE = 4, 48
 
-# Levels: (id, known, learn), each a list of ECDICT tags and CEFR-J levels.
+# Levels: (lists, [(id, known), ...]), lists being ECDICT tags and CEFR-J levels from
+# easy to hard. A level marks every listed word that its known lists lack, so a
+# learner at CET4 also sees the GRE words, which are rare in real text anyway.
 # Simplified Chinese follows the Chinese exams (plan 6.1).
-ZH_HANS_LEVELS = [
-    ('basic', ['zk'], ['gk', 'cet4']),
-    ('cet4', ['zk', 'gk', 'cet4'], ['cet6']),
-    ('ky', ['zk', 'gk', 'cet4'], ['cet6', 'ky']),
-    ('cet6', ['zk', 'gk', 'cet4', 'cet6', 'ky'], ['toefl', 'ielts']),
-    ('gre', ['zk', 'gk', 'cet4', 'cet6', 'ky', 'toefl', 'ielts'], ['gre']),
-]
+ZH_HANS_LEVELS = (['zk', 'gk', 'cet4', 'cet6', 'ky', 'toefl', 'ielts', 'gre'], [
+    ('basic', ['zk']),
+    ('cet4', ['zk', 'gk', 'cet4']),
+    ('cet6', ['zk', 'gk', 'cet4', 'cet6', 'ky']),
+    ('gre', ['zk', 'gk', 'cet4', 'cet6', 'ky', 'toefl', 'ielts']),
+])
 # Traditional Chinese climbs the CEFR-J levels, then the study-abroad exams (design 3.3).
-ZH_HANT_LEVELS = [
-    ('a1', [], ['A1', 'A2']),
-    ('b1', ['A1', 'A2'], ['B1']),
-    ('b2', ['A1', 'A2', 'B1'], ['B2']),
-    ('adv', ['A1', 'A2', 'B1', 'B2'], ['toefl', 'ielts']),
-    ('gre', ['A1', 'A2', 'B1', 'B2', 'toefl', 'ielts'], ['gre']),
-]
+# No level below A2: it would mark a fifth of a Wikipedia page or more.
+ZH_HANT_LEVELS = (['A1', 'A2', 'B1', 'B2', 'toefl', 'ielts', 'gre'], [
+    ('a2', ['A1', 'A2']),
+    ('b1', ['A1', 'A2', 'B1']),
+    ('b2', ['A1', 'A2', 'B1', 'B2']),
+    ('gre', ['A1', 'A2', 'B1', 'B2', 'toefl', 'ielts']),
+])
 CEFR = {'A1': 1, 'A2': 2, 'B1': 3, 'B2': 4}
 
 ZH_HANS = 'packs/en-zh-Hans'
@@ -222,10 +223,31 @@ def definition(row, convert=lambda text: text):
     return f'[{phonetic}] {text}' if phonetic else text
 
 
+def bases(w, row):
+    """Words w is a form of: "driving" -> drive, "sales" -> sale, "typically" -> typical.
+    ECDICT gives the lemma of inflected headwords; an exchange field without one
+    means w is a lemma itself ("herring", not "her"), so stems() is only a fallback.
+    A verb with forms of its own ("lay" -> laid, "found" -> founded) is a word too."""
+    ex = exchange(row)
+    if any(ex.get(k, w) != w for k in 'pd3'):
+        return []
+    res = [ex['0']] if ex.get('0', w) != w else [] if ex else stems(w)
+    if w.endswith('ly') and row['translation'].startswith('adv.'):
+        res += [w[:-2], w[:-3] + 'y', w[:-1] + 'e']  # typical, happy, gentle
+    return res
+
+
 def levels(spec, rows, cefr, words, common):
     labels = {w: set(rows[w]['tag'].split()) | {cefr.get(w)} for w in words}
     having = lambda names: {w for w in words if labels[w] & set(names)}
-    return {id: sorted(having(learn) - having(known) - common) for id, known, learn in spec}
+    lists, spec = spec
+    out = {}
+    for id, known in spec:
+        learn = [l for l in lists if l not in known]
+        # Forms of a known word are known: a learner who knows "drive" reads "driving".
+        easy = having(known) | common
+        out[id] = sorted(w for w in having(learn) - easy if not easy & set(bases(w, rows[w])))
+    return out
 
 
 def read_phrases():
@@ -318,24 +340,50 @@ def normalize_word(word):
     return word.replace('\u2019', "'").strip().lower()
 
 
+# v1.3.0, the only release with levels (words/ last changed before it), and its
+# levels.js: id -> (known lists, learn lists).
+V13 = '9d1a81f'
+V13_LEVELS = {
+    'basic': ([], ['CET4_edited', 'CET6_edited']),
+    'cet4': (['CET4_edited'], ['CET6_edited']),
+    'cet6': (['CET4_edited', 'CET6_edited'], ['GRE_abridged']),
+    'gre': (['CET4_edited', 'CET6_edited', 'GRE_abridged'], ['GRE_8000_Words']),
+}
+
+
+def short_hash(text):
+    return hashlib.sha1(text.encode('utf-8')).hexdigest()[:8]
+
+
 def legacy():
-    """Hashes of every [word, definition] row the v1.3 lists ever shipped, so the
-    v1.4 migration can tell bundled definitions from ones the learner edited.
-    Hash: first 8 hex digits of sha1(normalizeWord(word) + "\\t" + definition)."""
+    """What the v1.3 lists shipped, for the migration in migrate.js:
+    rows: every [word, definition] row ever, to tell bundled definitions from
+      ones the learner edited; sha1(normalizeWord(word) + "\\t" + definition).
+    lists: each level's starting list, to tell lists the learner never changed;
+      sha1 of its words joined by "\\n". Hashes are the first 8 hex digits."""
     git = lambda *args: subprocess.run(['git', *args], cwd=ROOT, capture_output=True, text=True, check=True).stdout
-    hashes = set()
+    valid = lambda row: isinstance(row, list) and row and isinstance(row[0], str) and normalize_word(row[0])
+    rows = set()
     for rev in git('log', '--format=%H', '--', 'words/*.json').split():
         for path in git('ls-tree', '--name-only', rev, 'words/').split():
             if not path.endswith('.json'):
                 continue
-            for row in json.loads(git('show', f'{rev}:{path}')):
-                if isinstance(row, list) and row and isinstance(row[0], str) and normalize_word(row[0]):
-                    definition = row[1] if len(row) > 1 and row[1] is not None else ''  # String(row[1] ?? '')
-                    text = f'{normalize_word(row[0])}\t{definition}'
-                    hashes.add(hashlib.sha1(text.encode('utf-8')).hexdigest()[:8])
-    write(ROOT, 'packs/legacy-v13.json', dump(sorted(hashes)))
-    print(f'packs/legacy-v13.json: {len(hashes):,} hashes')
+            for row in filter(valid, json.loads(git('show', f'{rev}:{path}'))):
+                definition = row[1] if len(row) > 1 and row[1] is not None else ''  # String(row[1] ?? '')
+                rows.add(short_hash(f'{normalize_word(row[0])}\t{definition}'))
 
+    # levelWords() of v1.3: learn words minus known and function words, first row wins.
+    def keys(names):
+        return list(dict.fromkeys(normalize_word(row[0]) for name in names
+                                  for row in filter(valid, json.loads(git('show', f'{V13}:words/{name}.json')))))
+    common = set(re.search(r'COMMON_WORDS = new Set\(`(.*?)`', git('show', f'{V13}:levels.js'), re.S).group(1).split())
+    lists = {}
+    for id, (known, learn) in V13_LEVELS.items():
+        easy = set(keys(known)) | common
+        lists[id] = short_hash('\n'.join(w for w in keys(learn) if w not in easy))
+
+    write(ROOT, 'packs/legacy-v13.json', dump({'lists': lists, 'rows': sorted(rows)}))
+    print(f'packs/legacy-v13.json: {len(rows):,} rows, lists {lists}')
 
 if __name__ == '__main__':
     commands = {'fetch': fetch, 'build': lambda: build(ROOT, report=True), 'check': check, 'legacy': legacy}

@@ -30,14 +30,14 @@ chrome.runtime.onInstalled.addListener(async({reason}) => {
   chrome.tabs.create({url: 'level.html?welcome=1'});
 });
 
-// Refreshes definitions left over from the v1.3 word lists (migrate.js).
+// Brings word lists from v1.3 up to date (migrate.js).
 async function upgrade() {
   const stored = await chrome.storage.local.get(['words', 'level', 'pack', 'backup_v13']);
-  const [{dict}, legacy] = await Promise.all([
+  const [data, {lists, rows}] = await Promise.all([
     packData(stored.pack),
     fetch(chrome.runtime.getURL('packs/legacy-v13.json')).then(res => res.json()),
   ]);
-  const changes = await LexiBridgeMigrate.upgrade(stored, dict, new Set(legacy));
+  const changes = await LexiBridgeMigrate.upgrade(stored, data, {lists, rows: new Set(rows)});
   if(Object.keys(changes).length) await chrome.storage.local.set(changes);
 }
 

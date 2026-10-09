@@ -11,8 +11,8 @@ const load = (pack) => ({
 
 // Generated level sizes; a rebuild that moves one by more than 5% needs a look.
 const SIZES = {
-  'en-zh-Hans': {basic: 3725, cet4: 1741, ky: 2045, cet6: 3571, gre: 3385},
-  'en-zh-Hant': {a1: 2096, b1: 2103, b2: 2411, adv: 4575, gre: 3423},
+  'en-zh-Hans': {basic: 12527, cet4: 8760, cet6: 6736, gre: 3348},
+  'en-zh-Hant': {a2: 12286, b1: 10145, b2: 7842, gre: 3388},
 };
 
 test('missing or unknown pack ids fall back to the first pack', () => {
@@ -43,6 +43,11 @@ for (const pack of PACKS) {
       const size = SIZES[pack.id][level.id];
       assert.ok(Math.abs(words.length - size) <= size * 0.05, `${level.id}: ${words.length}, snapshot ${size}`);
     }
+    // A level marks every harder word, so each one holds the next one's list.
+    pack.levels.slice(1).forEach((level, i) => {
+      const easier = new Set(data.levels[pack.levels[i].id]);
+      assert.ok(data.levels[level.id].every(w => easier.has(w)), level.id);
+    });
   });
 
   test(`${pack.id}: dictionary keys are clean and words with meanings of their own are kept`, () => {
@@ -84,4 +89,11 @@ test('packs using CEFR-J cite it', () => {
   assert.ok(fs.readFileSync(`${__dirname}/../packs/en-zh-Hant/ATTRIBUTION.md`, 'utf8').includes(citation));
   assert.ok(fs.readFileSync(`${__dirname}/../THIRD_PARTY_NOTICES.md`, 'utf8').includes(citation));
   assert.match(getPack('en-zh-Hant').credit, /CEFR-J/);
+});
+
+test('forms of known words are left out of the levels, verbs of their own are not', () => {
+  const {levels} = load(PACKS[0]);
+  const cet4 = new Set(levels.cet4), basic = new Set(levels.basic);
+  for (const w of ['driving', 'existing', 'making']) assert.ok(!cet4.has(w), w);
+  assert.ok(basic.has('fell'));  // "fell" a tree, not only the past of "fall"
 });

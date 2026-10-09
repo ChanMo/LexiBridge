@@ -334,9 +334,8 @@ button.opt:hover { background: var(--fill); }
 .opt .count { color: var(--ink-2); font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .bars { display: flex; align-items: flex-end; gap: 2px; height: 14px; }
 .bars i { width: 3px; border-radius: 1px; background: var(--fill-2); }
-.bars i:nth-child(1) { height: 4px; } .bars i:nth-child(2) { height: 6px; }
-.bars i:nth-child(3) { height: 9px; } .bars i:nth-child(4) { height: 11px; }
-.bars i:nth-child(5) { height: 14px; }
+.bars i:nth-child(1) { height: 5px; } .bars i:nth-child(2) { height: 8px; }
+.bars i:nth-child(3) { height: 11px; } .bars i:nth-child(4) { height: 14px; }
 .bars i.on { background: var(--ink-3); }
 .opt.is-current .bars i.on { background: var(--gold); }
 /* Definition language on the level page */
