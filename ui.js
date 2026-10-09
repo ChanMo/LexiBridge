@@ -115,6 +115,8 @@ const LexiBridgeUI = (() => {
     .icon-btn:hover { background: var(--hover); color: var(--accent); }
     .sub { margin-top: 2px; font-size: 13px; color: var(--muted); }
     .sub .sep { margin: 0 6px; opacity: 0.6; }
+    .sub:empty { display: none; }
+    .sub .current { color: var(--accent); }
     .body {
       max-height: min(300px, 45vh);
       overflow-y: auto;
@@ -319,7 +321,8 @@ const LexiBridgeUI = (() => {
   // state: "known" (in the word list), "added" (just added) or "new"
   // (not in any list yet: ask for a definition).
   // lang: language of the definition, e.g. "zh-Hans".
-  function showCard({word, surface, definition, lang, anchor, state, onKnown, onUndoAdd, onSave, onSpeak}) {
+  // band: a promise of the word's {band, current}, shown when it arrives.
+  function showCard({word, surface, definition, lang, band, anchor, state, onKnown, onUndoAdd, onSave, onSpeak}) {
     current?.box.remove();
     const box = layer('auto', 'card');
     const head = el('div', 'head');
@@ -330,18 +333,24 @@ const LexiBridgeUI = (() => {
     speak.setAttribute('aria-label', t('card_speak'));
     title.appendChild(speak);
     head.appendChild(title);
+    const sub = el('div', 'sub');
+    const addSub = (text) => {
+      if(sub.childNodes.length) sub.appendChild(el('span', 'sep', '·'));
+      return sub.appendChild(el('span', '', text));
+    };
     const {phonetic} = LexiBridge.parseDefinition(definition);
-    const subParts = [];
-    if(phonetic) subParts.push(`/${phonetic}/`);
-    if(surface && surface.toLowerCase() !== word) subParts.push(t('card_surface', surface));
-    if(subParts.length) {
-      const sub = el('div', 'sub');
-      subParts.forEach((t, i) => {
-        if(i) sub.appendChild(el('span', 'sep', '·'));
-        sub.appendChild(el('span', '', t));
-      });
-      head.appendChild(sub);
-    }
+    if(phonetic) addSub(`/${phonetic}/`);
+    if(surface && surface.toLowerCase() !== word) addSub(t('card_surface', surface));
+    band?.then(({band, current} = {}) => {
+      if(!band) return;
+      const span = addSub(band);
+      span.lang = lang;
+      if(current) {
+        span.className = 'current';
+        span.title = t('card_bandCurrent');
+      }
+    }).catch(() => {});
+    head.appendChild(sub);
     box.appendChild(head);
 
     const foot = el('div', 'foot');

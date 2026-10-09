@@ -16,6 +16,7 @@
   "common_blocked": {"message": "禁用網站"},
   "card_speak": {"message": "發音"},
   "card_surface": {"message": "原文 $1", "description": "$1 the word as written on the page"},
+  "card_bandCurrent": {"message": "你目前程度要學的單字"},
   "card_added": {"message": "已加入單字庫"},
   "card_known": {"message": "認識了"},
   "card_knownTitle": {"message": "移出單字庫，不再標示這個字"},

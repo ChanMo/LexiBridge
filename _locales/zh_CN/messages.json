@@ -18,6 +18,7 @@
 
   "card_speak": {"message": "发音"},
   "card_surface": {"message": "原文 $1", "description": "$1 the word as written on the page"},
+  "card_bandCurrent": {"message": "你当前水平要学的词"},
   "card_added": {"message": "已加入词库"},
   "card_known": {"message": "认识了"},
   "card_knownTitle": {"message": "移出词库，不再高亮这个词"},

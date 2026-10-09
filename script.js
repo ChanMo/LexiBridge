@@ -58,6 +58,7 @@
     while(walker.nextNode()) {
       highlightText(walker.currentNode, only);
     }
+    report();
   }
 
   function removeEntries(shouldRemove) {
@@ -68,7 +69,31 @@
       }
       return true;
     });
+    report();
   }
+
+  // The toolbar badge shows how many distinct words are highlighted here.
+  // Sent once things settle, and only when the number changes.
+  let reported = null;
+  let reportTimer = null;
+  function report() {
+    clearTimeout(reportTimer);
+    reportTimer = setTimeout(() => {
+      const count = enabled ? new Set(entries.map(e => e.word)).size : 0;
+      if(count === reported) return;
+      reported = count;
+      try {
+	chrome.runtime.sendMessage({action: 'badge', data: {count}}).catch(() => {});
+      } catch {} // extension reloaded: this page keeps an orphaned script
+    }, 500);
+  }
+  // Pages restored from the back/forward cache lost their badge.
+  addEventListener('pageshow', (e) => {
+    if(e.persisted) {
+      reported = null;
+      report();
+    }
+  });
 
   function setEnabled(on) {
     enabled = on;
@@ -77,6 +102,7 @@
     seen = new WeakSet();
     LexiBridgeUI.closeAll();
     if(on) scan(document.body);
+    report();
   }
 
   if(enabled) scan(document.body);
@@ -94,7 +120,8 @@
 	const nodes = pending;
 	pending = [];
 	timer = null;
-	removeEntries(e => !e.range.startContainer.isConnected);
+	// Ranges in removed text are moved out of it by the browser and collapse.
+	removeEntries(e => e.range.collapsed);
 	nodes.forEach(n => n.isConnected && scan(n));
       }, 300);
     }
@@ -159,6 +186,7 @@
   }
 
   const speak = (word) => chrome.runtime.sendMessage({action: 'speak', data: {word}});
+  const band = (word) => chrome.runtime.sendMessage({action: 'band', data: {word}});
 
   // The highlighted word under the pointer, if any.
   function entryAt(x, y) {
@@ -183,6 +211,7 @@
       surface: range.toString(),
       definition: dict.get(word),
       lang: defLang,
+      band: band(word),
       anchor: () => range.getBoundingClientRect(),
       state: 'known',
       onSpeak: () => speak(word),
@@ -284,6 +313,7 @@
       word,
       surface: text,
       lang: defLang,
+      band: band(word),
       anchor: () => range.getBoundingClientRect(),
       onSpeak: () => speak(word),
     };

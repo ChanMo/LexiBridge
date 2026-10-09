@@ -3,22 +3,23 @@
 // tools/build_packs.py. Plain script, used by background.js, extension pages and tests.
 const LexiBridgePacks = (() => {
   // Each level marks every word of the harder lists, not just the next one.
+  // band names the words a level marks and the next one knows; the word card shows it.
   // credit names the data sources, as their licenses ask; it shows on the level page.
   const PACKS = [
     {id: 'en-zh-Hans', defLang: 'zh-Hans', label: '简体中文', defaultLevel: 'cet4',
      credit: '词典与分级：ECDICT（MIT 许可证）', levels: [
-      {id: 'basic', name: '入门', desc: '掌握中考词汇 · 标出高考及更难的词'},
-      {id: 'cet4', name: '大学四级', desc: '掌握中考、高考、四级词汇 · 标出六级、考研及更难的词'},
-      {id: 'cet6', name: '大学六级', desc: '掌握四六级、考研词汇 · 标出托福、雅思、GRE 词汇'},
-      {id: 'gre', name: 'GRE', desc: '掌握托福、雅思词汇 · 标出 GRE 词汇'},
+      {id: 'basic', name: '入门', band: '高考 · 四级', desc: '掌握中考词汇 · 标出高考及更难的词'},
+      {id: 'cet4', name: '大学四级', band: '六级 · 考研', desc: '掌握中考、高考、四级词汇 · 标出六级、考研及更难的词'},
+      {id: 'cet6', name: '大学六级', band: '托福 · 雅思', desc: '掌握四六级、考研词汇 · 标出托福、雅思、GRE 词汇'},
+      {id: 'gre', name: 'GRE', band: 'GRE', desc: '掌握托福、雅思词汇 · 标出 GRE 词汇'},
     ]},
     {id: 'en-zh-Hant', defLang: 'zh-Hant', label: '繁體中文', defaultLevel: 'b1',
      credit: '詞典：ECDICT（MIT 授權），以 OpenCC 轉為繁體。分級：CEFR-J Wordlist Version 1.6，東京外國語大學投野由紀夫研究室。',
      levels: [
-      {id: 'a2', name: '國中', desc: '掌握 CEFR A1–A2（≈ 全民英檢初級）・標出更難的單字'},
-      {id: 'b1', name: '高中・學測', desc: '掌握 CEFR B1（≈ 全民英檢中級）・標出更難的單字'},
-      {id: 'b2', name: '全民英檢中高級', desc: '掌握 CEFR B2・標出托福、雅思、GRE 單字'},
-      {id: 'gre', name: 'GRE', desc: '掌握托福、雅思單字・標出 GRE 單字'},
+      {id: 'a2', name: '國中', band: 'CEFR B1', desc: '掌握 CEFR A1–A2（≈ 全民英檢初級）・標出更難的單字'},
+      {id: 'b1', name: '高中・學測', band: 'CEFR B2', desc: '掌握 CEFR B1（≈ 全民英檢中級）・標出更難的單字'},
+      {id: 'b2', name: '全民英檢中高級', band: '托福・雅思', desc: '掌握 CEFR B2・標出托福、雅思、GRE 單字'},
+      {id: 'gre', name: 'GRE', band: 'GRE', desc: '掌握托福、雅思單字・標出 GRE 單字'},
     ]},
   ];
 
@@ -56,7 +57,15 @@ const LexiBridgePacks = (() => {
     return (data.levels[levelId] ?? []).map(word => [word, data.dict.get(word)]);
   }
 
-  return {PACKS, getPack, pickPack, getLevel, loadPack, levelWords};
+  // Map(word -> index of the hardest level that marks it): the word's band.
+  // Words of no level (added by the learner, forms of easier words) have none.
+  function bands(pack, data) {
+    const index = new Map();
+    pack.levels.forEach((level, i) => (data.levels[level.id] ?? []).forEach(word => index.set(word, i)));
+    return index;
+  }
+
+  return {PACKS, getPack, pickPack, getLevel, loadPack, levelWords, bands};
 })();
 
 if (typeof module !== 'undefined') module.exports = LexiBridgePacks;

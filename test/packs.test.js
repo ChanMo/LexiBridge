@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert');
 const {COMMON_WORDS, parseDefinition} = require('../lexicon.js');
-const {PACKS, getPack, pickPack, getLevel, levelWords} = require('../packs.js');
+const {PACKS, getPack, pickPack, getLevel, levelWords, bands} = require('../packs.js');
 const IRREGULAR = require('../engines/en-irregular.js');
 
 const load = (pack) => ({
@@ -96,4 +96,18 @@ test('forms of known words are left out of the levels, verbs of their own are no
   const cet4 = new Set(levels.cet4), basic = new Set(levels.basic);
   for (const w of ['driving', 'existing', 'making']) assert.ok(!cet4.has(w), w);
   assert.ok(basic.has('fell'));  // "fell" a tree, not only the past of "fall"
+});
+
+test('bands: a word belongs to the hardest level that marks it', () => {
+  for (const pack of PACKS) {
+    const data = load(pack);
+    const sets = pack.levels.map(level => new Set(data.levels[level.id]));
+    for (const [word, i] of bands(pack, data)) {
+      assert.ok(sets[i].has(word) && !sets[i + 1]?.has(word), word);
+    }
+    assert.ok(pack.levels.every(level => level.band), pack.id);
+  }
+  const hans = bands(PACKS[0], load(PACKS[0]));
+  assert.strictEqual(PACKS[0].levels[hans.get('countenance')].band, 'GRE');
+  assert.strictEqual(hans.get('driving'), undefined);
 });
