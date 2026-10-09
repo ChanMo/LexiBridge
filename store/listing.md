@@ -4,7 +4,7 @@ The name and summary come from `_locales/*/messages.json` (`extName`, `extDescri
 must stay within 132 characters). The detailed descriptions below are pasted into each store's
 dashboard by hand. Keywords are guesses, not backed by search data.
 
-Rules for every language: levels are a reference ("参考 / 參考"), never "official"; the data sources
+Rules for every language: levels are a reference ("参考 / 參考 / 目安"), never "official"; the data sources
 are credited at the end; CEFR-J is cited in the form its authors ask for.
 
 ## zh-CN
@@ -59,4 +59,31 @@ The CEFR-J Wordlist Version 1.6. Compiled by Yukio Tono, Tokyo University of For
 
 **Keywords**: 單字、背單字、英文生字、學測、多益、全民英檢、英文閱讀
 
-Review: the zh-TW text has not been read by a Taiwanese speaker yet.
+## ja
+
+**Detailed description**
+
+```
+英語の Web ページを読むとき、LexiBridge はまだ知らない単語だけをマークします。クリックすると発音記号と日本語の意味を表示し、覚えたら外すだけ。ページ全体を翻訳せず、読む流れを止めません。
+
+【使い方】
+1. 英語レベルを選ぶ：中学、高校・大学入試、英検準1級、GRE の 4 段階。CEFR-J の語彙リストを目安にしています。もう知っている単語はマークせず、それより難しい単語をすべてマークします。
+2. いつも通り読む：知らない単語には金色の下線が引かれます。クリックで意味を表示し、発音も聞けます。
+3. 覚えたら外す：単語帳はあなたの成長とともに小さくなります。新しい単語は、選択するだけで追加できます。
+
+【特長】
+・知らない単語だけをマーク。ページは翻訳せず、原文は一語も変えません
+・日本語の意味。ブラウザの言語が日本語なら自動で使われます（中国語にも切り替え可能）
+・変化形もわかる：studies、making、went も原形で認識
+・単語帳はブラウザの中だけに保存。アカウント不要、サーバーなし、データは一切アップロードしません
+・サイトごとにオフにでき、単語帳のインポート・エクスポートにも対応
+・無料・オープンソース（MIT）。ソースコードは GitHub で公開：https://github.com/ChanMo/LexiBridge
+
+【データの出典】
+辞書：EJDict-hand（パブリックドメイン）、発音記号：ECDICT（MIT ライセンス）。レベルは CEFR-J Wordlist に基づく目安で、英検やその他の試験の公式な単語リストではありません。
+『CEFR-J Wordlist Version 1.6』東京外国語大学投野由紀夫研究室.（URL: https://www.cefr-j.org/download.html より 2026年10月ダウンロード）
+```
+
+**Keywords**: 英単語、単語帳、英語学習、英語 多読、英検、TOEIC、大学受験、英語 リーディング
+
+Review: neither the zh-TW nor the ja text has been read by a native speaker yet.

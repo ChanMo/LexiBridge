@@ -6,7 +6,9 @@
       <a href="{{ t.base | append: '/install.html' | relative_url }}">{{ t.install }}</a>
       <a href="{{ t.base | append: '/privacy.html' | relative_url }}">{{ t.privacy }}</a>
       <a href="{{ site.github_url }}">GitHub</a>
-      <a href="{{ t.other_base | append: path | relative_url }}" hreflang="{{ t.other_lang }}" lang="{{ t.other_lang }}">{{ t.other_label }}</a>
+      {%- for l in site.data.ui %}{% unless l[0] == lang %}
+      <a href="{{ l[1].base | append: path | relative_url }}" hreflang="{{ l[0] }}" lang="{{ l[0] }}">{{ l[1].label }}</a>
+      {%- endunless %}{% endfor %}
     </nav>
     <a class="btn primary small" href="{{ site.store_url }}">{{ t.add_chrome }}</a>
   </header>

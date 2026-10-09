@@ -34,7 +34,7 @@ LexiBridge 不包含廣告，也不包含任何統計或分析程式碼。
 
 ## 資料來源
 
-擴充功能內建的英漢詞典、音標和考試分級來自開源專案 [ECDICT](https://github.com/skywind3000/ECDICT)，依 MIT 授權使用；繁體中文釋義以 [OpenCC](https://github.com/BYVoid/OpenCC) 轉換，繁體中文版的分級參考東京外國語大學投野研究室的 [CEFR-J Wordlist](https://www.cefr-j.org/download.html)。完整的第三方授權見擴充功能套件和 [GitHub 儲存庫]({{ site.github_url }}) 裡的 `THIRD_PARTY_NOTICES.md`。
+擴充功能內建的英漢詞典、音標和考試分級來自開源專案 [ECDICT](https://github.com/skywind3000/ECDICT)，依 MIT 授權使用；繁體中文釋義以 [OpenCC](https://github.com/BYVoid/OpenCC) 轉換，繁體中文版和日文版的分級參考東京外國語大學投野研究室的 [CEFR-J Wordlist](https://www.cefr-j.org/download.html)；日文釋義來自公眾領域的英日詞典 [EJDict-hand](https://github.com/kujirahand/EJDict)。完整的第三方授權見擴充功能套件和 [GitHub 儲存庫]({{ site.github_url }}) 裡的 `THIRD_PARTY_NOTICES.md`。
 
 ## 本網站
 

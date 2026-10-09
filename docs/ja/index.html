@@ -1,0 +1,102 @@
+---
+layout: default
+lang: ja
+---
+{%- comment -%} Page content renders before the layout, so it looks up its own text. {%- endcomment -%}
+{%- assign lang = page.lang | default: site.lang -%}
+{%- assign t = site.data.ui[lang] -%}
+<main>
+  <div class="wrap hero">
+    <div>
+      <p class="eyebrow">Chrome 拡張機能 · 無料 · オープンソース</p>
+      <h1>英語を読みながら、<br>知らない<span class="marked">単語</span>だけ覚える。</h1>
+      <p class="lede">LexiBridge は、あなたが読む英語の Web ページで、まだ知らない単語だけをマークします。クリックで意味を表示し、覚えたら外すだけ。ページ全体を翻訳せず、読む流れを止めません。</p>
+      <div class="cta">
+        <a class="btn primary" href="{{ site.store_url }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14 M5 12h14"/></svg>{{ t.add_chrome }}</a>
+        {% if site.edge_store_url %}<a class="btn secondary" href="{{ site.edge_store_url }}">{{ t.add_edge }}</a>{% endif %}
+        <a class="btn link" href="#how">使い方を見る →</a>
+      </div>
+      <p class="fine">アカウント不要 · 単語帳はあなたのブラウザの中だけに保存</p>
+    </div>
+
+    <div class="demo" id="demo">
+      <span class="hint" aria-hidden="true">下線の単語をクリック</span>
+      <div class="window">
+        <div class="chrome" aria-hidden="true"><i></i><i></i><i></i><span class="url">news.example.com/environment</span><img src="{{ '/assets/icon_32.png' | relative_url }}" alt=""></div>
+        <div class="article" lang="en">
+          <div class="kicker">ENVIRONMENT</div>
+          <h3>Farmers adapt as rainfall becomes harder to predict</h3>
+          <p>Across the valley, growers say the <button type="button" class="w" data-w="abrupt">abrupt</button> shifts in <button type="button" class="w" data-w="humidity">humidity</button> have made old planting calendars almost useless.</p>
+          <p>Economists warn the region remains <button type="button" class="w" data-w="vulnerable">vulnerable</button>: crop prices <button type="button" class="w" data-w="fluctuate">fluctuate</button> sharply, and the policy signals are <button type="button" class="w" data-w="ambiguous">ambiguous</button>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="band" id="how">
+    <div class="wrap">
+      <h2>いつもの読書に、3 ステップで</h2>
+      <p class="sub">辞書を開く必要も、単語リストを暗記する必要もありません。LexiBridge は英語を読む場所にだけ現れます。</p>
+      <div class="steps">
+        <div class="step">
+          <div class="n">1</div>
+          <h3>レベルを選ぶ</h3>
+          <p>中学から GRE までの 4 段階。CEFR-J の語彙リストに基づきます。もう知っている単語はマークせず、それより難しい単語をすべてマークします。</p>
+          <div class="mini" aria-hidden="true">
+            <div class="opt"><span class="r"></span>中学<span>11,626 語</span></div>
+            <div class="opt on"><span class="r"></span>高校・大学入試<span>9,589 語</span></div>
+            <div class="opt"><span class="r"></span>英検準1級<span>7,425 語</span></div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="n">2</div>
+          <h3>いつも通り読む</h3>
+          <p>知らない単語には金色の下線が引かれます。クリックすると発音記号と意味が表示されます。</p>
+          <div class="mini read" lang="en" aria-hidden="true">The policy signals so far are <span class="u">ambiguous</span>, and prices <span class="u">fluctuate</span> sharply.</div>
+        </div>
+        <div class="step">
+          <div class="n">3</div>
+          <h3>覚えたら外す</h3>
+          <p>単語帳はあなたの成長とともに小さくなります。新しい単語は、選択するだけで追加できます。</p>
+          <div class="mini read" aria-hidden="true"><span lang="en">Prices still fluctuate sharply.</span><br><span class="chip">✓ 覚えました <b>元に戻す</b></span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>原文で読みたい人のために</h2>
+      <p class="sub">原文の手ざわりはそのままに、足りない数語だけを補います。</p>
+      <div class="points">
+        <div class="point"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16 M4 12h10 M4 18h7"/></svg><div><h3>ページ全体を翻訳しない</h3><p>原文は一語も変えません。マークされるのは知らない単語だけで、読める部分の邪魔はしません。</p></div></div>
+        <div class="point"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/></svg><div><h3>データは手元だけに</h3><p>単語帳はブラウザの中に保存され、アカウントも不要です。LexiBridge にはサーバーがなく、何もアップロードしません。</p></div></div>
+        <div class="point"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h9a4 4 0 0 1 0 8H8 M8 11l-3 4 3 4"/></svg><div><h3>変化形もわかる</h3><p>studies、making、went も原形で認識するので、単語帳には 1 語だけあれば十分です。</p></div></div>
+        <div class="point"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5 M16 7l5 5-5 5"/></svg><div><h3>無料・オープンソース</h3><p>MIT ライセンス。ソースコードは GitHub で公開しており、自由に使用・改変・再配布できます。</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="about">
+    <div class="wrap story">
+      <h2>LexiBridge をつくった理由</h2>
+      <div>
+        <p>英語の原文を読むとき、よくある方法は二つです。英語が得意な人は知らない単語を読み飛ばし、そうでない人はページごと翻訳します。前者は読み終えても単語が身につかず、後者は内容がわかっても原文を読む力が育ちません。</p>
+        <p>LexiBridge はその間の道を選びます。原文はそのままに、足りない数語だけを補う。記事を一本読むたびにいくつか単語を覚え、覚えた単語はもう出てきません。</p>
+        <p>オープンソースのプロジェクトです。ご意見や開発への参加は <a href="{{ site.github_url }}/issues">GitHub</a> でどうぞ。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="closing">
+    <div class="wrap">
+      <h2>次に読む英語の記事から</h2>
+      <p class="sub">インストールしたら、どんな英語の Web ページでも開くだけ。知らない単語が自然に浮かび上がります。</p>
+      <div class="cta center">
+        <a class="btn primary" href="{{ site.store_url }}">{{ t.add_chrome }}</a>
+        {% if site.edge_store_url %}<a class="btn secondary" href="{{ site.edge_store_url }}">{{ t.add_edge }}</a>{% endif %}
+      </div>
+    </div>
+  </section>
+</main>
+<script src="{{ '/assets/demo.js' | relative_url }}"></script>

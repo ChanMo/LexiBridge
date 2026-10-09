@@ -1,6 +1,8 @@
 {%- assign lang = page.lang | default: site.lang -%}
 {%- assign t = site.data.ui[lang] -%}
-{%- assign path = page.url | remove_first: '/zh-TW' -%}
+{%- comment -%} path: the page's URL without its language prefix, the same in every language. {%- endcomment -%}
+{%- assign path = page.url -%}
+{%- if t.base != "" -%}{%- assign path = page.url | remove_first: t.base -%}{%- endif -%}
 <!doctype html>
 <html lang="{{ lang }}">
 <head>
@@ -12,8 +14,9 @@
   <meta property="og:description" content="{{ page.description | default: t.description }}">
   <meta property="og:image" content="{{ '/assets/icon.png' | absolute_url }}">
   <link rel="canonical" href="{{ page.url | absolute_url }}">
-  <link rel="alternate" hreflang="zh-CN" href="{{ path | absolute_url }}">
-  <link rel="alternate" hreflang="zh-TW" href="{{ path | prepend: '/zh-TW' | absolute_url }}">
+  {%- for l in site.data.ui %}
+  <link rel="alternate" hreflang="{{ l[0] }}" href="{{ path | prepend: l[1].base | absolute_url }}">
+  {%- endfor %}
   <link rel="alternate" hreflang="x-default" href="{{ path | absolute_url }}">
   <link rel="icon" href="{{ '/assets/icon_32.png' | relative_url }}">
   <link rel="stylesheet" href="{{ '/assets/site.css' | relative_url }}">

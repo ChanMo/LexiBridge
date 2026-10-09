@@ -33,7 +33,7 @@ LexiBridge 不包含广告，也不包含任何统计或分析代码。
 
 ## 数据来源
 
-扩展内置的英汉词典、音标和考试分级来自开源项目 [ECDICT](https://github.com/skywind3000/ECDICT)，按 MIT 许可证使用；繁体中文释义由 [OpenCC](https://github.com/BYVoid/OpenCC) 转换，繁体中文版的分级参考东京外国语大学投野研究室的 [CEFR-J Wordlist](https://www.cefr-j.org/download.html)。完整的第三方许可证见扩展包和 [GitHub 仓库]({{ site.github_url }}) 里的 `THIRD_PARTY_NOTICES.md`。
+扩展内置的英汉词典、音标和考试分级来自开源项目 [ECDICT](https://github.com/skywind3000/ECDICT)，按 MIT 许可证使用；繁体中文释义由 [OpenCC](https://github.com/BYVoid/OpenCC) 转换，繁体中文版和日文版的分级参考东京外国语大学投野研究室的 [CEFR-J Wordlist](https://www.cefr-j.org/download.html)；日文释义来自公有领域的英日词典 [EJDict-hand](https://github.com/kujirahand/EJDict)。完整的第三方许可证见扩展包和 [GitHub 仓库]({{ site.github_url }}) 里的 `THIRD_PARTY_NOTICES.md`。
 
 ## 本网站
 

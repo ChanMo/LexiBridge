@@ -1,6 +1,7 @@
 // Homepage demo: the extension's word card, without the extension.
 // Definitions are copied from the dictionaries bundled with LexiBridge
-// (packs/en-zh-Hans and en-zh-Hant), in the page's language.
+// (packs/en-zh-Hans, en-zh-Hant and en-ja), in the page's language.
+// Japanese has no part of speech.
 (() => {
   const DEFS = {
     'zh-CN': {
@@ -17,8 +18,15 @@
       fluctuate: ["'flʌktʃueit", 'vi.', ['變動', '起伏', '動搖']],
       ambiguous: ["æm'bigjuəs", 'adj.', ['不明確的', '模稜兩可的']],
     },
+    'ja': {
+      abrupt: ["ə'brʌpt", null, ['突然の']],
+      humidity: ["hju:'miditi", null, ['湿気、湿度']],
+      vulnerable: ["'vʌlnərəbl", null, ['(身体的に)傷つきやすい', '攻撃(非難)を受けやすい、批判(皮肉など)に傷つきやすい']],
+      fluctuate: ["'flʌktʃueit", null, ['動揺する、変動する、上下する']],
+      ambiguous: ["æm'bigjuəs", null, ['(意味が)いろいろな意味にとれる、多義の', '(正体などが)はっきりしない、(輪郭などが)ぼんやりとした']],
+    },
   };
-  const KNOWN = {'zh-CN': '✓ 认识了', 'zh-TW': '✓ 認識了'};
+  const KNOWN = {'zh-CN': '✓ 认识了', 'zh-TW': '✓ 認識了', 'ja': '✓ 覚えた'};
   const lang = DEFS[document.documentElement.lang] ? document.documentElement.lang : 'zh-CN';
   const demo = document.getElementById('demo');
   if (!demo) return;
@@ -47,7 +55,8 @@
     const body = el('div', 'body');
     const list = el('ol');
     senses.forEach(s => list.appendChild(el('li', '', s)));
-    body.append(el('span', 'pos', pos), list);
+    if (pos) body.append(el('span', 'pos', pos));
+    body.append(list);
     const foot = el('div', 'foot');
     const known = el('button', '', KNOWN[lang]);
     known.type = 'button';

@@ -27,6 +27,13 @@
   --sans: -apple-system, BlinkMacSystemFont, "PingFang TC", "Segoe UI", "Microsoft JhengHei",
     "Noto Sans CJK TC", sans-serif;
 }
+/* Japanese pages (/ja/) use Japanese glyphs. */
+:root:lang(ja) {
+  --sans: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Segoe UI",
+    "Yu Gothic UI", "Meiryo", "Noto Sans CJK JP", sans-serif;
+}
+/* Japanese headings break between phrases, not inside words (Chrome 119+). */
+:lang(ja) :is(h1, h2, h3) { word-break: auto-phrase; }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #161c2d;
