@@ -60,10 +60,19 @@ ZH_HANT_LEVELS = (['A1', 'A2', 'B1', 'B2', 'toefl', 'ielts', 'gre'], [
 ])
 CEFR = {'A1': 1, 'A2': 2, 'B1': 3, 'B2': 4}
 
+# EJDict marks the core senses of common words with 『』. Dropped from a sense: usage
+# notes "《複数形で》", countability "〈C〉", part-of-speech tags "{名}", English glosses
+# "(therefore)", variants "(またburger)". Phrases split at ",;・" outside brackets: "(人,人の判断が)『正しい』,正当な".
+JA_NOTE_RE = re.compile(r'〈[CU]〉|\{[^}]*\}|\([ -~]*\)|\(また[^)]*\)')
+JA_PHRASE_RE = re.compile(r'(?:\([^)]*\)|〈[^〉]*〉|[^,;・(〈])+')
+JA_LINE, JA_SENSE = 60, 32
+JA_OPEN, JA_CLOSE = '(〈《', ')〉》'
+
 ZH_HANS = 'packs/en-zh-Hans'
 ZH_HANT = 'packs/en-zh-Hant'
+JA = 'packs/en-ja'
 IRREGULAR = 'engines/en-irregular.js'
-OUTPUTS = [f'{pack}/{name}' for pack in (ZH_HANS, ZH_HANT) for name in ('dict.json', 'levels.json', 'LICENSE')]
+OUTPUTS = [f'{pack}/{name}' for pack in (ZH_HANS, ZH_HANT, JA) for name in ('dict.json', 'levels.json', 'LICENSE')]
 OUTPUTS.append(IRREGULAR)
 
 
@@ -174,6 +183,82 @@ def read_cefrj():
     return levels
 
 
+def read_ejdict():
+    """EJDict-hand headword -> meaning, "『走る』,駆ける / 〈人が〉…". "polish" wins over
+    "Polish"; headwords listing variants ("A1,A-1") give each its own key."""
+    with zipfile.ZipFile(vendor('ejdict')) as z:
+        lines = [l for n in sorted(z.namelist()) if re.search(r'/src/[a-z]\.txt$', n)
+                 for l in z.read(n).decode('utf-8').splitlines()]
+    out = {}
+    for lower in (True, False):
+        for line in lines:
+            head, _, meaning = line.partition('\t')
+            for w in head.split(','):
+                w = w.strip()
+                if meaning.strip() and (w == w.lower()) == lower:
+                    out.setdefault(w.lower(), meaning.strip())
+    return out
+
+
+def ja_flatten(text):
+    """Drops the usage notes 《…》, which hold " / " and brackets of their own, and
+    brackets inside brackets: "(…澱粉(でんぷん))" -> "(…澱粉)". Stray closers go too."""
+    out, stack = [], []
+    for ch in text:
+        if ch in JA_OPEN:
+            stack.append(ch)
+            keep = len(stack) == 1 and ch != '《'
+        elif ch in JA_CLOSE:
+            if not stack:
+                continue
+            top = stack.pop()
+            keep, ch = not stack and top != '《', JA_CLOSE[JA_OPEN.index(top)]
+        else:
+            keep = len(stack) <= 1 and '《' not in stack
+        if keep:
+            out.append(ch)
+    return ''.join(out)
+
+
+def ja_shorten(sense):
+    """The phrases of a sense that fit JA_SENSE, so no cut lands inside brackets.
+    A long context goes first: "(中南米の農園で,…働かされる)未熟練労働者" -> "未熟練労働者"."""
+    for text in (sense, re.sub(r'^\([^)]*\)', '', sense)):
+        fit = [m.end() for m in JA_PHRASE_RE.finditer(text) if m.end() <= JA_SENSE]
+        if fit:
+            return text[:fit[-1]]
+    return shorten(sense, JA_SENSE)
+
+
+def ja_definition(row, meaning, ej):
+    """"[lait] 光；明かり；…に火をつける；明るい；(重量が)軽い", one line of parseDefinition().
+    Words with core senses keep their marked phrases, which span the parts of speech;
+    others keep their first senses. "=hamburger3" takes sense 3 of hamburger.
+    None if nothing is left ("=all right", not an entry)."""
+    split = lambda text: re.split(r'\s+/\s*|\s*/\s+', text)
+    senses = []
+    for s in split(ja_flatten(meaning)):
+        ref = re.fullmatch(r'=([^{\d]+)(?:\{[^}]*\})?\s*(\d*)\s*', s)
+        if not ref:
+            senses.append(s)
+            continue
+        target = split(ja_flatten(ej.get(ref[1].strip().lower(), '')))
+        n = int(ref[2] or 0)
+        senses += target[n - 1:n] if 0 < n <= len(target) else target
+    senses = [re.sub(r'\s+', ' ', JA_NOTE_RE.sub('', s)).strip(' ,;') for s in senses]
+    core = lambda p: '『' in re.sub(r'\([^)]*\)', '', p)  # not "(…『NATO』…)"
+    marked = [p for s in senses for p in JA_PHRASE_RE.findall(s) if core(p)]
+    kept = []
+    for group in (marked, [ja_shorten(s) for s in senses]):
+        for p in group:
+            p = p.replace('『', '').replace('』', '').replace(',', '、').replace(';', '、').strip()
+            if p and p not in kept and len('；'.join(kept + [p])) <= JA_LINE:
+                kept.append(p)
+        if kept:
+            return with_phonetic(row, '；'.join(kept))
+    return None
+
+
 def select(rows, cefr, common):
     """Headwords of the dictionary, shared by every pack (plan 5.2 step 2, design 3.1)."""
     cand = {w for w, r in rows.items()
@@ -199,15 +284,15 @@ def select(rows, cefr, common):
                     and w not in forms and not any(s in words for s in stems(w))}
 
 
-def shorten(line):
-    if len(line) <= MAX_LINE:
+def shorten(line, limit=MAX_LINE):
+    if len(line) <= limit:
         return line
-    cut = max(line.rfind(c, 0, MAX_LINE) for c in '；;，,')
-    line = line[:cut] if cut > MAX_LINE // 3 else line[:MAX_LINE]
-    # Drop a bracket the cut left open: "abbr. 咨询调解和仲裁局（Advisory".
-    opened = max(line.rfind('（'), line.rfind('('))
-    if opened > max(line.rfind('）'), line.rfind(')')):
-        line = line[:opened].rstrip('；;，, ') or line
+    cut = max(line.rfind(c, 0, limit) for c in '；;，,')
+    line = line[:cut] if cut > limit // 3 else line[:limit]
+    # Drop a bracket the cut left open: "abbr. 咨询调解和仲裁局（Advisory", "〈液体".
+    opened = max(line.rfind('（'), line.rfind('('), line.rfind('〈'))
+    if opened > max(line.rfind('）'), line.rfind(')'), line.rfind('〉')):
+        line = line[:opened].rstrip('；;，, ') or line[opened + 1:]  # "(John ~,1628-88;英国の" -> "John ~…"
     return line
 
 
@@ -218,7 +303,10 @@ def definition(row, convert=lambda text: text):
     # A lone "[计] 累加器" keeps its text but not the tag, which would read as a phonetic.
     kept = ([l for l in lines if not DOMAIN_RE.match(l) and not INFLECTION_RE.match(l)]
             or [DOMAIN_RE.sub('', lines[0]).strip() or lines[0]])
-    text = convert(' '.join(shorten(l.replace(', ', '；')) for l in kept[:MAX_LINES]))
+    return with_phonetic(row, convert(' '.join(shorten(l.replace(', ', '；')) for l in kept[:MAX_LINES])))
+
+
+def with_phonetic(row, text):
     phonetic = row['phonetic'].strip().replace('\u04d9', '\u0259')  # Cyrillic ә -> IPA ə
     return f'[{phonetic}] {text}' if phonetic else text
 
@@ -304,6 +392,10 @@ def build(out, report=False):
         ZH_HANS: ({w: definition(rows[w]) for w in words}, levels(ZH_HANS_LEVELS, rows, cefr, words, common)),
         ZH_HANT: ({w: definition(rows[w], hant) for w in words}, levels(ZH_HANT_LEVELS, rows, cefr, words, common)),
     }
+    # Japanese takes the CEFR-J levels too; words EJDict lacks are left out.
+    ej = read_ejdict()
+    ja = {w: text for w in words if w in ej and (text := ja_definition(rows[w], ej[w], ej))}
+    packs[JA] = (ja, {id: [w for w in ws if w in ja] for id, ws in packs[ZH_HANT][1].items()})
 
     for pack, (defs, lvls) in packs.items():
         write(out, f'{pack}/dict.json', dump(defs))

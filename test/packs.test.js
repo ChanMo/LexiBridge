@@ -13,6 +13,7 @@ const load = (pack) => ({
 const SIZES = {
   'en-zh-Hans': {basic: 12527, cet4: 8760, cet6: 6736, gre: 3348},
   'en-zh-Hant': {a2: 12286, b1: 10145, b2: 7842, gre: 3388},
+  'en-ja': {a2: 11626, b1: 9589, b2: 7425, gre: 3193},
 };
 
 test('missing or unknown pack ids fall back to the first pack', () => {
@@ -30,6 +31,9 @@ test('the pack follows the browser language', () => {
   assert.strictEqual(pick('en-US', 'zh-TW', 'zh-CN'), 'en-zh-Hant');
   assert.strictEqual(pick('zh', 'zh-TW'), 'en-zh-Hans');
   assert.strictEqual(pick('zhx-TW'), 'en-zh-Hans');
+  for (const tag of ['ja', 'ja-JP', 'ja_JP']) assert.strictEqual(pick(tag), 'en-ja', tag);
+  assert.strictEqual(pick('en-US', 'ja', 'zh-CN'), 'en-ja');
+  assert.strictEqual(pick('jam'), 'en-zh-Hans');
 });
 
 for (const pack of PACKS) {
@@ -83,12 +87,28 @@ test('Traditional Chinese: same words as Simplified, converted text, every phras
   }
 });
 
+test('Japanese: definitions are EJDict text without its markup', () => {
+  const ja = require('../packs/en-ja/dict.json');
+  for (const [w, d] of Object.entries(ja)) {
+    const {groups} = parseDefinition(d);
+    assert.ok(groups.length === 1 && groups[0].senses.join('').trim(), w);
+    assert.doesNotMatch(d, /[『』《》{}]|〈[CU]〉/, w);
+  }
+  // Core senses span the parts of speech: "light" is also 軽い.
+  assert.match(ja.light, /軽い/);
+  assert.match(ja.right, /正しい/);
+  // "=hamburger3" takes that sense only.
+  assert.match(ja.burger, /^\S+ ハンバーガー/);
+});
+
 test('packs using CEFR-J cite it', () => {
   const fs = require('node:fs');
   const citation = 'The CEFR-J Wordlist Version 1.6. Compiled by Yukio Tono, Tokyo University of Foreign Studies.';
-  assert.ok(fs.readFileSync(`${__dirname}/../packs/en-zh-Hant/ATTRIBUTION.md`, 'utf8').includes(citation));
+  for (const id of ['en-zh-Hant', 'en-ja']) {
+    assert.ok(fs.readFileSync(`${__dirname}/../packs/${id}/ATTRIBUTION.md`, 'utf8').includes(citation), id);
+    assert.match(getPack(id).credit, /CEFR-J/, id);
+  }
   assert.ok(fs.readFileSync(`${__dirname}/../THIRD_PARTY_NOTICES.md`, 'utf8').includes(citation));
-  assert.match(getPack('en-zh-Hant').credit, /CEFR-J/);
 });
 
 test('forms of known words are left out of the levels, verbs of their own are not', () => {

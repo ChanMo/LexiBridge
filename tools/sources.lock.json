@@ -19,5 +19,12 @@
     "sha256": "c837d2c00ab8954ed8db48e79afd8ef37099570295fec36950dbf9322303a37a",
     "license": "Free for research, education and commercial use with citation (Tono Laboratory, TUFS)",
     "retrieved": "2026-10-08"
+  },
+  "ejdict": {
+    "file": "ejdict-9663055.zip",
+    "url": "https://github.com/kujirahand/EJDict/archive/9663055d59a8cb1a35078a71db7a09ff39305828.zip",
+    "sha256": "638e8a7ec21f7ef64e742318641162283d4d818400156ce26edcdbfe9ffb21e7",
+    "license": "CC0 1.0 (public domain)",
+    "retrieved": "2026-10-09"
   }
 }

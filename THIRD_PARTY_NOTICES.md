@@ -8,7 +8,7 @@ LexiBridge code: MIT License (see LICENSE).
 
 - Source: https://github.com/skywind3000/ECDICT (commit bc015ed)
 - Used in: `packs/en-zh-Hans` and `packs/en-zh-Hant` (definitions, phonetics, exam tags; converted to Traditional
-  Chinese for `en-zh-Hant`), `engines/en-irregular.js` (inflected forms)
+  Chinese for `en-zh-Hant`), `packs/en-ja` (phonetics, exam tags), `engines/en-irregular.js` (inflected forms)
 - Modified: selected headwords, shortened definitions, normalized phonetics (see `tools/build_packs.py`)
 
 ```
@@ -35,11 +35,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
+### EJDict-hand
+
+- Source: https://github.com/kujirahand/EJDict (commit 9663055)
+- Public domain (CC0 1.0 Universal): "This is the English-Japanese Dictionary data (Public Domain / No Copyright)."
+- Used in: `packs/en-ja` (definitions)
+- Modified: core senses only, usage notes dropped, shortened (see `tools/build_packs.py`)
+
 ### CEFR-J Wordlist Version 1.6
 
 - Source: https://www.cefr-j.org/download.html
 - © Tono Laboratory, Tokyo University of Foreign Studies. Free for research, education and commercial use with citation.
-- Used in: level lists of `packs/en-zh-Hant`, and words added to the shared word list
+- Used in: level lists of `packs/en-zh-Hant` and `packs/en-ja`, and words added to the shared word list
 - Modified: single-word headwords only, each at its lowest level (see `tools/build_packs.py`)
 
 > The CEFR-J Wordlist Version 1.6. Compiled by Yukio Tono, Tokyo University of Foreign Studies. Retrieved from https://www.cefr-j.org/download.html on 08/10/2026.

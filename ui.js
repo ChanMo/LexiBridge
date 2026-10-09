@@ -48,7 +48,7 @@ const LexiBridgeUI = (() => {
         --shadow-sm: 0 0 0 1px var(--line), 0 4px 14px rgba(0, 0, 0, 0.35);
       }
     }
-    /* Chinese glyphs follow the language: the UI's on the card, the definitions' in its body. */
+    /* CJK glyphs follow the language: the UI's on the card, the definitions' in its body. */
     .lb, :lang(zh-Hans), :lang(zh-CN) {
       --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB",
         "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
@@ -56,6 +56,10 @@ const LexiBridgeUI = (() => {
     :lang(zh-Hant), :lang(zh-TW), :lang(zh-HK) {
       --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei",
         "Noto Sans CJK TC", sans-serif;
+    }
+    :lang(ja) {
+      --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+        "Yu Gothic UI", "Meiryo", "Noto Sans CJK JP", sans-serif;
     }
     [lang] { font-family: var(--sans); }
     [popover] {

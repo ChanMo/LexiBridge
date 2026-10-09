@@ -23,6 +23,14 @@ const LexiBridgePacks = (() => {
       {id: 'b2', name: '全民英檢中高級', band: '托福・雅思', desc: '掌握 CEFR B2・標出托福、雅思、GRE 單字'},
       {id: 'gre', name: 'GRE', band: 'GRE', desc: '掌握托福、雅思單字・標出 GRE 單字'},
     ]},
+    {id: 'en-ja', defLang: 'ja', label: '日本語', defaultLevel: 'b1',
+     credit: '辞書：EJDict-hand（パブリックドメイン）、発音記号：ECDICT（MIT ライセンス）。レベル：CEFR-J Wordlist Version 1.6、東京外国語大学投野由紀夫研究室。',
+     levels: [
+      {id: 'a2', name: '中学', band: 'CEFR B1', desc: 'CEFR A1–A2（≈ 英検3級〜準2級）を習得・それより難しい単語をマーク'},
+      {id: 'b1', name: '高校・大学入試', band: 'CEFR B2', desc: 'CEFR B1（≈ 英検2級）を習得・それより難しい単語をマーク'},
+      {id: 'b2', name: '英検準1級', band: 'TOEFL・IELTS', desc: 'CEFR B2 を習得・TOEFL、IELTS、GRE の単語をマーク'},
+      {id: 'gre', name: 'GRE', band: 'GRE', desc: 'TOEFL、IELTS の単語を習得・GRE の単語をマーク'},
+    ]},
   ];
 
   // Missing or unknown ids (storage written before packs existed) mean the first pack.
@@ -31,11 +39,12 @@ const LexiBridgePacks = (() => {
   }
 
   // The pack for a learner whose browser languages are `languages` (most preferred
-  // first): Traditional Chinese for Taiwan, Hong Kong and Macau, else Simplified.
+  // first): Japanese, Traditional Chinese for Taiwan, Hong Kong and Macau, else Simplified.
   // Only packs that exist are picked.
   function pickPack(languages) {
     for(const language of languages) {
       const tag = String(language).toLowerCase().replace('_', '-');
+      if(/^ja\b/.test(tag)) return getPack('en-ja');
       if(!/^zh\b/.test(tag)) continue;
       return getPack(/^zh-(tw|hk|mo|hant)\b/.test(tag) ? 'en-zh-Hant' : 'en-zh-Hans');
     }
