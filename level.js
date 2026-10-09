@@ -4,20 +4,17 @@
   const {el} = Page;
   const $ = (id) => document.getElementById(id);
   const container = $("levels");
-  const dialog = $("confirm-dialog");
 
   // What is stored: pack and level ids, either possibly missing.
   let current = await chrome.storage.local.get(['pack', 'level']);
+  let {words = [], known = []} = await chrome.storage.local.get(['words', 'known']);
   // The pack whose levels are listed; picking one of them switches to it.
   let shown = P.getPack(current.pack);
 
-  // Levels of a pack with their word lists, loaded when first shown.
+  // Pack data, loaded when first shown.
   const loaded = new Map();
-  function levelsOf(pack) {
-    if(!loaded.has(pack.id)) {
-      loaded.set(pack.id, P.loadPack(pack).then(data =>
-        pack.levels.map(level => ({...level, words: P.levelWords(data, level.id)}))));
-    }
+  function dataOf(pack) {
+    if(!loaded.has(pack.id)) loaded.set(pack.id, P.loadPack(pack));
     return loaded.get(pack.id);
   }
 
@@ -29,12 +26,6 @@
       $("welcome").replaceChildren(...tNodes('level_welcome', b));
       $("welcome").hidden = false;
     }
-  }
-
-  // True when the stored list is exactly what a level generated, i.e. the
-  // learner has not deleted or added any word since.
-  function isUntouched(words, level) {
-    return !!level && words.length === level.words.length && words.every((w, i) => w[0] === level.words[i][0]);
   }
 
   function renderTabs() {
@@ -53,33 +44,40 @@
   async function render() {
     renderTabs();
     const pack = shown;
-    const levels = await levelsOf(pack);
+    const data = await dataOf(pack);
     if(pack !== shown) return; // another tab was picked meanwhile
     $("credit").textContent = pack.credit;
     $("credit").lang = pack.defLang;
+    const mine = pack === P.getPack(current.pack);
+    const at = mine ? P.progress(pack, data.levels, current.level, words) : null;
+    const ready = at?.next && at.known >= at.total * P.READY;
+    if(ready) {
+      const pct = `${Math.floor(at.known / at.total * 100)}%`;
+      $("ready").replaceChildren(...tNodes('level_ready', at.band, el('b', '', pct), el('b', 'marked', at.next.name)));
+      $("ready").lang = pack.defLang;
+    }
+    $("ready").hidden = !ready;
     const template = $("level-row");
-    container.replaceChildren(...levels.map((level, index) => {
+    container.replaceChildren(...pack.levels.map((level, index) => {
       const row = document.importNode(template.content, true).firstElementChild;
-      const on = pack === P.getPack(current.pack) && level.id === current.level;
+      const on = mine && level.id === current.level;
       row.querySelector(".text").lang = pack.defLang;
       row.querySelector(".name").textContent = level.name;
       row.querySelector(".desc").textContent = level.desc;
-      row.querySelector(".count").textContent = t('level_count', num(level.words.length));
+      row.querySelector(".count").textContent = t('level_count', num(data.levels[level.id].length));
       row.querySelectorAll(".bars i").forEach((bar, i) => bar.classList.toggle("on", i <= index));
+      row.querySelector(".tag").hidden = !(ready && level === at.next);
+      if(on && at) {
+        const bar = row.querySelector(".progress");
+        bar.hidden = false;
+        bar.querySelector("i").style.width = `${at.known / at.total * 100}%`;
+        bar.querySelector(".known").textContent = t('level_progress', at.band, num(at.known), num(at.total));
+      }
       row.classList.toggle("is-current", on);
       row.setAttribute("aria-checked", on);
       row.addEventListener("click", () => choose(pack, level));
       return row;
     }));
-  }
-
-  function confirmReplace(pack, level, count) {
-    const otherPack = pack !== P.getPack(current.pack) ? t('level_confirmPack', pack.label) : '';
-    $("confirm-text").textContent =
-      t('level_confirmText', level.name, num(level.words.length), num(count)) + otherPack;
-    dialog.returnValue = '';
-    dialog.showModal();
-    return new Promise(resolve => dialog.addEventListener("close", () => resolve(dialog.returnValue === 'ok'), {once: true}));
   }
 
   // Writes the state; missing values are removed, as before the first choice.
@@ -89,24 +87,31 @@
     if(missing.length) await chrome.storage.local.remove(missing);
   }
 
+  // Moves the list to the level's, keeping the words the learner took out or added.
   async function choose(pack, level) {
     if(pack === P.getPack(current.pack) && level.id === current.level) return;
-    const {words = []} = await chrome.storage.local.get(['words']);
-    const currentLevel = (await levelsOf(P.getPack(current.pack))).find(l => l.id === current.level);
-    if(words.length && !isUntouched(words, currentLevel) && !await confirmReplace(pack, level, words.length)) {
-      return;
-    }
-    const previous = {...current, words};
+    const [from, to] = await Promise.all([dataOf(P.getPack(current.pack)), dataOf(pack)]);
+    const previous = {...current, words, known};
+    ({words, known} = P.switchWords(words, known, {dict: from.dict, list: from.levels[current.level] ?? []},
+                                                  {dict: to.dict, list: to.levels[level.id]}));
     current = {pack: pack.id, level: level.id};
-    await store({...current, words: level.words});
+    await store({...current, words, known});
     render();
-    Page.toast(t('level_switched', level.name, num(level.words.length)), t('common_undo'), async() => {
+    Page.toast(t('level_switched', level.name, num(words.length)), t('common_undo'), async() => {
       current = {pack: previous.pack, level: previous.level};
+      ({words, known} = previous);
       shown = P.getPack(current.pack);
       await store(previous);
       render();
     });
   }
+
+  // Words taken out or added on a page while this one is open.
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if(area !== 'local' || !changes.words) return;
+    words = changes.words.newValue ?? [];
+    render();
+  });
 
   render();
 })();

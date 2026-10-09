@@ -64,5 +64,18 @@
     window.close();
   };
   $("level-link").addEventListener("click", () => open('level.html'));
+
+  // Progress through the band of the level: words taken out on pages.
+  const packOf = LexiBridgePacks.getPack(pack);
+  const at = level && LexiBridgePacks.progress(packOf, await LexiBridgePacks.loadLevels(packOf), level, words);
+  if(at?.total) {
+    const ready = at.next && at.known >= at.total * LexiBridgePacks.READY;
+    $("progress-band").textContent = ready ? t('popup_ready') : at.band;
+    $("progress-band").lang = ready ? '' : packOf.defLang;
+    $("progress-count").textContent = `${num(at.known)} / ${num(at.total)}`;
+    $("progress").querySelector("i").style.width = `${at.known / at.total * 100}%`;
+    $("progress").classList.toggle("is-ready", !!ready);
+    $("progress").hidden = false;
+  }
   $("words-link").addEventListener("click", () => open('options.html'));
 })();

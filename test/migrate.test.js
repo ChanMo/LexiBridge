@@ -13,20 +13,26 @@ test('hashes match the ones tools/build_packs.py wrote', async() => {
   assert.strictEqual(await legacyHash('abandon', OLD), 'c12c0868');
   assert.ok(new Set(legacy.rows).has('c12c0868'));
   // v1.3 starting lists, checked against its levels.js once.
-  assert.deepStrictEqual(legacy.lists, {basic: 'd4383b45', cet4: '76dcd4a1', cet6: 'a24d4a8b', gre: 'c0d06f2d'});
+  const lists = Object.fromEntries(Object.entries(legacy.lists).map(([id, words]) => [id, listHash(words)]));
+  assert.deepStrictEqual(lists, {basic: 'd4383b45', cet4: '76dcd4a1', cet6: 'a24d4a8b', gre: 'c0d06f2d'});
 });
 
-test('an unchanged v1.3 starting list is replaced with the new level list', async() => {
-  const words = [['Abandon', OLD], ['study', 'v.学']];
-  const legacy = {lists: {cet4: listHash(['abandon', 'study'])}, rows: new Set()};
-  const changes = await upgrade({words, level: 'cet4'}, data, legacy, 1);
-  assert.deepStrictEqual(changes.words, [['abandon', dict.get('abandon')], ['zeal', 'n. 热心']]);
+test('a v1.3 list moves to the new level list, keeping what the learner changed', async() => {
+  const legacy = {lists: {cet4: ['abandon', 'study', 'oust']}, rows: new Set([await legacyHash('abandon', OLD), await legacyHash('study', 'v.学')])};
+  // oust was taken out, zebra added.
+  const words = [['Abandon', OLD], ['study', 'v.学'], ['zebra', '斑马']];
+  const levels = {cet4: ['abandon', 'oust', 'zeal']};
+  const changes = await upgrade({words, level: 'cet4'}, {dict, levels}, legacy, 1);
+  assert.deepStrictEqual(changes.words, [['Abandon', dict.get('abandon')], ['zebra', '斑马'], ['zeal', 'n. 热心']]);
+  assert.deepStrictEqual(changes.known, ['oust']);
   assert.deepStrictEqual(changes.backup_v13, {words, level: 'cet4', at: 1});
-  // Done once: the new list no longer matches.
-  assert.deepStrictEqual(await upgrade({...changes, level: 'cet4'}, data, legacy), {});
-  // Another level, or a list the learner changed, is left to the definition refresh.
-  assert.deepStrictEqual(await upgrade({words, level: 'gre'}, data, legacy), {});
-  assert.deepStrictEqual(await upgrade({words: words.slice(1), level: 'cet4'}, data, legacy), {});
+  // Done once.
+  assert.deepStrictEqual(await upgrade({...changes, level: 'cet4'}, {dict, levels}, legacy), {});
+  // Another level only gets the definitions.
+  const other = await upgrade({words, level: 'nope'}, {dict, levels}, legacy, 1);
+  assert.deepStrictEqual(other.words, [['Abandon', dict.get('abandon')], ['study', 'v. 学习'], ['zebra', '斑马']]);
+  // A list started after v1.3 has no old definitions and is left alone.
+  assert.deepStrictEqual(await upgrade({words: [['abandon', dict.get('abandon')]], level: 'cet4'}, {dict, levels}, legacy), {});
 });
 
 test('bundled definitions are refreshed, edited and unknown ones kept, backup written once', async() => {

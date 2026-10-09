@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert');
 const {COMMON_WORDS, parseDefinition} = require('../lexicon.js');
-const {PACKS, getPack, pickPack, getLevel, levelWords, bands} = require('../packs.js');
+const {PACKS, getPack, pickPack, getLevel, levelWords, bands, switchWords, progress} = require('../packs.js');
 const IRREGULAR = require('../engines/en-irregular.js');
 
 const load = (pack) => ({
@@ -110,4 +110,49 @@ test('bands: a word belongs to the hardest level that marks it', () => {
   const hans = bands(PACKS[0], load(PACKS[0]));
   assert.strictEqual(PACKS[0].levels[hans.get('countenance')].band, 'GRE');
   assert.strictEqual(hans.get('driving'), undefined);
+});
+
+test('switching levels keeps the words taken out and added, and edited definitions', () => {
+  const dict = new Map([['abandon', 'v. 放弃'], ['zeal', 'n. 热心'], ['oust', 'v. 驱逐'], ['vex', 'v. 使烦恼']]);
+  const from = {dict, list: ['abandon', 'oust', 'zeal', 'vex']}, to = {dict, list: ['oust', 'zeal']};
+  // abandon is known to the new level; vex was taken out, zebra added, zeal edited.
+  const words = [['zebra', '斑马'], ['Abandon', 'v. 放弃'], ['oust', 'v. 驱逐'], ['zeal', '热情']];
+  const up = switchWords(words, [], from, to);
+  assert.deepStrictEqual(up, {words: [['zebra', '斑马'], ['oust', 'v. 驱逐'], ['zeal', '热情']], known: ['vex']});
+  // And back: the easier words return, vex stays out.
+  assert.deepStrictEqual(switchWords(up.words, up.known, to, from).words,
+    [['zebra', '斑马'], ['oust', 'v. 驱逐'], ['zeal', '热情'], ['abandon', 'v. 放弃']]);
+  // A known word added again is no longer known.
+  assert.deepStrictEqual(switchWords([...up.words, ['vex', '烦']], up.known, to, from).known, []);
+  // Another dictionary replaces definitions that were not edited.
+  const hant = {dict: new Map([['oust', 'v. 驅逐'], ['zeal', 'n. 熱心']]), list: ['oust', 'zeal']};
+  assert.deepStrictEqual(switchWords(words, [], from, hant).words, [['zebra', '斑马'], ['oust', 'v. 驅逐'], ['zeal', '热情']]);
+});
+
+test('words taken out survive any round of switches', () => {
+  for (const pack of PACKS) {
+    const data = load(pack), list = (id) => ({dict: data.dict, list: data.levels[id]});
+    const [first, ...rest] = pack.levels.map(l => l.id);
+    // Take out every third word of the first level.
+    const out = new Set(data.levels[first].filter((_, i) => i % 3 === 0));
+    let state = {words: levelWords(data, first).filter(([w]) => !out.has(w)), known: []}, at = first;
+    for (const id of [...rest, first, rest.at(-1), first]) {
+      state = switchWords(state.words, state.known, list(at), list(id));
+      at = id;
+    }
+    assert.ok(state.words.every(([w]) => !out.has(w)), pack.id);
+    assert.strictEqual(state.words.length, data.levels[first].length - out.size, pack.id);
+  }
+});
+
+test('progress counts the band of the level the learner took out', () => {
+  const pack = PACKS[0], {levels} = load(pack);
+  const words = levelWords({levels, dict: new Map()}, 'cet4');
+  const start = progress(pack, levels, 'cet4', words);
+  assert.deepStrictEqual({...start, next: start.next.id}, {band: '六级 · 考研', known: 0, total: levels.cet4.length - levels.cet6.length, next: 'cet6'});
+  const band = levels.cet4.find(w => !levels.cet6.includes(w)), harder = levels.cet6[0];
+  const less = words.filter(([w]) => w !== band && w !== harder);
+  assert.strictEqual(progress(pack, levels, 'cet4', less).known, 1);
+  assert.strictEqual(progress(pack, levels, 'gre', []).next, undefined);
+  assert.strictEqual(progress(pack, levels, 'nope', words), null);
 });

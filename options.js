@@ -318,9 +318,11 @@
     if(clearDialog.returnValue === 'export') {
       exportWords();
     } else if(clearDialog.returnValue === 'clear') {
-      const before = words;
+      // A fresh start: no level, so nothing counts as known.
+      const before = await chrome.storage.local.get(['words', 'level', 'known']);
+      await chrome.storage.local.remove(['level', 'known']);
       await save([]);
-      toast(t('words_cleared', num(before.length)), t('common_undo'), () => save(before));
+      toast(t('words_cleared', num(before.words?.length ?? 0)), t('common_undo'), () => chrome.storage.local.set(before));
     }
   });
 

@@ -359,8 +359,8 @@ def legacy():
     """What the v1.3 lists shipped, for the migration in migrate.js:
     rows: every [word, definition] row ever, to tell bundled definitions from
       ones the learner edited; sha1(normalizeWord(word) + "\\t" + definition).
-    lists: each level's starting list, to tell lists the learner never changed;
-      sha1 of its words joined by "\\n". Hashes are the first 8 hex digits."""
+    lists: each level's starting list, to tell the words the learner took out.
+    Hashes are the first 8 hex digits."""
     git = lambda *args: subprocess.run(['git', *args], cwd=ROOT, capture_output=True, text=True, check=True).stdout
     valid = lambda row: isinstance(row, list) and row and isinstance(row[0], str) and normalize_word(row[0])
     rows = set()
@@ -380,10 +380,10 @@ def legacy():
     lists = {}
     for id, (known, learn) in V13_LEVELS.items():
         easy = set(keys(known)) | common
-        lists[id] = short_hash('\n'.join(w for w in keys(learn) if w not in easy))
+        lists[id] = [w for w in keys(learn) if w not in easy]
 
     write(ROOT, 'packs/legacy-v13.json', dump({'lists': lists, 'rows': sorted(rows)}))
-    print(f'packs/legacy-v13.json: {len(rows):,} rows, lists {lists}')
+    print(f'packs/legacy-v13.json: {len(rows):,} rows, lists', {id: short_hash('\n'.join(l)) for id, l in lists.items()})
 
 if __name__ == '__main__':
     commands = {'fetch': fetch, 'build': lambda: build(ROOT, report=True), 'check': check, 'legacy': legacy}
