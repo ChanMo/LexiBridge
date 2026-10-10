@@ -17,18 +17,19 @@
   --on-primary: #ffffff;
   --article: #262a33;
   --shadow: 0 0 0 1px var(--line), 0 30px 60px -20px rgba(24, 34, 61, 0.22);
-  --sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Segoe UI",
-    "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
   --serif: "Iowan Old Style", Georgia, "Times New Roman", serif;
   color-scheme: light dark;
 }
-/* Traditional Chinese pages (/zh-TW/) use Traditional glyphs. */
-:root:lang(zh-TW) {
+/* Glyphs follow the language: of the page (/zh-TW/, /ja/), and of each name in the language menu. */
+:root, :lang(zh-CN) {
+  --sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Segoe UI",
+    "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+}
+:lang(zh-TW) {
   --sans: -apple-system, BlinkMacSystemFont, "PingFang TC", "Segoe UI", "Microsoft JhengHei",
     "Noto Sans CJK TC", sans-serif;
 }
-/* Japanese pages (/ja/) use Japanese glyphs. */
-:root:lang(ja) {
+:lang(ja) {
   --sans: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Segoe UI",
     "Yu Gothic UI", "Meiryo", "Noto Sans CJK JP", sans-serif;
 }
@@ -69,6 +70,17 @@ a { color: inherit; }
 .site-head nav { margin-left: auto; display: flex; gap: 26px; font-size: 14.5px; color: var(--ink-2); }
 .site-head nav a { text-decoration: none; }
 .site-head nav a:hover { color: var(--ink); }
+.lang { position: relative; font-size: 14.5px; color: var(--ink-2); }
+.lang summary { display: flex; align-items: center; gap: 6px; padding: 6px 4px; white-space: nowrap; list-style: none; cursor: pointer; border-radius: 6px; }
+.lang summary::-webkit-details-marker { display: none; }
+.lang summary::after { content: ""; width: 5px; height: 5px; margin: -3px 0 0 2px; border: solid currentColor; border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); opacity: 0.7; }
+.lang summary:hover, .lang[open] summary { color: var(--ink); }
+.lang svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+.lang ul { position: absolute; top: calc(100% + 6px); right: 0; z-index: 10; min-width: 140px; margin: 0; padding: 6px; list-style: none; background: var(--surface); border-radius: 10px; box-shadow: var(--shadow); }
+.lang ul a { display: block; font-family: var(--sans); padding: 7px 12px; border-radius: 6px; text-decoration: none; color: var(--ink-2); }
+.lang ul a:hover { background: var(--band); color: var(--ink); }
+.lang ul a[aria-current] { color: var(--ink); font-weight: 600; }
+.lang ul a[aria-current]::after { content: "✓"; float: right; margin-left: 12px; color: var(--accent); }
 .site-foot { margin-top: 0; padding: 32px 0 40px; border-top: 1px solid var(--line); color: var(--ink-3); font-size: 13.5px; }
 .site-foot .wrap { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
 .site-foot a { text-decoration: none; }
@@ -222,7 +234,9 @@ h2 { margin: 0 0 12px; font: 700 32px/1.3 var(--sans); }
 
 @media (max-width: 860px) {
   .site-head nav { display: none; }
-  .site-head .btn { margin-left: auto; }
+  .site-head { gap: 16px; }
+  .site-head .lang { margin-left: auto; }
+  .lang summary span { display: none; }  /* the globe alone; its label stays in aria-label */
   .hero { grid-template-columns: minmax(0, 1fr); gap: 40px; padding: 32px 0 64px; }
   h1 { font-size: 36px; }
   .steps, .points, .story { grid-template-columns: minmax(0, 1fr); }

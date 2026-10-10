@@ -20,6 +20,27 @@
   <link rel="alternate" hreflang="x-default" href="{{ path | absolute_url }}">
   <link rel="icon" href="{{ '/assets/icon_32.png' | relative_url }}">
   <link rel="stylesheet" href="{{ '/assets/site.css' | relative_url }}">
+  <script>
+    // A visitor to the default pages who never picked a language goes to the pages in their
+    // browser's language; a pick in the language menu is remembered and wins from then on.
+    (() => {
+      const bases = { {%- for l in site.data.ui -%}"{{ l[0] }}": "{{ l[1].base }}"{% unless forloop.last %}, {% endunless %}{%- endfor -%} };
+      const pick = (tag) => /^ja\b/i.test(tag) ? 'ja' : /^zh-(tw|hk|mo|hant)\b/i.test(tag) ? 'zh-TW' : /^zh\b/i.test(tag) ? 'zh-CN' : null;
+      let saved;
+      try { saved = localStorage.getItem('lang'); } catch { saved = 'unknown'; }  // no storage, no redirect: it could not be undone
+      if (!saved && "{{ lang }}" === "{{ site.lang }}") {
+        const want = (navigator.languages || [navigator.language]).map(pick).find(Boolean);
+        if (want && want !== "{{ lang }}") location.replace("{{ site.baseurl }}" + bases[want] + {{ path | jsonify }} + location.search + location.hash);
+      }
+      const closeMenus = (except) => document.querySelectorAll('details.lang[open]').forEach(m => { if (!m.contains(except)) m.open = false; });
+      document.addEventListener('click', (e) => {
+        const link = e.target.closest('[data-lang]');
+        if (link) try { localStorage.setItem('lang', link.dataset.lang); } catch {}
+        closeMenus(e.target);
+      });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenus(null); });
+    })();
+  </script>
 </head>
 <body>
   {% include header.html %}

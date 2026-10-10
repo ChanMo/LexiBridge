@@ -6,10 +6,15 @@
       <a href="{{ t.base | append: '/install.html' | relative_url }}">{{ t.install }}</a>
       <a href="{{ t.base | append: '/privacy.html' | relative_url }}">{{ t.privacy }}</a>
       <a href="{{ site.github_url }}">GitHub</a>
-      {%- for l in site.data.ui %}{% unless l[0] == lang %}
-      <a href="{{ l[1].base | append: path | relative_url }}" hreflang="{{ l[0] }}" lang="{{ l[0] }}">{{ l[1].label }}</a>
-      {%- endunless %}{% endfor %}
     </nav>
+    <details class="lang">
+      <summary aria-label="{{ t.language }}: {{ t.label }}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18 M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/></svg><span>{{ t.label }}</span></summary>
+      <ul>
+        {%- for l in site.data.ui %}
+        <li><a href="{{ l[1].base | append: path | relative_url }}" hreflang="{{ l[0] }}" lang="{{ l[0] }}" data-lang="{{ l[0] }}"{% if l[0] == lang %} aria-current="page"{% endif %}>{{ l[1].label }}</a></li>
+        {%- endfor %}
+      </ul>
+    </details>
     <a class="btn primary small" href="{{ site.store_url }}">{{ t.add_chrome }}</a>
   </header>
 </div>
