@@ -3,7 +3,10 @@
 LexiBridge 是一个免费开源的 Chrome 扩展：读英文网页时，只标出你还不认识的词，
 点一下看释义，认识了就移出。不翻译整页，数据只保存在本地浏览器。
 
-官网：https://chanmo.github.io/LexiBridge/
+- 释义语言：简体中文、繁體中文、日本語，各有四档英语水平可选
+- 安装：[[https://chromewebstore.google.com/detail/mnhdbmjfgoohoajakjkeminblgnbmlhp][Chrome 应用商店]] (Edge 等 Chromium 浏览器也可以用)，手动安装见[[https://chanmo.github.io/LexiBridge/install.html][安装说明]]
+- 官网：https://chanmo.github.io/LexiBridge/
+- 许可证：MIT (=LICENSE=)，内置数据的来源和许可证见 =THIRD_PARTY_NOTICES.md=
 
 
 ** 名字来源
@@ -53,33 +56,34 @@ env/bin/python tools/build_packs.py check   # 检查提交的数据和构建结�
 =docs/= 是 Jekyll 源文件，由 GitHub Pages 直接构建 (Settings → Pages → Deploy from a branch → =main= / =docs=)，
 不需要本地构建，也不提交构建产物。只用 GitHub Pages 自带的 Jekyll 功能，没有主题和插件。
 
-- =_config.yml=: 商店链接、GitHub 链接等站点变量
-- =index.html=: 首页，含可点击的演示 (=assets/demo.js=)
-- =install.md=, =privacy.md=: 安装说明、隐私政策
+- =_config.yml=: 商店链接、GitHub 链接等站点变量；=edge_store_url= 填上后才显示"添加到 Edge"按钮
+- =_data/ui.yml=: 各语言共用的文案 (导航、按钮、页脚) 和路径前缀
+- =index.html=, =install.md=, =privacy.md=: 简体中文的首页、安装说明、隐私政策；
+  =zh-TW/= 和 =ja/= 下是同名的繁体中文、日文页面
+- =_layouts/=, =_includes/=: 页面骨架、页头 (含语言菜单) 和页脚。首次访问按浏览器语言跳转，
+  在菜单里选过语言之后以选择为准
+- =assets/demo.js=: 首页上可点击的演示，释义按页面语言取
 - =assets/site.css=: 全站样式，品牌色与扩展一致，支持深色模式
+- =sitemap.xml=: 手写，新增页面时要加上
+
+新增一种语言：在 =_data/ui.yml= 加一组文案，建同名目录放三个页面 (front matter 里写 =lang=)，
+补上 =_layouts/default.html= 里的浏览器语言判断和 =assets/demo.js= 里的释义，再把网址加进 =sitemap.xml=。
 
 本地预览 (可选)：=jekyll serve --source docs=，然后打开 http://localhost:4000/LexiBridge/
+
+** 发布
+
+1. 改 =manifest.json= 和 =package.json= 里的版本号，提交为 =vX.Y.Z=
+2. =npm test=，然后 =npm run package= 生成 zip
+3. 打 tag 并推送：=git tag vX.Y.Z && git push origin main vX.Y.Z= (手动安装的用户从 tag 页下载源码)
+4. 把 zip 上传到应用商店。详细描述有改动时，从 =store/listing.md= 粘贴到商店后台
+   (名称和简介来自 =_locales/=)
 
 ** 品牌
 
 墨与荧光笔：墨蓝 =#1f2a44= 为主色，荧光金 =#f5b83d= 为标记色，纸色 =#f7f1e3= 为底色。
 网页上的下划线高亮用 =#c98400=。高亮色避开蓝/紫 (链接) 和红 (拼写错误)。
 
-** TODO:
+** TODO
 
-- [ ] 导入导出增加CSV支持
-- [X] 高亮样式可选 (底色 / 下划线 / 点线)，在扩展弹出面板中切换
-- [X] 单词卡片重新设计：贴近单词弹出、解析音标/词性/义项、深色模式、可撤销
-- [X] 首次使用选择水平，可随时一键切换 (已掌握词表与要学词表做差集)
-- [X] 管理页改为纯 HTML/CSS，去掉 Material Web 与 Google Fonts 依赖
-- [X] 官网重新设计：品牌色、可交互演示、安装说明与隐私政策，去掉 Bulma
-- [X] 新图标与品牌色 (墨与荧光笔)，工具栏 16/32 单独绘制
-- [X] 在网页中选中单词添加到词库 (释义自动从内置词库查找)
-- [X] 词形还原 (abandoned -> abandon)、标点和连字符分词
-- [X] 动态内容高亮、多标签页同步删除
-- [X] 导入合并、校验，搜索支持释义
-- [X] 增加搜索和分页
-- [X] 优化options页面
-- [X] 使用Highlight代替span标签
-- [X] 在弹出框中增加删除单词
-
+- [ ] 导入导出增加 CSV 支持
