@@ -3,7 +3,7 @@ layout: page
 lang: zh-TW
 title: 安裝
 lede: 建議從 Chrome 線上應用程式商店安裝，可以自動更新。無法開啟商店時，也可以手動安裝。
-description: 從 Chrome 線上應用程式商店安裝 LexiBridge，或下載原始碼手動載入。
+description: 從 Chrome 線上應用程式商店安裝 LexiBridge，或下載 zip 手動載入。
 ---
 
 ## 從 Chrome 線上應用程式商店安裝
@@ -18,7 +18,7 @@ description: 從 Chrome 線上應用程式商店安裝 LexiBridge，或下載原
 
 適用於無法使用 Chrome 線上應用程式商店的情況。手動安裝的版本不會自動更新。
 
-1. 在 [GitHub 版本列表]({{ site.github_url }}/tags) 中下載最新版本的 **Source code (zip)**，然後解壓縮。
+1. 在 [GitHub 發行頁面]({{ site.github_url }}/releases/latest) 的 **Assets** 中下載 `lexibridge-x.y.z.zip`，然後解壓縮。
 2. 在 Chrome 網址列輸入 `chrome://extensions` 並按 Enter。
 3. 打開右上角的 **開發人員模式**。
 4. 點選 **載入未封裝項目**，選擇解壓縮後的資料夾（裡面有 `manifest.json` 檔案）。

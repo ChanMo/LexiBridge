@@ -75,8 +75,10 @@ env/bin/python tools/build_packs.py check   # 检查提交的数据和构建结�
 
 1. 改 =manifest.json= 和 =package.json= 里的版本号，提交为 =vX.Y.Z=
 2. =npm test=，然后 =npm run package= 生成 zip
-3. 打 tag 并推送：=git tag vX.Y.Z && git push origin main vX.Y.Z= (手动安装的用户从 tag 页下载源码)
-4. 把 zip 上传到应用商店。详细描述有改动时，从 =store/listing.md= 粘贴到商店后台
+3. 打 tag 并推送：=git tag vX.Y.Z && git push origin main vX.Y.Z=
+4. 创建 Release 并附上 zip：=gh release create vX.Y.Z dist/lexibridge-X.Y.Z.zip --title vX.Y.Z --notes "..."=
+   (官网的手动安装指向最新 Release 里的这个 zip)
+5. 把 zip 上传到应用商店。详细描述有改动时，从 =store/listing.md= 粘贴到商店后台
    (名称和简介来自 =_locales/=)
 
 ** 品牌

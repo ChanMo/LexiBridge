@@ -3,7 +3,7 @@ layout: page
 lang: ja
 title: インストール
 lede: 自動で更新される Chrome ウェブストアからのインストールをおすすめします。ストアを開けない場合は、手動でもインストールできます。
-description: Chrome ウェブストアから LexiBridge をインストールするか、ソースコードをダウンロードして手動で読み込みます。
+description: Chrome ウェブストアから LexiBridge をインストールするか、zip をダウンロードして手動で読み込みます。
 ---
 
 ## Chrome ウェブストアからインストール
@@ -18,7 +18,7 @@ description: Chrome ウェブストアから LexiBridge をインストールす
 
 Chrome ウェブストアを使えない場合の方法です。手動でインストールした版は自動では更新されません。
 
-1. [GitHub のバージョン一覧]({{ site.github_url }}/tags)から最新版の **Source code (zip)** をダウンロードし、展開します。
+1. [GitHub のリリースページ]({{ site.github_url }}/releases/latest)の **Assets** から `lexibridge-x.y.z.zip` をダウンロードし、展開します。
 2. Chrome のアドレスバーに `chrome://extensions` と入力して Enter を押します。
 3. 右上の **デベロッパー モード** をオンにします。
 4. **パッケージ化されていない拡張機能を読み込む** をクリックし、展開したフォルダ（`manifest.json` が入っているフォルダ）を選びます。
