@@ -74,7 +74,8 @@ test('store link by extension id', () => {
   assert.strictEqual(storeUrl(CHROME_ID), chrome);
   assert.strictEqual(storeUrl(CHROME_ID, 'edgeid123'), chrome);
   assert.strictEqual(storeUrl('edgeid123', 'edgeid123'), 'https://microsoftedge.microsoft.com/addons/detail/edgeid123');
-  assert.strictEqual(EDGE_ADDON_ID, '');
+  assert.strictEqual(EDGE_ADDON_ID, 'mfkdpjjhgckichnfmlhnhploekkdpgaj');
+  assert.strictEqual(storeUrl(EDGE_ADDON_ID), 'https://microsoftedge.microsoft.com/addons/detail/mfkdpjjhgckichnfmlhnhploekkdpgaj');
   assert.strictEqual(storeUrl('edgeid123'), chrome);
   assert.strictEqual(storeUrl('', ''), chrome);
   assert.strictEqual(storeUrl('abcdefghijklmnopabcdefghijklmnop'), chrome);

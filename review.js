@@ -13,8 +13,8 @@ const LexiBridgeReview = (() => {
   const MIN_KNOWN = 50;
 
   const CHROME_ID = 'mnhdbmjfgoohoajakjkeminblgnbmlhp';
-  // The id LexiBridge gets on Edge Add-ons; fill it in once the Edge listing is live.
-  const EDGE_ADDON_ID = '';
+  // The id LexiBridge has on Edge Add-ons.
+  const EDGE_ADDON_ID = 'mfkdpjjhgckichnfmlhnhploekkdpgaj';
 
   const lexicon = () => (typeof LexiBridge !== 'undefined' ? LexiBridge : require('./lexicon.js'));
 
