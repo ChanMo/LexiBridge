@@ -101,5 +101,10 @@
   "blocked_remove": {"message": "$1 を削除", "description": "$1 domain"},
   "blocked_enabled": {"message": "$1 で再び有効にしました", "description": "$1 domain"},
   "blocked_disabled": {"message": "$1 で無効にしました", "description": "$1 domain"},
-  "blocked_invalid": {"message": "有効なドメインを入力してください（例：www.bbc.com）"}
+  "blocked_invalid": {"message": "有効なドメインを入力してください（例：www.bbc.com）"},
+
+  "reviewPrompt_body": {"message": "LexiBridge がお役に立っていれば、レビューをいただけるととても助かります。", "description": "The one-time review invitation in the popup. Neutral: no reward, no star nudging (store policy)."},
+  "reviewPrompt_rate": {"message": "レビューする"},
+  "reviewPrompt_later": {"message": "あとで"},
+  "reviewPrompt_never": {"message": "結構です"}
 }

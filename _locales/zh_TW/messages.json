@@ -101,5 +101,10 @@
   "blocked_remove": {"message": "移除 $1", "description": "$1 domain"},
   "blocked_enabled": {"message": "已在 $1 重新啟用", "description": "$1 domain"},
   "blocked_disabled": {"message": "已在 $1 停用", "description": "$1 domain"},
-  "blocked_invalid": {"message": "請輸入有效的網域，例如 www.bbc.com"}
+  "blocked_invalid": {"message": "請輸入有效的網域，例如 www.bbc.com"},
+
+  "reviewPrompt_body": {"message": "如果 LexiBridge 對你有幫助，留下一則評論會很有幫助。", "description": "The one-time review invitation in the popup. Neutral: no reward, no star nudging (store policy)."},
+  "reviewPrompt_rate": {"message": "去評論"},
+  "reviewPrompt_later": {"message": "以後再說"},
+  "reviewPrompt_never": {"message": "不用了"}
 }

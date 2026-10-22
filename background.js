@@ -1,4 +1,4 @@
-importScripts('engines/en-irregular.js', 'lexicon.js', 'packs.js', 'migrate.js');
+importScripts('engines/en-irregular.js', 'lexicon.js', 'packs.js', 'migrate.js', 'review.js');
 
 const P = LexiBridgePacks;
 
@@ -18,11 +18,13 @@ chrome.runtime.onInstalled.addListener(async({reason}) => {
   // Also fired on Chrome updates, which need nothing.
   if(reason === chrome.runtime.OnInstalledReason.UPDATE) {
     await upgrade();
+    await installedSince();
     return;
   }
   if(reason !== chrome.runtime.OnInstalledReason.INSTALL) {
     return;
   }
+  await installedSince();
   const {words = []} = await chrome.storage.local.get(['words']);
   if(words.length <= 0) {
     // A sensible default until the learner picks a level on the welcome page:
@@ -43,6 +45,14 @@ async function upgrade() {
   ]);
   const changes = await LexiBridgeMigrate.upgrade(stored, data, {lists, rows: new Set(rows)});
   if(Object.keys(changes).length) await chrome.storage.local.set(changes);
+}
+
+// When the review invitation's wait starts: on install, or on the first update
+// for those who installed before it existed.
+async function installedSince() {
+  const key = LexiBridgeReview.KEY;
+  const {[key]: state = {}} = await chrome.storage.local.get([key]);
+  if(!state.installedAt) await chrome.storage.local.set({[key]: {...state, installedAt: Date.now()}});
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {

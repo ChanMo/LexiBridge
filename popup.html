@@ -37,9 +37,20 @@
       <span class="progress" id="progress" hidden><span id="progress-band"></span><span class="track"><i></i></span><span id="progress-count"></span></span>
     </button>
   </footer>
+
+  <aside class="review" id="review" hidden>
+    <p data-i18n="reviewPrompt_body">如果 LexiBridge 对你有帮助，留下一条评价会很有帮助。</p>
+    <div class="review-actions">
+      <button type="button" class="primary" data-choice="rate" data-i18n="reviewPrompt_rate">去评价</button>
+      <button type="button" data-choice="later" data-i18n="reviewPrompt_later">以后再说</button>
+      <button type="button" data-choice="never" data-i18n="reviewPrompt_never">不用了</button>
+    </div>
+    <button type="button" class="review-close" data-choice="closed" data-i18n-attr="title:common_close;aria-label:common_close"></button>
+  </aside>
   <script src="lexicon.js"></script>
   <script src="packs.js"></script>
   <script src="i18n.js"></script>
+  <script src="review.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

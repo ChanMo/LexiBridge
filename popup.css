@@ -192,3 +192,49 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .track i { display: block; height: 100%; border-radius: inherit; background: var(--bar); animation: fill 700ms cubic-bezier(0.2, 0.7, 0.2, 1); }
 @keyframes fill { from { width: 0; } }
 @media (prefers-reduced-motion: reduce) { .track i { animation: none; } }
+
+/* The one-time review invitation: a quiet card under the links */
+.review {
+  position: relative;
+  margin: 0 10px 10px;
+  padding: 10px 30px 10px 12px;
+  border-radius: 12px;
+  background: var(--surface);
+  font-size: 12px;
+}
+.review[hidden] { display: none; }
+.review p { margin: 0 0 8px; color: var(--muted); }
+.review-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.review-actions button {
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+}
+.review-actions button:hover { background: var(--hover); }
+.review-actions .primary { border-color: var(--primary); color: var(--fg); font-weight: 500; }
+.review-close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+}
+.review-close:hover { background: var(--hover); }
+.review-close::before, .review-close::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 6px;
+  width: 10px;
+  height: 1.5px;
+  background: var(--muted);
+  transform: rotate(45deg);
+}
+.review-close::after { transform: rotate(-45deg); }

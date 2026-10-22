@@ -26,7 +26,7 @@ test('every locale has the same keys and placeholders', () => {
 
 test('keys used in code and pages exist, and every key is used', () => {
   const used = new Set([
-    ...[...sources.matchAll(/'((?:common|card|popup|page|words|level|blocked)_\w+)'/g)].map(m => m[1]),
+    ...[...sources.matchAll(/'((?:common|card|popup|page|words|level|blocked|reviewPrompt)_\w+)'/g)].map(m => m[1]),
     ...[...sources.matchAll(/data-i18n="(\w+)"/g)].map(m => m[1]),
     ...[...sources.matchAll(/data-i18n-attr="([^"]+)"/g)].flatMap(m => m[1].split(';').map(p => p.split(':')[1])),
     ...[...sources.matchAll(/__MSG_(\w+)__/g)].map(m => m[1]),
