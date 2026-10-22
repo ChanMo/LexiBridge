@@ -5,9 +5,11 @@ lede: LexiBridge 没有服务器，不需要账号，不收集、也不上传任
 description: LexiBridge 不收集任何个人信息，所有数据只保存在本地浏览器中。
 ---
 
+本政策适用于 Microsoft Edge 加载项商店和 Chrome 应用商店中的 LexiBridge 扩展，两个版本的功能和数据处理方式完全相同。
+
 ## 保存在你浏览器里的数据
 
-LexiBridge 用浏览器提供的扩展存储保存以下内容，它们不会离开你的设备：
+LexiBridge 用浏览器（Microsoft Edge 或 Chrome）提供的扩展存储保存以下内容，它们不会离开你的设备：
 
 - 你的词库：单词和释义
 - 你选择的释义语言和英语水平

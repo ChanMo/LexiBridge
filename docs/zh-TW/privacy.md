@@ -6,9 +6,11 @@ lede: LexiBridge 沒有伺服器，不需要帳號，不收集、也不上傳任
 description: LexiBridge 不收集任何個人資料，所有資料只儲存在本機瀏覽器中。
 ---
 
+本政策適用於 Microsoft Edge 附加元件商店和 Chrome 線上應用程式商店中的 LexiBridge 擴充功能，兩個版本的功能和資料處理方式完全相同。
+
 ## 儲存在你瀏覽器裡的資料
 
-LexiBridge 使用瀏覽器提供的擴充功能儲存空間保存以下內容，它們不會離開你的裝置：
+LexiBridge 使用瀏覽器（Microsoft Edge 或 Chrome）提供的擴充功能儲存空間保存以下內容，它們不會離開你的裝置：
 
 - 你的單字庫：單字和釋義
 - 你選擇的釋義語言和英文程度
