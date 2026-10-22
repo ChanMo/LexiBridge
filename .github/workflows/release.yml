@@ -1,0 +1,54 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to release, e.g. v1.8.1"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Check version matches tag
+        run: |
+          VER="$(node -p "require(./manifest.json).version")"
+          PKG="$(node -p "require(./package.json).version")"
+          if [ "v$VER" != "$TAG" ] || [ "$PKG" != "$VER" ]; then
+            echo "Tag $TAG, manifest $VER, package.json $PKG do not match" >&2
+            exit 1
+          fi
+          echo "VER=$VER" >> "$GITHUB_ENV"
+
+      - run: npm test
+
+      - run: npm run package
+
+      - name: Publish release
+        run: |
+          ZIP="dist/lexibridge-$VER.zip"
+          NOTES="release-notes/$TAG.md"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$ZIP" --clobber
+          elif [ -f "$NOTES" ]; then
+            gh release create "$TAG" "$ZIP" --title "LexiBridge $VER" --notes-file "$NOTES" --verify-tag
+          else
+            gh release create "$TAG" "$ZIP" --title "LexiBridge $VER" --generate-notes --verify-tag
+          fi
