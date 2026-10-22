@@ -19,6 +19,7 @@ chrome.runtime.onInstalled.addListener(async({reason}) => {
   if(reason === chrome.runtime.OnInstalledReason.UPDATE) {
     await upgrade();
     await installedSince();
+    await seedKnownCountIfNeeded();
     return;
   }
   if(reason !== chrome.runtime.OnInstalledReason.INSTALL) {
@@ -33,6 +34,8 @@ chrome.runtime.onInstalled.addListener(async({reason}) => {
     const data = await packData(pack.id);
     await chrome.storage.local.set({pack: pack.id, words: P.levelWords(data, pack.defaultLevel), level: pack.defaultLevel});
   }
+  // After words exist: new installs seed to 0 (full level still in words).
+  await seedKnownCountIfNeeded();
   chrome.tabs.create({url: 'level.html?welcome=1'});
 });
 
@@ -53,6 +56,21 @@ async function installedSince() {
   const key = LexiBridgeReview.KEY;
   const {[key]: state = {}} = await chrome.storage.local.get([key]);
   if(!state.installedAt) await chrome.storage.local.set({[key]: {...state, installedAt: Date.now()}});
+}
+
+// Once: if knownCount was never stored, seed it from the current level list
+// minus remaining words. Existing users get credit for words already marked
+// known; new installs (full level still in words) get 0.
+async function seedKnownCountIfNeeded() {
+  const key = LexiBridgeReview.KNOWN_KEY;
+  const stored = await chrome.storage.local.get([key, 'words', 'pack', 'level']);
+  if(Object.hasOwn(stored, key)) return;
+  let count = 0;
+  if(Array.isArray(stored.words) && stored.level) {
+    const data = await packData(stored.pack);
+    count = LexiBridgeReview.seedKnownCount(data.levels[stored.level] ?? [], stored.words);
+  }
+  await chrome.storage.local.set({[key]: count});
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {

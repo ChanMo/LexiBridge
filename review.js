@@ -16,8 +16,34 @@ const LexiBridgeReview = (() => {
   // The id LexiBridge gets on Edge Add-ons; fill it in once the Edge listing is live.
   const EDGE_ADDON_ID = '';
 
+  const lexicon = () => (typeof LexiBridge !== 'undefined' ? LexiBridge : require('./lexicon.js'));
+
+  // Words still on the learner's list, normalised the same way packs.js does.
+  function remaining(words) {
+    const LB = lexicon();
+    return new Set((words ?? []).filter(row => Array.isArray(row) && typeof row[0] === 'string')
+      .map(row => LB.normalizeWord(row[0])));
+  }
+
+  // Seed for existing users: words of the current level that are no longer in
+  // `words` (the "don't know yet" list). Not words.length alone — switching
+  // levels also changes that. New installs get 0 because `words` starts as the
+  // full level list.
+  function seedKnownCount(levelList, words) {
+    const LB = lexicon();
+    const have = remaining(words);
+    return (levelList ?? []).filter(w => typeof w === 'string' && !have.has(LB.normalizeWord(w))).length;
+  }
+
+  // Chrome sets update_url on store installs; unpacked/dev builds have none.
+  function isStoreBuild(manifest) {
+    return Boolean(manifest && manifest.update_url);
+  }
+
   // state: the stored reviewPrompt value; known: the stored knownCount.
-  function shouldShow(state, known, now = Date.now()) {
+  // storeBuild: false for unpacked/dev — never show the card there.
+  function shouldShow(state, known, now = Date.now(), storeBuild = true) {
+    if(!storeBuild) return false;
     if(!state?.installedAt || state.shownAt || state.done) return false;
     return now - state.installedAt >= MIN_DAYS * DAY_MS && known >= MIN_KNOWN;
   }
@@ -34,7 +60,8 @@ const LexiBridgeReview = (() => {
     return `https://chromewebstore.google.com/detail/${CHROME_ID}/reviews`;
   }
 
-  return {KEY, KNOWN_KEY, MIN_DAYS, MIN_KNOWN, CHROME_ID, EDGE_ADDON_ID, shouldShow, countKnown, storeUrl};
+  return {KEY, KNOWN_KEY, MIN_DAYS, MIN_KNOWN, CHROME_ID, EDGE_ADDON_ID,
+    seedKnownCount, isStoreBuild, shouldShow, countKnown, storeUrl};
 })();
 
 if (typeof module !== 'undefined') module.exports = LexiBridgeReview;

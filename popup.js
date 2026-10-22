@@ -10,8 +10,9 @@
   } catch {}
 
   const R = LexiBridgeReview;
-  let {blocked = [], words = [], pack, level, highlightStyle = 'underline', [R.KEY]: review = {}, [R.KNOWN_KEY]: knownCount = 0} =
+  let {blocked = [], words = [], pack, level, highlightStyle = 'underline', [R.KEY]: review = {}, ...rest} =
     await chrome.storage.local.get(['blocked', 'words', 'pack', 'level', 'highlightStyle', R.KEY, R.KNOWN_KEY]);
+  let knownCount = rest[R.KNOWN_KEY];
 
   // Store page of this copy (review.js): the rate link, always there, and the
   // review invitation at the top, shown once and then never again.
@@ -22,7 +23,15 @@
     review = {...review, installedAt: Date.now()};
     await chrome.storage.local.set({[R.KEY]: review});
   }
-  if(R.shouldShow(review, knownCount)) {
+  // First run after this version, if background.js has not seeded yet.
+  if(!Object.hasOwn(rest, R.KNOWN_KEY)) {
+    const packOf = LexiBridgePacks.getPack(pack);
+    const levels = await LexiBridgePacks.loadLevels(packOf);
+    knownCount = R.seedKnownCount(levels[level] ?? [], words);
+    await chrome.storage.local.set({[R.KNOWN_KEY]: knownCount});
+  }
+  const storeBuild = R.isStoreBuild(chrome.runtime.getManifest());
+  if(R.shouldShow(review, knownCount, Date.now(), storeBuild)) {
     review = {...review, shownAt: Date.now()};
     await chrome.storage.local.set({[R.KEY]: review});
     const card = $("review");
