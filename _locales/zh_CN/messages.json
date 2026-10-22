@@ -110,8 +110,10 @@
   "blocked_disabled": {"message": "已在 $1 停用", "description": "$1 domain"},
   "blocked_invalid": {"message": "请输入有效的域名，例如 www.bbc.com"},
 
-  "reviewPrompt_body": {"message": "如果 LexiBridge 对你有帮助，留下一条评价会很有帮助。", "description": "The one-time review invitation in the popup. Neutral: no reward, no star nudging (store policy)."},
-  "reviewPrompt_rate": {"message": "去评价"},
-  "reviewPrompt_later": {"message": "以后再说"},
-  "reviewPrompt_never": {"message": "不用了"}
+  "review_title": {"message": "用得还顺手吗？", "description": "The one-time review invitation at the top of the popup. Neutral: no reward, no star nudging (store policy)."},
+  "review_body": {"message": "你已经用 LexiBridge 认识了 $count$ 个词。如果愿意，可以在商店写几句真实的评价，帮更多读英文的人找到它。", "description": "$count$: words marked known on pages", "placeholders": {"count": {"content": "$1", "example": "1,234"}}},
+  "review_rate": {"message": "去写评价"},
+  "review_later": {"message": "不再提示", "description": "Ends the invitation for good"},
+  "review_feedback": {"message": "有问题或建议？告诉我们", "description": "Small link to GitHub Issues, always shown with the invitation"},
+  "popup_rateLink": {"message": "给 LexiBridge 评分", "description": "Always there: popup bottom and the pages sidebar"}
 }

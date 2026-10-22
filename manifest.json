@@ -17,7 +17,7 @@
   "content_scripts": [
     {
     "matches": ["http://*/*", "https://*/*"],
-    "js": ["engines/en-irregular.js", "lexicon.js", "packs.js", "i18n.js", "ui.js", "script.js"],
+    "js": ["engines/en-irregular.js", "lexicon.js", "packs.js", "i18n.js", "review.js", "ui.js", "script.js"],
     "css": ["app.css"]
   }
   ],

@@ -140,7 +140,8 @@ button { cursor: pointer; }
 .side-foot {
   margin-top: auto;
   display: flex;
-  gap: 14px;
+  flex-wrap: wrap;
+  gap: 8px 14px;
   padding: 0 10px;
   color: var(--ink-2);
   font-size: 12px;
@@ -148,6 +149,7 @@ button { cursor: pointer; }
 .side-foot a { text-decoration: none; }
 .side-foot a:hover { color: var(--ink); }
 .side-foot .version { margin-left: auto; }
+.side-foot .rate { flex-basis: 100%; }
 
 /* Content */
 main { padding: 44px 48px 72px; }

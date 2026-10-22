@@ -103,8 +103,10 @@
   "blocked_disabled": {"message": "$1 で無効にしました", "description": "$1 domain"},
   "blocked_invalid": {"message": "有効なドメインを入力してください（例：www.bbc.com）"},
 
-  "reviewPrompt_body": {"message": "LexiBridge がお役に立っていれば、レビューをいただけるととても助かります。", "description": "The one-time review invitation in the popup. Neutral: no reward, no star nudging (store policy)."},
-  "reviewPrompt_rate": {"message": "レビューする"},
-  "reviewPrompt_later": {"message": "あとで"},
-  "reviewPrompt_never": {"message": "結構です"}
+  "review_title": {"message": "LexiBridge、お役に立っていますか？", "description": "The one-time review invitation at the top of the popup. Neutral: no reward, no star nudging (store policy)."},
+  "review_body": {"message": "LexiBridge で $count$ 語を覚えました。よろしければ、ストアで率直な感想を書いていただけると、英語を読む人がこのツールを見つけやすくなります。", "description": "$count$: words marked known on pages", "placeholders": {"count": {"content": "$1", "example": "1,234"}}},
+  "review_rate": {"message": "レビューを書く"},
+  "review_later": {"message": "表示しない", "description": "Ends the invitation for good"},
+  "review_feedback": {"message": "不具合・ご要望はこちら", "description": "Small link to GitHub Issues, always shown with the invitation"},
+  "popup_rateLink": {"message": "LexiBridge を評価する", "description": "Always there: popup bottom and the pages sidebar"}
 }

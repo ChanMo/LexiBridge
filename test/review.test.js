@@ -1,55 +1,61 @@
 const test = require('node:test');
 const assert = require('node:assert');
-const {MIN_DAYS, MIN_WORDS, EDGE_ADDON_ID, wordsTakenOut, shouldShow, isEdge, storeUrl} = require('../review.js');
+const {MIN_DAYS, MIN_KNOWN, CHROME_ID, EDGE_ADDON_ID, shouldShow, countKnown, storeUrl} = require('../review.js');
 
 const DAY = 24 * 60 * 60 * 1000;
 const installedAt = 1_000_000_000_000;
 const later = installedAt + MIN_DAYS * DAY;
 
-test('waits a week from install', () => {
-  assert.strictEqual(shouldShow({installedAt}, MIN_WORDS, later - 1), false);
-  assert.strictEqual(shouldShow({installedAt}, MIN_WORDS, later), true);
+test('too early: waits a week from install', () => {
+  assert.strictEqual(shouldShow({installedAt}, MIN_KNOWN, later - 1), false);
+  assert.strictEqual(shouldShow({installedAt}, MIN_KNOWN * 10, installedAt), false);
   // No install time recorded yet: not shown.
-  assert.strictEqual(shouldShow({}, MIN_WORDS, later), false);
-  assert.strictEqual(shouldShow(undefined, MIN_WORDS, later), false);
+  assert.strictEqual(shouldShow({}, MIN_KNOWN, later), false);
+  assert.strictEqual(shouldShow(undefined, MIN_KNOWN, later), false);
 });
 
-test('waits for enough words taken out', () => {
-  assert.strictEqual(shouldShow({installedAt}, MIN_WORDS - 1, later), false);
-  assert.strictEqual(shouldShow({installedAt}, MIN_WORDS, later + 30 * DAY), true);
+test('too few: waits for 50 words marked known', () => {
+  assert.strictEqual(shouldShow({installedAt}, MIN_KNOWN - 1, later + 365 * DAY), false);
+  assert.strictEqual(shouldShow({installedAt}, 0, later), false);
+  assert.strictEqual(shouldShow({installedAt}, undefined, later), false);
 });
 
-test('shown once: being shown or any choice ends it for good', () => {
-  assert.strictEqual(shouldShow({installedAt, shownAt: later}, MIN_WORDS, later + 365 * DAY), false);
-  for (const choice of ['rate', 'later', 'never', 'closed']) {
-    assert.strictEqual(shouldShow({installedAt, shownAt: later, choice}, MIN_WORDS * 10, later + 365 * DAY), false, choice);
-    assert.strictEqual(shouldShow({installedAt, choice}, MIN_WORDS * 10, later + 365 * DAY), false, choice);
-  }
+test('eligible: a week and 50 words', () => {
+  assert.strictEqual(MIN_DAYS, 7);
+  assert.strictEqual(MIN_KNOWN, 50);
+  assert.strictEqual(shouldShow({installedAt}, MIN_KNOWN, later), true);
+  assert.strictEqual(shouldShow({installedAt}, 1234, later + 30 * DAY), true);
 });
 
-test('words taken out: from the level list, and from earlier lists', () => {
-  const list = ['abandon', 'oust', 'zeal', 'vex'];
-  assert.strictEqual(wordsTakenOut([['abandon', 'v.'], ['Oust', 'v.'], ['zeal', 'n.'], ['vex', 'v.']], [], list), 0);
-  // zeal and vex taken out, zebra added (does not count), oust known from an earlier list too.
-  assert.strictEqual(wordsTakenOut([['abandon', 'v.'], ['oust', 'v.'], ['zebra', 'n.'], 'junk'], ['oust', 'quell', 'vex'], list), 4);
-  assert.strictEqual(wordsTakenOut([], [], []), 0);
+test('shown once: being shown, or done, ends it for good', () => {
+  assert.strictEqual(shouldShow({installedAt, shownAt: later}, MIN_KNOWN * 10, later + 365 * DAY), false);
+  assert.strictEqual(shouldShow({installedAt, shownAt: later, done: true}, MIN_KNOWN * 10, later + 365 * DAY), false);
+  assert.strictEqual(shouldShow({installedAt, done: true}, MIN_KNOWN * 10, later + 365 * DAY), false);
 });
 
-test('Edge is told apart by its brand, or by its user agent', () => {
-  assert.strictEqual(isEdge({userAgentData: {brands: [{brand: 'Chromium'}, {brand: 'Microsoft Edge'}]}, userAgent: ''}), true);
-  assert.strictEqual(isEdge({userAgentData: {brands: [{brand: 'Chromium'}, {brand: 'Google Chrome'}]}, userAgent: 'Chrome/130.0'}), false);
-  assert.strictEqual(isEdge({userAgent: 'Mozilla/5.0 Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0'}), true);
-  assert.strictEqual(isEdge({userAgent: 'Mozilla/5.0 Chrome/130.0.0.0 Safari/537.36'}), false);
-  assert.strictEqual(isEdge({}), false);
+test('knownCount: +1 when marked known, -1 on undo, never below 0', () => {
+  assert.strictEqual(countKnown(undefined, 1), 1);
+  assert.strictEqual(countKnown(49, 1), 50);
+  assert.strictEqual(countKnown(50, -1), 49);
+  assert.strictEqual(countKnown(0, -1), 0);
+  assert.strictEqual(countKnown(undefined, -1), 0);
+  assert.strictEqual(countKnown('junk', 1), 1);
 });
 
-test('store link: Chrome Web Store, Edge Add-ons once listed there', () => {
+test('store link by extension id', () => {
   const chrome = 'https://chromewebstore.google.com/detail/mnhdbmjfgoohoajakjkeminblgnbmlhp/reviews';
-  assert.strictEqual(storeUrl(false), chrome);
-  // Not on Edge Add-ons yet: Edge falls back to the Chrome Web Store.
+  assert.strictEqual(CHROME_ID, 'mnhdbmjfgoohoajakjkeminblgnbmlhp');
+  // Chrome Web Store copy.
+  assert.strictEqual(storeUrl(CHROME_ID), chrome);
+  assert.strictEqual(storeUrl(CHROME_ID, 'edgeid123'), chrome);
+  // Edge Add-ons copy, once its id is set.
+  assert.strictEqual(storeUrl('edgeid123', 'edgeid123'), 'https://microsoftedge.microsoft.com/addons/detail/edgeid123');
+  // Edge id not set yet: nothing matches it, not even an empty id.
   assert.strictEqual(EDGE_ADDON_ID, '');
-  assert.strictEqual(storeUrl(true), chrome);
-  assert.strictEqual(storeUrl(true, ''), chrome);
-  assert.strictEqual(storeUrl(true, 'abc123'), 'https://microsoftedge.microsoft.com/addons/detail/abc123');
-  assert.strictEqual(storeUrl(false, 'abc123'), chrome);
+  assert.strictEqual(storeUrl('edgeid123'), chrome);
+  assert.strictEqual(storeUrl('', ''), chrome);
+  // Any other id (unpacked): the Chrome Web Store.
+  assert.strictEqual(storeUrl('abcdefghijklmnopabcdefghijklmnop'), chrome);
+  assert.strictEqual(storeUrl('abcdefghijklmnopabcdefghijklmnop', 'edgeid123'), chrome);
+  assert.strictEqual(storeUrl(undefined), chrome);
 });

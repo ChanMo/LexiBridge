@@ -106,6 +106,12 @@ const Page = (() => {
       nav.appendChild(a);
     }
     const foot = el('div', 'side-foot');
+    // Always there: the store page of this copy (review.js), to rate it.
+    const rate = el('a', 'rate', t('popup_rateLink'));
+    rate.href = LexiBridgeReview.storeUrl(chrome.runtime.id);
+    rate.target = '_blank';
+    rate.rel = 'noopener';
+    foot.appendChild(rate);
     for(const [href, label] of [['https://chanmo.github.io/LexiBridge/', 'page_help'], ['https://github.com/ChanMo/LexiBridge/issues', 'page_feedback']]) {
       const a = el('a', '', t(label));
       a.href = href;

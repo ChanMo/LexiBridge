@@ -193,7 +193,18 @@ button { font: inherit; color: inherit; cursor: pointer; }
 @keyframes fill { from { width: 0; } }
 @media (prefers-reduced-motion: reduce) { .track i { animation: none; } }
 
-/* The one-time review invitation: a quiet card under the links */
+/* Always there, under the links: the store page of this copy */
+.rate-link {
+  display: block;
+  margin: -4px 10px 12px;
+  padding: 0 10px;
+  color: var(--muted);
+  font-size: 12px;
+  text-decoration: none;
+}
+.rate-link:hover { color: var(--fg); text-decoration: underline; }
+
+/* The one-time review invitation: a quiet card at the top */
 .review {
   position: relative;
   margin: 0 10px 10px;
@@ -203,6 +214,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   font-size: 12px;
 }
 .review[hidden] { display: none; }
+.review h2 { margin: 0 0 4px; font-size: 13px; font-weight: 600; }
 .review p { margin: 0 0 8px; color: var(--muted); }
 .review-actions { display: flex; flex-wrap: wrap; gap: 6px; }
 .review-actions button {
@@ -215,6 +227,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 }
 .review-actions button:hover { background: var(--hover); }
 .review-actions .primary { border-color: var(--primary); color: var(--fg); font-weight: 500; }
+.review-feedback { display: inline-block; margin-top: 8px; color: var(--muted); font-size: 11.5px; }
+.review-feedback:hover { color: var(--fg); }
 .review-close {
   position: absolute;
   top: 6px;

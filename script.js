@@ -185,6 +185,14 @@
     };
   }
 
+  // Words marked known here, for the review invitation (review.js). Counted
+  // on its own: switching levels changes `words` too.
+  async function countKnown(delta) {
+    const key = LexiBridgeReview.KNOWN_KEY;
+    const {[key]: count} = await chrome.storage.local.get([key]);
+    await chrome.storage.local.set({[key]: LexiBridgeReview.countKnown(count, delta)});
+  }
+
   const speak = (word) => chrome.runtime.sendMessage({action: 'speak', data: {word}});
   const band = (word) => chrome.runtime.sendMessage({action: 'band', data: {word}});
 
@@ -230,7 +238,11 @@
 	await LexiBridgeUI.erase(rects(entry), also);
 	removeEntries(e => e.word === word);
 	const undo = await removeWord(word);
-	LexiBridgeUI.chip(() => range.getBoundingClientRect(), t('card_knownDone'), t('card_removed', word), t('common_undo'), undo);
+	await countKnown(1);
+	LexiBridgeUI.chip(() => range.getBoundingClientRect(), t('card_knownDone'), t('card_removed', word), t('common_undo'), async() => {
+	  await undo();
+	  await countKnown(-1);
+	});
       },
     });
   }

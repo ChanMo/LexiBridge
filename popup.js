@@ -10,8 +10,35 @@
   } catch {}
 
   const R = LexiBridgeReview;
-  let {blocked = [], words = [], known = [], pack, level, highlightStyle = 'underline', [R.KEY]: review = {}} =
-    await chrome.storage.local.get(['blocked', 'words', 'known', 'pack', 'level', 'highlightStyle', R.KEY]);
+  let {blocked = [], words = [], pack, level, highlightStyle = 'underline', [R.KEY]: review = {}, [R.KNOWN_KEY]: knownCount = 0} =
+    await chrome.storage.local.get(['blocked', 'words', 'pack', 'level', 'highlightStyle', R.KEY, R.KNOWN_KEY]);
+
+  // Store page of this copy (review.js): the rate link, always there, and the
+  // review invitation at the top, shown once and then never again.
+  const storeUrl = R.storeUrl(chrome.runtime.id);
+  $("rate-link").href = storeUrl;
+  if(!review.installedAt) {
+    // Normally set by background.js on install or update.
+    review = {...review, installedAt: Date.now()};
+    await chrome.storage.local.set({[R.KEY]: review});
+  }
+  if(R.shouldShow(review, knownCount)) {
+    review = {...review, shownAt: Date.now()};
+    await chrome.storage.local.set({[R.KEY]: review});
+    const card = $("review");
+    $("review-body").textContent = t('review_body', num(knownCount));
+    card.addEventListener("click", async(e) => {
+      const choice = e.target.closest('button[data-choice]')?.dataset.choice;
+      if(!choice) return;
+      await chrome.storage.local.set({[R.KEY]: {...review, done: true}});
+      card.hidden = true;
+      if(choice === 'rate') {
+        chrome.tabs.create({url: storeUrl});
+        window.close();
+      }
+    });
+    card.hidden = false;
+  }
 
   const levelName = LexiBridgePacks.getLevel(pack, level)?.name ?? '';
   $("level-name").textContent = levelName || t('popup_noLevel');
@@ -68,8 +95,7 @@
 
   // Progress through the band of the level: words taken out on pages.
   const packOf = LexiBridgePacks.getPack(pack);
-  const levels = level ? await LexiBridgePacks.loadLevels(packOf) : {};
-  const at = level && LexiBridgePacks.progress(packOf, levels, level, words);
+  const at = level && LexiBridgePacks.progress(packOf, await LexiBridgePacks.loadLevels(packOf), level, words);
   if(at?.total) {
     const ready = at.next && at.known >= at.total * LexiBridgePacks.READY;
     $("progress-band").textContent = ready ? t('popup_ready') : at.band;
@@ -80,27 +106,4 @@
     $("progress").hidden = false;
   }
   $("words-link").addEventListener("click", () => open('options.html'));
-
-  // The review invitation (review.js): shown once, then never again.
-  if(!review.installedAt) {
-    // Normally set by background.js on install or update.
-    review = {...review, installedAt: Date.now()};
-    await chrome.storage.local.set({[R.KEY]: review});
-  }
-  if(R.shouldShow(review, R.wordsTakenOut(words, known, levels[level] ?? []))) {
-    review = {...review, shownAt: Date.now()};
-    await chrome.storage.local.set({[R.KEY]: review});
-    const card = $("review");
-    card.addEventListener("click", async(e) => {
-      const choice = e.target.closest('[data-choice]')?.dataset.choice;
-      if(!choice) return;
-      await chrome.storage.local.set({[R.KEY]: {...review, choice}});
-      card.hidden = true;
-      if(choice === 'rate') {
-        chrome.tabs.create({url: R.storeUrl(R.isEdge(navigator))});
-        window.close();
-      }
-    });
-    card.hidden = false;
-  }
 })();

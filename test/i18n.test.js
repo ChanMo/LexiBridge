@@ -15,18 +15,24 @@ const code = (file) => read(file).replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|\
 const sources = [...scripts.map(code), ...[...pages, 'manifest.json'].map(read)].join('\n');
 
 const CJK = /[\u3040-\u30ff\u3400-\u9fff]/;
-const placeholders = (message) => [...message.matchAll(/\$\d/g)].map(m => m[0]).sort().join();
+// Positional ($1) and named ($count$) placeholders; named ones must be declared.
+const placeholders = (message) => [...message.matchAll(/\$(\d|\w+\$)/g)].map(m => m[0]).sort().join();
+const named = (m) => [...m.message.matchAll(/\$(\w+)\$/g)].map(x => x[1].toLowerCase());
 
 test('every locale has the same keys and placeholders', () => {
   for (const [locale, m] of Object.entries(messages)) {
     assert.deepStrictEqual(Object.keys(m).sort(), [...keys].sort(), locale);
-    for (const key of keys) assert.strictEqual(placeholders(m[key].message), placeholders(messages.zh_CN[key].message), `${locale}: ${key}`);
+    for (const key of keys) {
+      assert.strictEqual(placeholders(m[key].message), placeholders(messages.zh_CN[key].message), `${locale}: ${key}`);
+      assert.deepStrictEqual(Object.keys(m[key].placeholders ?? {}).sort(), [...new Set(named(m[key]))].sort(), `${locale}: ${key} placeholders`);
+      assert.deepStrictEqual(m[key].placeholders, messages.zh_CN[key].placeholders, `${locale}: ${key} placeholders`);
+    }
   }
 });
 
 test('keys used in code and pages exist, and every key is used', () => {
   const used = new Set([
-    ...[...sources.matchAll(/'((?:common|card|popup|page|words|level|blocked|reviewPrompt)_\w+)'/g)].map(m => m[1]),
+    ...[...sources.matchAll(/'((?:common|card|popup|page|words|level|blocked|review)_\w+)'/g)].map(m => m[1]),
     ...[...sources.matchAll(/data-i18n="(\w+)"/g)].map(m => m[1]),
     ...[...sources.matchAll(/data-i18n-attr="([^"]+)"/g)].flatMap(m => m[1].split(';').map(p => p.split(':')[1])),
     ...[...sources.matchAll(/__MSG_(\w+)__/g)].map(m => m[1]),

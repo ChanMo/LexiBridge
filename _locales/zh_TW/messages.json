@@ -103,8 +103,10 @@
   "blocked_disabled": {"message": "已在 $1 停用", "description": "$1 domain"},
   "blocked_invalid": {"message": "請輸入有效的網域，例如 www.bbc.com"},
 
-  "reviewPrompt_body": {"message": "如果 LexiBridge 對你有幫助，留下一則評論會很有幫助。", "description": "The one-time review invitation in the popup. Neutral: no reward, no star nudging (store policy)."},
-  "reviewPrompt_rate": {"message": "去評論"},
-  "reviewPrompt_later": {"message": "以後再說"},
-  "reviewPrompt_never": {"message": "不用了"}
+  "review_title": {"message": "用起來還順手嗎？", "description": "The one-time review invitation at the top of the popup. Neutral: no reward, no star nudging (store policy)."},
+  "review_body": {"message": "你已經用 LexiBridge 認識了 $count$ 個單字。如果願意，可以到商店寫幾句真實的評價，讓更多讀英文的人找到它。", "description": "$count$: words marked known on pages", "placeholders": {"count": {"content": "$1", "example": "1,234"}}},
+  "review_rate": {"message": "去寫評價"},
+  "review_later": {"message": "不再提示", "description": "Ends the invitation for good"},
+  "review_feedback": {"message": "有問題或建議？告訴我們", "description": "Small link to GitHub Issues, always shown with the invitation"},
+  "popup_rateLink": {"message": "為 LexiBridge 評分", "description": "Always there: popup bottom and the pages sidebar"}
 }
