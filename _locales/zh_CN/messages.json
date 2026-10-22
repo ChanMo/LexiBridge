@@ -1,6 +1,6 @@
 {
-  "extName": {"message": "LexiBridge: 英语学习，从阅读开始"},
-  "extDescription": {"message": "LexiBridge 是一个开源、无服务器的英语学习应用程序，帮助英语学习者在阅读网页时学习新词汇，提升阅读流畅度。"},
+  "extName": {"message": "LexiBridge：生词高亮，读英文网页顺手背单词"},
+  "extDescription": {"message": "读英文网页时只标出你不认识的单词，点一下看音标和中文释义。按入门、四级、六级、GRE 分档，覆盖四六级和考研词汇。免费开源，词库只存在本地，无需账号。"},
 
   "common_cancel": {"message": "取消"},
   "common_close": {"message": "关闭"},

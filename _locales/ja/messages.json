@@ -1,6 +1,6 @@
 {
-  "extName": {"message": "LexiBridge: 英語は読みながら覚える"},
-  "extDescription": {"message": "LexiBridge はオープンソースでサーバー不要の英語学習ツールです。Web ページを読みながら知らない単語だけをマークし、語彙力と読むスピードを伸ばします。"},
+  "extName": {"message": "LexiBridge：知らない英単語だけハイライト"},
+  "extDescription": {"message": "英語の Web ページで、まだ知らない英単語だけをハイライト。クリックで発音記号と日本語の意味を表示。中学〜GRE の 4 段階（CEFR-J 目安）。無料・オープンソース、データはブラウザ内だけ。"},
   "common_cancel": {"message": "キャンセル"},
   "common_close": {"message": "閉じる"},
   "common_undo": {"message": "元に戻す"},

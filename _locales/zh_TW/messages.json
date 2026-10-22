@@ -1,6 +1,6 @@
 {
-  "extName": {"message": "LexiBridge: 英文學習，從閱讀開始"},
-  "extDescription": {"message": "LexiBridge 是一個開源、免伺服器的英文學習應用程式，幫助英文學習者在閱讀網頁時學習新詞彙，提升閱讀流暢度。"},
+  "extName": {"message": "LexiBridge：英文生字標示，讀網頁順手背單字"},
+  "extDescription": {"message": "讀英文網頁時只標出你不認識的單字，點一下看音標和繁體中文釋義。分國中、學測、全民英檢中高級、GRE 四個程度。免費開源，資料只存在本機，不需帳號。"},
   "common_cancel": {"message": "取消"},
   "common_close": {"message": "關閉"},
   "common_undo": {"message": "復原"},
