@@ -19,18 +19,18 @@ jobs:
       TAG: ${{ github.event.inputs.tag || github.ref_name }}
       GH_TOKEN: ${{ github.token }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ env.TAG }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
 
       - name: Check version matches tag
         run: |
-          VER="$(node -p "require(./manifest.json).version")"
-          PKG="$(node -p "require(./package.json).version")"
+          VER="$(node -p 'require("./manifest.json").version')"
+          PKG="$(node -p 'require("./package.json").version')"
           if [ "v$VER" != "$TAG" ] || [ "$PKG" != "$VER" ]; then
             echo "Tag $TAG, manifest $VER, package.json $PKG do not match" >&2
             exit 1
