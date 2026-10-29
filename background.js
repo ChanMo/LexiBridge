@@ -73,7 +73,54 @@ async function seedKnownCountIfNeeded() {
   await chrome.storage.local.set({[key]: count});
 }
 
+// Page interactions from different tabs share one writer. Read-modify-write
+// in individual content scripts can otherwise resurrect a removed word.
+let wordChanges = Promise.resolve();
+function changeWord(data) {
+  const operation = wordChanges.then(async() => {
+    const word = LexiBridge.normalizeWord(data.word ?? data.row?.[0] ?? '');
+    if(!LexiBridge.isWord(word)) throw new Error('Invalid word');
+    await seedKnownCountIfNeeded();
+    const key = LexiBridgeReview.KNOWN_KEY;
+    const {words = [], [key]: count = 0} = await chrome.storage.local.get(['words', key]);
+    const index = words.findIndex(row => LexiBridge.normalizeWord(row[0]) === word);
+    if(data.op === 'add') {
+      if(typeof data.definition !== 'string' || !data.definition.trim()) throw new Error('Invalid definition');
+      await chrome.storage.local.set({words: [[word, data.definition], ...words.filter((_, i) => i !== index)]});
+      return {changed: true};
+    }
+    if(data.op === 'remove') {
+      if(index < 0) return {changed: false};
+      const counted = data.markKnown === true;
+      const changes = {words: words.filter((_, i) => i !== index)};
+      if(counted) changes[key] = LexiBridgeReview.countKnown(count, 1);
+      await chrome.storage.local.set(changes);
+      return {changed: true, row: words[index], index, counted};
+    }
+    if(data.op === 'restore') {
+      if(index >= 0) return {changed: false};
+      if(!Array.isArray(data.row) || typeof data.row[1] !== 'string') throw new Error('Invalid row');
+      const next = [...words];
+      const at = Number.isInteger(data.index) ? Math.max(0, Math.min(data.index, next.length)) : 0;
+      next.splice(at, 0, [word, data.row[1]]);
+      const changes = {words: next};
+      if(data.counted === true) changes[key] = LexiBridgeReview.countKnown(count, -1);
+      await chrome.storage.local.set(changes);
+      return {changed: true};
+    }
+    throw new Error('Invalid operation');
+  });
+  wordChanges = operation.catch(() => {});
+  return operation;
+}
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if(request.action === 'change-word') {
+    changeWord(request.data ?? {}).then(
+      result => sendResponse({ok: true, result}),
+      () => sendResponse({ok: false}));
+    return true;
+  }
   if(request.action == 'speak') {
     // chrome.tts is not available to content scripts.
     chrome.tts.speak(request.data.word, {lang: 'en-US'});

@@ -4,6 +4,7 @@
 
   "common_cancel": {"message": "取消"},
   "common_close": {"message": "关闭"},
+  "common_actionError": {"message": "操作未完成，请重试。"},
   "common_undo": {"message": "撤销"},
   "common_save": {"message": "保存"},
   "common_saveShortcut": {"message": "Ctrl + Enter 保存"},
@@ -33,7 +34,7 @@
   "popup_noLevel": {"message": "未选择"},
   "popup_ready": {"message": "可以升一档了"},
   "popup_siteOff": {"message": "已在此网站停用"},
-  "popup_siteOn": {"message": "已启用"},
+  "popup_siteInactive": {"message": "请刷新页面以启用标记"},
   "popup_siteOnCount": {"message": "已启用 · 本页 $1 个生词", "description": "$1 number of highlighted words"},
   "popup_unsupported": {"message": "此页面不支持高亮"},
   "popup_unsupportedHint": {"message": "仅在普通网页 (http/https) 上可用"},

@@ -85,7 +85,9 @@ const LexiBridgeUI = (() => {
     svg { width: 18px; height: 18px; fill: currentColor; flex: none; }
 
     /* Word card */
+    .card:popover-open { display: flex; flex-direction: column; }
     .card {
+      max-height: calc(100vh - 16px);
       width: 340px;
       max-width: calc(100vw - 24px);
       background: var(--bg);
@@ -94,7 +96,7 @@ const LexiBridgeUI = (() => {
       box-shadow: var(--shadow);
       animation: lb-in 140ms ease-out;
     }
-    .head { padding: 16px 18px 10px; }
+    .head { flex: none; padding: 16px 18px 10px; }
     .title { display: flex; align-items: center; gap: 6px; }
     .word {
       font: 600 24px/1.25 Georgia, "Times New Roman", serif;
@@ -119,7 +121,9 @@ const LexiBridgeUI = (() => {
     .sub:empty { display: none; }
     .sub .current { color: var(--accent); }
     .body {
+      min-height: 0;
       max-height: min(300px, 45vh);
+      overscroll-behavior: contain;
       overflow-y: auto;
       padding: 2px 18px 14px;
     }
@@ -163,6 +167,7 @@ const LexiBridgeUI = (() => {
     }
     .hint { margin-top: 6px; font-size: 12px; color: var(--muted); }
     .foot {
+      flex: none;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -187,6 +192,8 @@ const LexiBridgeUI = (() => {
       font-weight: 500;
       color: var(--fg);
     }
+    button:disabled { cursor: wait; opacity: 0.6; }
+    .error { padding: 6px 12px; background: var(--bg); color: var(--fg); font: 12px/1.5 var(--sans); }
     .btn:hover { background: var(--hover); }
     .btn.primary { background: var(--primary); color: var(--on-primary); }
     .btn.primary:hover { filter: brightness(0.95); }
@@ -212,13 +219,10 @@ const LexiBridgeUI = (() => {
     .pill:hover { filter: brightness(0.95); }
     .pill svg { width: 16px; height: 16px; color: var(--marker); }
 
-    /* Marking a word known: a highlighter pass over the word (main) and a
-       glow over its other visible occurrences (also), which hide the
-       highlights going; then a quiet undo below the word. */
+    /* Brief feedback for a completed write, followed by a quiet undo. */
     .erase { left: 0; top: 0; pointer-events: none; }
     .erase i { position: absolute; border-radius: 3px; background: rgba(245, 184, 61, 0.4); }
-    .erase .main { animation: lb-sweep 560ms cubic-bezier(0.3, 0.7, 0.2, 1) forwards; }
-    .erase .also { animation: lb-glow 560ms ease-out forwards; }
+    .erase .main { animation: lb-glow 180ms ease-out forwards; }
     .chip {
       display: flex;
       align-items: center;
@@ -236,14 +240,9 @@ const LexiBridgeUI = (() => {
     .chip svg { width: 14px; height: 14px; color: var(--accent); }
     .chip .btn { height: 22px; padding: 0 9px; border-radius: 11px; font-size: 12.5px; color: var(--accent); }
 
-    @keyframes lb-sweep {
-      0% { clip-path: inset(0 100% 0 0); }
-      38% { clip-path: inset(0); }
-      100% { clip-path: inset(0 0 0 100%); }
-    }
     @keyframes lb-glow {
-      38% { opacity: 1; }
-      0%, 100% { opacity: 0; }
+      from { opacity: 1; }
+      to { opacity: 0; }
     }
     @keyframes lb-in {
       from { opacity: 0; transform: translateY(4px); }
@@ -289,31 +288,49 @@ const LexiBridgeUI = (() => {
     b.type = 'button';
     if(iconName) b.appendChild(icon(iconName));
     if(label) b.appendChild(document.createTextNode(label));
-    b.addEventListener('click', onClick);
+    b.addEventListener('click', async() => {
+      if(b.disabled) return;
+      b.disabled = true;
+      const owner = b.closest('.lb');
+      owner?.querySelector('.error')?.remove();
+      try { await onClick(); }
+      catch {
+        if(owner?.isConnected) {
+          const error = el('div', 'error', t('common_actionError'));
+          error.setAttribute('role', 'alert');
+          owner.appendChild(error);
+          refresh();
+        }
+      } finally { b.disabled = false; }
+    });
     return b;
   }
 
-  // A popover in the top layer, wrapped so the theme variables apply.
-  function layer(type, className) {
+  // Manual popovers leave the host page's menus and hints alone. Dismissal is
+  // scoped to our own UI below; no site click or Escape event is cancelled.
+  function layer(className) {
     const wrap = el('div', 'lb ' + className);
     wrap.lang = LexiBridgeI18n.lang;
-    wrap.popover = type;
+    wrap.popover = 'manual';
     getRoot().appendChild(wrap);
     return wrap;
   }
 
-  // Place `box` next to the anchor rect: below it, or above when there is
-  // more room there; centred on it and kept inside the viewport.
   function place(box, rect, prefer = 'below', gap = 8) {
-    const w = box.offsetWidth, h = box.offsetHeight;
     const vw = document.documentElement.clientWidth, vh = window.innerHeight;
+    if(!rect || !rect.width || !rect.height || rect.bottom <= 0 || rect.top >= vh ||
+       rect.right <= 0 || rect.left >= vw) return false;
+    const w = box.offsetWidth, h = box.offsetHeight;
     const below = vh - rect.bottom, above = rect.top;
-    const fitsPreferred = prefer === 'below' ? below >= h + gap : above >= h + gap;
-    const side = fitsPreferred ? prefer : (below >= above ? 'below' : 'above');
+    prefer = box.side ?? prefer;
+    const fits = prefer === 'below' ? below >= h + gap : above >= h + gap;
+    const side = fits ? prefer : (below >= above ? 'below' : 'above');
+    box.side = side;
     const top = side === 'below' ? rect.bottom + gap : rect.top - h - gap;
     const left = rect.left + rect.width / 2 - w / 2;
     box.style.top = `${Math.max(8, Math.min(top, vh - h - 8))}px`;
     box.style.left = `${Math.max(12, Math.min(left, vw - w - 12))}px`;
+    return true;
   }
 
   function definitionBody(definition, lang) {
@@ -330,24 +347,51 @@ const LexiBridgeUI = (() => {
     return body;
   }
 
-  // Follow their anchors while the page scrolls; the chip goes once its word is out of view.
-  let current = null;
-  window.addEventListener('scroll', () => {
-    if(current?.box.isConnected) place(current.box, current.anchor());
-    if(chipBox) {
-      const r = chipBox.anchor();
-      if(r.bottom < 0 || r.top > window.innerHeight) hideChip();
-      else place(chipBox, r, 'below', 6);
-    }
-  }, {capture: true, passive: true});
+  let current = null, pill = null, chipBox = null, chipTimer = null, frame = null;
+  const effects = new Set();
+  const sizes = new ResizeObserver(() => refresh());
+  sizes.observe(document.documentElement);
+  const layout = new MutationObserver(mutations => {
+    if(mutations.some(m => !m.target.closest('.lexibridge-ui'))) refresh();
+  });
 
-  // state: "known" (in the word list), "added" (just added) or "new"
-  // (not in any list yet: ask for a definition).
-  // lang: language of the definition, e.g. "zh-Hans".
-  // band: a promise of the word's {band, current}, shown when it arrives.
+  function closeCard(box = current?.box) {
+    if(!box) return;
+    sizes.unobserve(box);
+    box.remove();
+    if(current?.box === box) { current = null; layout.disconnect(); }
+    box.dispatchEvent(new Event('lexibridge-close'));
+  }
+
+  // Event-driven positioning: no perpetual animation loop or document polling.
+  function refresh() {
+    if(frame !== null || (!current && !pill && !chipBox)) return;
+    frame = requestAnimationFrame(() => {
+      frame = null;
+      if(current && (!current.box.isConnected || !place(current.box, current.anchor()))) closeCard();
+      if(pill && (!pill.isConnected || !place(pill, pill.anchor(), 'above', 6))) hidePill();
+      if(chipBox && (!chipBox.isConnected || !place(chipBox, chipBox.anchor(), 'below', 6))) hideChip();
+    });
+  }
+  window.addEventListener('scroll', e => {
+    if(e.composedPath().some(n => n.classList?.contains('lexibridge-ui'))) return;
+    clearEffects();
+    hidePill();
+    refresh();
+  }, {capture: true, passive: true});
+  window.addEventListener('resize', refresh, {passive: true});
+  document.addEventListener('load', refresh, true);
+  document.fonts?.addEventListener('loadingdone', refresh);
+  document.addEventListener('visibilitychange', () => { if(document.hidden) closeAll(); });
+
+  // state: "known" (in the word list), "added" or "new" (manual definition).
   function showCard({word, surface, definition, lang, band, anchor, state, onKnown, onUndoAdd, onSave, onSpeak}) {
-    current?.box.remove();
-    const box = layer('auto', 'card');
+    closeCard();
+    hidePill();
+    hideChip();
+    const box = layer('card');
+    box.setAttribute('role', 'dialog');
+    box.setAttribute('aria-label', word);
     const head = el('div', 'head');
     const title = el('div', 'title');
     title.appendChild(el('div', 'word', word));
@@ -357,27 +401,25 @@ const LexiBridgeUI = (() => {
     title.appendChild(speak);
     head.appendChild(title);
     const sub = el('div', 'sub');
-    const addSub = (text) => {
+    const addSub = text => {
       if(sub.childNodes.length) sub.appendChild(el('span', 'sep', '·'));
       return sub.appendChild(el('span', '', text));
     };
     const {phonetic} = LexiBridge.parseDefinition(definition);
     if(phonetic) addSub(`/${phonetic}/`);
     if(surface && surface.toLowerCase() !== word) addSub(t('card_surface', surface));
-    band?.then(({band, current} = {}) => {
-      if(!band) return;
+    band?.then(({band, current: atLevel} = {}) => {
+      if(!band || !box.isConnected) return;
       const span = addSub(band);
       span.lang = lang;
-      if(current) {
-        span.className = 'current';
-        span.title = t('card_bandCurrent');
-      }
+      if(atLevel) { span.className = 'current'; span.title = t('card_bandCurrent'); }
+      refresh();
     }).catch(() => {});
     head.appendChild(sub);
     box.appendChild(head);
 
     const foot = el('div', 'foot');
-    const close = () => box.hidePopover();
+    const close = () => closeCard(box);
     if(state === 'new') {
       const body = el('div', 'body');
       const textarea = el('textarea');
@@ -386,115 +428,106 @@ const LexiBridgeUI = (() => {
       textarea.setAttribute('aria-label', t('common_definition'));
       body.appendChild(textarea);
       box.appendChild(body);
-      const save = async() => {
-	const value = textarea.value.trim();
-	if(!value) return textarea.focus();
-	await onSave(value);
-	close();
-      };
-      textarea.addEventListener('keydown', (e) => {
-	if(e.key === 'Enter' && (e.metaKey || e.ctrlKey)) save();
+      const save = button(t('common_addToList'), 'btn primary', async() => {
+        const value = textarea.value.trim();
+        if(!value) return textarea.focus();
+        await onSave(value);
+        close();
+      });
+      textarea.addEventListener('keydown', e => {
+        if(!e.isComposing && e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+          e.preventDefault();
+          save.click();
+        }
       });
       foot.appendChild(el('span', '', t(navigator.platform.startsWith('Mac') ? 'common_saveShortcutMac' : 'common_saveShortcut')));
-      foot.appendChild(button(t('common_addToList'), 'btn primary', save));
+      foot.appendChild(save);
       box.appendChild(foot);
-      requestAnimationFrame(() => textarea.focus());
+      requestAnimationFrame(() => { if(current?.box === box) textarea.focus({preventScroll: true}); });
     } else {
       box.appendChild(definitionBody(definition, lang));
       if(state === 'added') {
-	const status = el('span', 'status');
-	status.append(icon('check'), t('card_added'));
-	foot.appendChild(status);
-	foot.appendChild(button(t('common_undo'), 'btn', async() => { await onUndoAdd(); close(); }));
+        const status = el('span', 'status');
+        status.append(icon('check'), t('card_added'));
+        foot.appendChild(status);
+        foot.appendChild(button(t('common_undo'), 'btn', async() => { await onUndoAdd(); close(); }));
       } else {
-	foot.appendChild(el('span', '', ''));
-	const known = button(t('card_known'), 'btn', async() => { close(); await onKnown(); }, 'check');
-	known.title = t('card_knownTitle');
-	foot.appendChild(known);
+        foot.appendChild(el('span', '', ''));
+        const known = button(t('card_known'), 'btn', async() => { await onKnown(); close(); }, 'check');
+        known.title = t('card_knownTitle');
+        foot.appendChild(known);
       }
       box.appendChild(foot);
     }
-
-    box.addEventListener('toggle', (e) => {
-      if(e.newState === 'closed') {
-	box.remove();
-	if(current?.box === box) current = null;
-      }
-    });
     box.showPopover();
     current = {box, anchor};
-    place(box, anchor());
+    if(!place(box, anchor())) { close(); return null; }
+    sizes.observe(box);
+    // Style changes can move the source without scrolling or changing the
+    // document's size. Watch them only while a card is open.
+    layout.observe(document.documentElement, {subtree: true, attributes: true, attributeFilter: ['class', 'style']});
     return box;
   }
 
-  let pill = null;
-  function showPill(rect, onClick) {
+  function showPill(anchor, onClick) {
     hidePill();
-    pill = layer('manual', 'pill-wrap');
-    const b = button(t('common_addToList'), 'pill', () => { hidePill(); onClick(); }, 'add');
-    // Keep the page selection while clicking.
-    b.addEventListener('mousedown', (e) => e.preventDefault());
-    pill.appendChild(b);
-    pill.showPopover();
-    place(pill, rect, 'above', 6);
+    const box = pill = layer('pill-wrap');
+    box.anchor = anchor;
+    const b = button(t('common_addToList'), 'pill', async() => {
+      await onClick();
+      if(pill === box) hidePill();
+    }, 'add');
+    b.addEventListener('mousedown', e => e.preventDefault());
+    box.appendChild(b);
+    box.showPopover();
+    if(!place(box, anchor(), 'above', 6)) hidePill();
   }
-  function hidePill() {
-    pill?.remove();
-    pill = null;
-  }
+  function hidePill() { pill?.remove(); pill = null; }
 
-  // The pass over a word marked known: main and also are the rects of the
-  // clicked occurrence and of the other visible ones. Resolves once they are
-  // covered (38% in), when the highlights can go unseen.
-  function erase(main, also) {
-    if(matchMedia('(prefers-reduced-motion: reduce)').matches) return Promise.resolve();
-    const wrap = layer('manual', 'erase');
-    for(const [rects, kind] of [[main, 'main'], [also, 'also']]) {
-      for(const r of rects) {
-        const i = el('i', kind);
-        Object.assign(i.style, {left: `${r.left - 2}px`, top: `${r.top}px`, width: `${r.width + 4}px`, height: `${r.height + 2}px`});
-        wrap.appendChild(i);
-      }
+  // Decoration is independent of persistence and is cancelled on scrolling.
+  function erase(rects) {
+    if(!rects.length || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const wrap = layer('erase');
+    for(const r of rects) {
+      const i = el('i', 'main');
+      Object.assign(i.style, {left: `${r.left - 2}px`, top: `${r.top}px`, width: `${r.width + 4}px`, height: `${r.height + 2}px`});
+      wrap.appendChild(i);
     }
+    effects.add(wrap);
     wrap.showPopover();
-    setTimeout(() => wrap.remove(), 560);
-    return new Promise(resolve => setTimeout(resolve, 210));
+    setTimeout(() => { wrap.remove(); effects.delete(wrap); }, 180);
   }
+  function clearEffects() { effects.forEach(e => e.remove()); effects.clear(); }
 
-  // A quiet undo below the word: gone after a while, on a click elsewhere,
-  // or once the word scrolls out of view; kept while the pointer is on it.
-  let chipBox = null, chipTimer = null;
   function chip(anchor, message, label, actionLabel, onAction) {
     hideChip();
-    const box = chipBox = layer('manual', 'chip-wrap');
+    const box = chipBox = layer('chip-wrap');
     const c = el('div', 'chip');
     c.setAttribute('role', 'status');
     c.setAttribute('aria-label', label);
-    c.append(icon('check'), el('span', '', message), button(actionLabel, 'btn', () => { hideChip(); onAction(); }));
+    c.append(icon('check'), el('span', '', message), button(actionLabel, 'btn', async() => {
+      clearTimeout(chipTimer);
+      await onAction();
+      if(chipBox === box) hideChip();
+    }));
     box.appendChild(c);
     box.anchor = anchor;
     box.showPopover();
-    place(box, anchor(), 'below', 6);
-    const later = (ms) => { clearTimeout(chipTimer); chipTimer = setTimeout(hideChip, ms); };
+    if(!place(box, anchor(), 'below', 6)) { hideChip(); return; }
+    const later = ms => { clearTimeout(chipTimer); chipTimer = setTimeout(hideChip, ms); };
     later(4000);
     box.addEventListener('pointerenter', () => clearTimeout(chipTimer));
     box.addEventListener('pointerleave', () => later(1500));
   }
-  function hideChip() {
-    clearTimeout(chipTimer);
-    chipBox?.remove();
-    chipBox = null;
-  }
-  window.addEventListener('pointerdown', (e) => {
-    if(chipBox && !e.composedPath().includes(chipBox)) hideChip();
+  function hideChip() { clearTimeout(chipTimer); chipBox?.remove(); chipBox = null; }
+  window.addEventListener('pointerdown', e => {
+    const path = e.composedPath();
+    if(current && !path.includes(current.box)) closeCard();
+    if(pill && !path.includes(pill)) hidePill();
+    if(chipBox && !path.includes(chipBox)) hideChip();
   }, true);
+  window.addEventListener('keydown', e => { if(!e.isComposing && e.key === 'Escape') closeAll(); }, true);
+  function closeAll() { closeCard(); hidePill(); hideChip(); clearEffects(); }
 
-  function closeAll() {
-    current?.box.remove();
-    current = null;
-    hidePill();
-    hideChip();
-  }
-
-  return {showCard, showPill, hidePill, erase, chip, closeAll};
+  return {showCard, closeCard, showPill, hidePill, erase, chip, closeAll, refresh};
 })();

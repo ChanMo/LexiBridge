@@ -1,5 +1,6 @@
 (async() => {
   const {t} = LexiBridgeI18n;
+  if(!globalThis.Highlight || !CSS.highlights) return;
   let {words = [], blocked = [], pack, highlightStyle = 'underline'} =
     await chrome.storage.local.get(['words', 'blocked', 'pack', 'highlightStyle']);
   let dict = LexiBridge.buildDictionary(words);
@@ -7,7 +8,6 @@
   words = null;
   let enabled = !blocked.includes(location.hostname);
 
-  // Each style is a separately named highlight, styled in app.css.
   const highlight = new Highlight();
   let highlightName = null;
   function applyStyle(style) {
@@ -17,341 +17,390 @@
   }
   applyStyle(highlightStyle);
 
-  let entries = []; // [{word, range}]
-  let seen = new WeakSet();
-  const excluded = 'meta, style, script, noscript, head, input, textarea, select, pre, code, kbd, svg, .lexibridge-ui';
+  // Keep matches by their source text node. Live Ranges can move to an
+  // ancestor when a virtual list removes or reuses the original node.
+  const records = new Map();
+  const byWord = new Map();
+  const excluded = 'meta, style, script, noscript, head, input, textarea, select, pre, code, kbd, svg, [hidden], [inert], [aria-hidden="true"], .lexibridge-ui';
+  const pending = new Set();
+  let iterator = null, scanTimer = null;
+  let dictionaryVersion = 0;
 
   function acceptText(node) {
     const parent = node.parentElement;
-    if(!parent || !node.data.trim()) {
-      return false;
-    }
-    return !parent.closest(excluded) && !parent.isContentEditable;
+    return node.isConnected && !!parent && !!node.data.trim() &&
+      !parent.closest(excluded) && !parent.isContentEditable;
   }
 
-  // only: highlight just these words (newly added ones) in already seen text.
-  function highlightText(node, only) {
-    seen.add(node);
-    for(const m of LexiBridge.findMatches(node.data, dict)) {
-      if(only && !only.has(m.word)) continue;
+  function clearNode(node) {
+    const record = records.get(node);
+    if(!record) return;
+    for(const entry of record.entries) {
+      highlight.delete(entry.range);
+      const group = byWord.get(entry.word);
+      group.delete(entry);
+      if(!group.size) byWord.delete(entry.word);
+    }
+    records.delete(node);
+  }
+
+  function validEntry({node, text, word, range, start, end}) {
+    return dict.has(word) && acceptText(node) && node.data === text &&
+      range.startContainer === node && range.endContainer === node &&
+      range.startOffset === start && range.endOffset === end;
+  }
+
+  function highlightText(node) {
+    const old = records.get(node);
+    if(!acceptText(node)) { clearNode(node); return; }
+    if(old?.text === node.data && old.version === dictionaryVersion && old.entries.every(validEntry)) return;
+    clearNode(node);
+    const entries = LexiBridge.findMatches(node.data, dict).map(m => {
       const range = document.createRange();
       range.setStart(node, m.start);
       range.setEnd(node, m.end);
-      entries.push({word: m.word, range});
+      const entry = {...m, node, range, text: node.data};
       highlight.add(range);
-    }
-  }
-
-  function scan(root, only) {
-    // Unseen nodes with `only` are left to the full scan of pending mutations.
-    const accept = (n) => acceptText(n) && (only ? seen.has(n) : !seen.has(n));
-    if(root.nodeType === Node.TEXT_NODE) {
-      if(accept(root)) highlightText(root, only);
-      return;
-    }
-    if(root.nodeType !== Node.ELEMENT_NODE || root.closest(excluded)) {
-      return;
-    }
-    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
-      acceptNode: (n) => accept(n) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT
+      if(!byWord.has(m.word)) byWord.set(m.word, new Set());
+      byWord.get(m.word).add(entry);
+      return entry;
     });
-    while(walker.nextNode()) {
-      highlightText(walker.currentNode, only);
-    }
-    report();
+    // Unmatched nodes need no persistent record.
+    if(entries.length) records.set(node, {text: node.data, entries, version: dictionaryVersion});
   }
 
-  function removeEntries(shouldRemove) {
-    entries = entries.filter(e => {
-      if(shouldRemove(e)) {
-	highlight.delete(e.range);
-	return false;
+  function* textNodes(root) {
+    if(root.nodeType === Node.TEXT_NODE) { yield root; return; }
+    if(root.nodeType !== Node.ELEMENT_NODE || root.closest(excluded) || root.isContentEditable) return;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, {
+      acceptNode: n => n.nodeType === Node.TEXT_NODE ? NodeFilter.FILTER_ACCEPT :
+        n.matches(excluded) || n.isContentEditable ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_SKIP
+    });
+    while(walker.nextNode()) yield walker.currentNode;
+  }
+
+  function queueScan(root) {
+    if(!enabled || !root?.isConnected) return;
+    if(root.nodeType === Node.ELEMENT_NODE && root.closest(excluded)) return;
+    for(const queued of pending) {
+      if(queued.contains(root)) return;
+      if(root.contains(queued)) pending.delete(queued);
+    }
+    pending.add(root);
+    if(scanTimer === null) scanTimer = setTimeout(flush, 60);
+  }
+
+  function flush() {
+    scanTimer = null;
+    if(!enabled) return;
+    const deadline = performance.now() + 6;
+    do {
+      if(!iterator) {
+        const root = pending.values().next().value;
+        if(!root) break;
+        pending.delete(root);
+        if(!root.isConnected) continue;
+        iterator = textNodes(root);
       }
-      return true;
-    });
+      const next = iterator.next();
+      if(next.done) iterator = null;
+      else highlightText(next.value);
+    } while(performance.now() < deadline);
     report();
+    if(iterator || pending.size) scanTimer = setTimeout(flush, 16);
   }
 
-  // The toolbar badge shows how many distinct words are highlighted here.
-  // Sent once things settle, and only when the number changes.
-  let reported = null;
-  let reportTimer = null;
+  let reported = null, reportTimer = null;
   function report() {
     clearTimeout(reportTimer);
     reportTimer = setTimeout(() => {
-      const count = enabled ? new Set(entries.map(e => e.word)).size : 0;
+      const count = enabled ? byWord.size : 0;
       if(count === reported) return;
       reported = count;
       try {
-	chrome.runtime.sendMessage({action: 'badge', data: {count}}).catch(() => {});
-      } catch {} // extension reloaded: this page keeps an orphaned script
+        chrome.runtime.sendMessage({action: 'badge', data: {count}}).catch(() => {});
+      } catch {} // A reloaded extension leaves an orphaned script in old pages.
     }, 500);
   }
-  // Pages restored from the back/forward cache lost their badge.
-  addEventListener('pageshow', (e) => {
-    if(e.persisted) {
-      reported = null;
-      report();
-    }
+  addEventListener('pageshow', e => {
+    if(e.persisted) { reported = null; report(); LexiBridgeUI.refresh(); }
   });
 
   function setEnabled(on) {
     enabled = on;
+    clearTimeout(scanTimer);
+    scanTimer = null;
+    iterator = null;
+    pending.clear();
     highlight.clear();
-    entries = [];
-    seen = new WeakSet();
+    records.clear();
+    byWord.clear();
+    cancelHover();
+    interactionVersion++;
     LexiBridgeUI.closeAll();
-    if(on) scan(document.body);
+    if(on) queueScan(document.body);
     report();
   }
 
-  if(enabled) scan(document.body);
-
-  // Content added later (SPA navigation, infinite scroll, lazy loading).
-  let pending = [];
-  let timer = null;
-  new MutationObserver((mutations) => {
+  new MutationObserver(mutations => {
     if(!enabled) return;
+    const removed = new Set(), dirty = new Set();
+    let changed = false;
     for(const m of mutations) {
-      pending.push(...m.addedNodes);
+      const parent = m.target.nodeType === Node.TEXT_NODE ? m.target.parentElement : m.target;
+      if(parent?.closest('.lexibridge-ui')) continue;
+      changed = true;
+      if(m.type === 'characterData') {
+        clearNode(m.target);
+        queueScan(m.target);
+      } else if(m.type === 'attributes') {
+        dirty.add(m.target);
+        queueScan(m.target);
+      } else {
+        m.removedNodes.forEach(n => removed.add(n));
+        m.addedNodes.forEach(queueScan);
+      }
     }
-    if(!timer) {
-      timer = setTimeout(() => {
-	const nodes = pending;
-	pending = [];
-	timer = null;
-	// Ranges in removed text are moved out of it by the browser and collapse.
-	removeEntries(e => e.range.collapsed);
-	nodes.forEach(n => n.isConnected && scan(n));
-      }, 300);
+    // Clean once per batch, including a subtree removed and reinserted in the
+    // same batch: its old Ranges may already have collapsed or moved.
+    if(removed.size || dirty.size) {
+      const roots = [...removed, ...dirty];
+      for(const node of records.keys()) {
+        if(!node.isConnected || roots.some(root => root.contains(node))) clearNode(node);
+      }
     }
-  }).observe(document.body, {childList: true, subtree: true});
+    if(changed) {
+      if(hoverEntry && !validEntry(hoverEntry)) cancelHover();
+      LexiBridgeUI.refresh();
+      report();
+    }
+  }).observe(document.documentElement, {
+    childList: true, characterData: true, subtree: true,
+    attributes: true, attributeFilter: ['contenteditable', 'hidden', 'inert', 'aria-hidden']
+  });
 
-  // Settings changed here, in another tab, the popup or the options page.
   chrome.storage.onChanged.addListener((changes, area) => {
-    if(area !== 'local') {
-      return;
-    }
-    if(changes.highlightStyle) {
-      applyStyle(changes.highlightStyle.newValue ?? 'underline');
-    }
+    if(area !== 'local') return;
+    if(changes.highlightStyle) applyStyle(changes.highlightStyle.newValue ?? 'underline');
     if(changes.pack) {
       defLang = LexiBridgePacks.getPack(changes.pack.newValue).defLang;
+      LexiBridgeUI.closeAll();
     }
     if(changes.blocked) {
       const on = !(changes.blocked.newValue ?? []).includes(location.hostname);
       if(on !== enabled) setEnabled(on);
     }
     if(changes.words) {
+      cancelHover();
       const old = dict;
       dict = LexiBridge.buildDictionary(changes.words.newValue ?? []);
       if(!enabled) return;
-      removeEntries(e => !dict.has(e.word));
-      const added = new Set([...dict.keys()].filter(k => !old.has(k)));
-      if(added.size) {
-	scan(document.body, added);
+      // An added key can change a lemma match anywhere; a removed key only
+      // affects nodes previously matched against it. Definition edits need no scan.
+      const added = [...dict.keys()].some(k => !old.has(k));
+      if(added) dictionaryVersion++;
+      for(const [node, record] of records) {
+        if(record.entries.some(e => !dict.has(e.word))) {
+          clearNode(node);
+          if(!added) queueScan(node);
+        }
       }
+      // Keep existing marks visible while new keys are scanned in slices.
+      if(added) queueScan(document.body);
+      LexiBridgeUI.refresh();
+      report();
     }
   });
-
-  // The popup asks how many distinct words are highlighted on this page.
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if(request.action === 'page-stats') {
-      sendResponse({enabled, count: new Set(entries.map(e => e.word)).size});
-    }
+    if(request.action === 'page-stats') sendResponse({enabled, count: byWord.size});
   });
 
-  async function getWords() {
-    return (await chrome.storage.local.get(['words'])).words ?? [];
+  async function changeWord(data) {
+    const response = await chrome.runtime.sendMessage({action: 'change-word', data});
+    if(!response?.ok) throw new Error('Word update failed');
+    return response.result;
+  }
+  const speak = word => chrome.runtime.sendMessage({action: 'speak', data: {word}});
+  const band = word => chrome.runtime.sendMessage({action: 'band', data: {word}});
+
+  function entryAt(x, y) {
+    const target = document.caretRangeFromPoint(x, y);
+    if(!target) return null;
+    const inside = r => x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+    return records.get(target.startContainer)?.entries.find(e => validEntry(e) &&
+      e.range.isPointInRange(target.startContainer, target.startOffset) &&
+      [...e.range.getClientRects()].some(inside)) ?? null;
   }
 
-  async function addWord(word, definition) {
-    const rest = (await getWords()).filter(i => LexiBridge.normalizeWord(i[0]) !== word);
-    await chrome.storage.local.set({'words': [[word, definition], ...rest]});
-  }
+  const interactive = 'a[href], button, label, summary, [role="button"], [role="link"], article[tabindex], [role="article"][tabindex]';
+  const inInteractive = entry => !!entry.node.parentElement?.closest(interactive);
+  const inUI = e => e.composedPath().some(n => n.classList?.contains('lexibridge-ui'));
 
-  // Returns a function that puts the word back where it was.
-  async function removeWord(word) {
-    const words = await getWords();
-    const index = words.findIndex(i => LexiBridge.normalizeWord(i[0]) === word);
-    if(index < 0) return async() => {};
-    const row = words[index];
-    await chrome.storage.local.set({'words': words.filter((_, i) => i !== index)});
-    return async() => {
-      const now = await getWords();
-      if(now.some(i => LexiBridge.normalizeWord(i[0]) === word)) return;
-      now.splice(Math.min(index, now.length), 0, row);
-      await chrome.storage.local.set({'words': now});
+  // Snapshot source boundaries: never trust a live Range after a DOM update.
+  function rangeAnchor(range) {
+    const start = range.startContainer, end = range.endContainer;
+    const a = range.startOffset, b = range.endOffset, text = range.toString();
+    const startText = start.textContent, endText = end.textContent;
+    return () => {
+      if(!enabled || !start.isConnected || !end.isConnected || range.collapsed ||
+         range.startContainer !== start || range.endContainer !== end ||
+         range.startOffset !== a || range.endOffset !== b ||
+         start.textContent !== startText || end.textContent !== endText || range.toString() !== text) return null;
+      const parent = start.nodeType === Node.TEXT_NODE ? start.parentElement : start;
+      if(!parent || parent.closest(excluded) || parent.isContentEditable) return null;
+      if(parent.checkVisibility && getComputedStyle(parent).display !== 'contents' &&
+         !parent.checkVisibility({checkVisibilityCSS: true})) return null;
+      const rect = range.getBoundingClientRect();
+      for(let p = parent; p && p !== document.body; p = p.parentElement) {
+        const style = getComputedStyle(p), box = p.getBoundingClientRect();
+        if(/hidden|clip|auto|scroll/.test(style.overflowY) && (rect.bottom <= box.top || rect.top >= box.bottom)) return null;
+        if(/hidden|clip|auto|scroll/.test(style.overflowX) && (rect.right <= box.left || rect.left >= box.right)) return null;
+      }
+      return rect;
     };
   }
 
-  // Words marked known here, for the review invitation (review.js). Counted
-  // on its own: switching levels changes `words` too.
-  async function countKnown(delta) {
-    const key = LexiBridgeReview.KNOWN_KEY;
-    const {[key]: count} = await chrome.storage.local.get([key]);
-    await chrome.storage.local.set({[key]: LexiBridgeReview.countKnown(count, delta)});
-  }
-
-  const speak = (word) => chrome.runtime.sendMessage({action: 'speak', data: {word}});
-  const band = (word) => chrome.runtime.sendMessage({action: 'band', data: {word}});
-
-  // The highlighted word under the pointer, if any.
-  function entryAt(x, y) {
-    const target = document.caretRangeFromPoint(x, y);
-    if(!target) {
-      return null;
-    }
-    // caretRangeFromPoint also answers for blank space next to a word.
-    const inside = (r) => x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
-    return entries.find(i => i.range.isPointInRange(target.startContainer, target.startOffset) &&
-      [...i.range.getClientRects()].some(inside)) ?? null;
-  }
-
-  // Words inside links and buttons keep their click; their card opens on hover.
-  const interactive = 'a[href], button, [role="button"], [role="link"]';
-  const inInteractive = (entry) => !!entry.range.startContainer.parentElement?.closest(interactive);
-
-  function showWordCard(entry) {
-    const {word, range} = entry;
-    return LexiBridgeUI.showCard({
-      word,
-      surface: range.toString(),
-      definition: dict.get(word),
-      lang: defLang,
-      band: band(word),
-      anchor: () => range.getBoundingClientRect(),
-      state: 'known',
-      onSpeak: () => speak(word),
-      // The pass over the word hides its highlights going, here and wherever
-      // else it is in view; other tabs follow through storage.onChanged.
+  let activeBox = null, activeEntry = null, activeMode = null;
+  let interactionVersion = 0;
+  function showWordCard(entry, mode = 'click') {
+    if(!validEntry(entry)) return;
+    cancelHover();
+    interactionVersion++;
+    const {word, range} = entry, definition = dict.get(word);
+    const anchor = rangeAnchor(range);
+    const box = LexiBridgeUI.showCard({
+      word, surface: range.toString(), definition, lang: defLang, band: band(word),
+      anchor: () => validEntry(entry) && dict.get(word) === definition ? anchor() : null,
+      state: 'known', onSpeak: () => speak(word),
       onKnown: async() => {
-	// Only where the text shows: clipped, off-canvas or covered text (screen
-	// reader headings, closed menus) has rects too.
-	const shown = (r, parent) => {
-	  if(!r.width || r.bottom <= 0 || r.top >= window.innerHeight) return false;
-	  const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
-	  return !!hit && (hit === parent || parent.contains(hit));
-	};
-	const rects = (e) => [...e.range.getClientRects()].filter(r => shown(r, e.range.startContainer.parentElement));
-	const also = entries.filter(e => e.word === word && e !== entry).flatMap(rects).slice(0, 40);
-	await LexiBridgeUI.erase(rects(entry), also);
-	removeEntries(e => e.word === word);
-	const undo = await removeWord(word);
-	await countKnown(1);
-	LexiBridgeUI.chip(() => range.getBoundingClientRect(), t('card_knownDone'), t('card_removed', word), t('common_undo'), async() => {
-	  await undo();
-	  await countKnown(-1);
-	});
+        const version = interactionVersion;
+        const removed = await changeWord({op: 'remove', word, markKnown: true});
+        if(!removed.changed || !enabled || document.hidden || version !== interactionVersion) return;
+        const rect = anchor();
+        if(rect) LexiBridgeUI.erase([rect]);
+        LexiBridgeUI.chip(anchor, t('card_knownDone'), t('card_removed', word), t('common_undo'),
+          () => changeWord({op: 'restore', ...removed}));
       },
     });
+    if(box) {
+      activeBox = box; activeEntry = entry; activeMode = mode;
+      box.addEventListener('lexibridge-close', () => {
+        if(activeBox === box) { activeBox = activeEntry = activeMode = null; cancelHover(); }
+      }, {once: true});
+    }
+    return box;
   }
 
-  // Click a highlighted word: show its card.
-  document.body.addEventListener("click", (e) => {
-    if(!enabled || !window.getSelection().isCollapsed || e.target.closest?.('.lexibridge-ui')) {
-      return;
-    }
+  document.addEventListener('click', e => {
+    if(e.button !== 0 || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey || e.detail > 1 ||
+       e.defaultPrevented || !enabled || !window.getSelection().isCollapsed || inUI(e)) return;
     const entry = entryAt(e.clientX, e.clientY);
-    if(!entry || inInteractive(entry)) {
-      return;
-    }
+    if(!entry || inInteractive(entry)) return;
     e.preventDefault();
     showWordCard(entry);
   });
 
-  // Hover a highlighted word in a link: show its card after a pause, and
-  // close it once the pointer has left both the word and the card.
   const HOVER_OPEN_MS = 500, HOVER_CLOSE_MS = 300;
-  let hoverEntry = null, hoverCard = null, openTimer = null, closeTimer = null;
-
-  function onPointer(e) {
-    const overCard = !!e.target.closest?.('.lexibridge-ui');
-    const entry = overCard || !e.target.closest?.(interactive) ? null : entryAt(e.clientX, e.clientY);
-    const candidate = entry && inInteractive(entry) ? entry : null;
-
-    if(hoverCard?.isConnected) {
-      const stay = overCard || candidate === hoverEntry;
-      if(stay) {
-	clearTimeout(closeTimer);
-	closeTimer = null;
-      } else if(!closeTimer) {
-	closeTimer = setTimeout(() => {
-	  hoverCard?.hidePopover();
-	  hoverCard = hoverEntry = closeTimer = null;
-	}, HOVER_CLOSE_MS);
-      }
-      return;
-    }
-    if(candidate === hoverEntry) {
-      return;
-    }
+  let hoverEntry = null, openTimer = null, closeTimer = null;
+  function cancelHover() {
     clearTimeout(openTimer);
-    hoverEntry = candidate;
-    if(candidate) {
-      openTimer = setTimeout(() => {
-	if(enabled && hoverEntry === candidate) hoverCard = showWordCard(candidate);
+    clearTimeout(closeTimer);
+    if(pointerFrame !== null) { cancelAnimationFrame(pointerFrame); pointerFrame = null; }
+    openTimer = closeTimer = null;
+    hoverEntry = null;
+  }
+  function onPointer(e) {
+    if(!enabled || e.buttons || !window.getSelection().isCollapsed) { cancelHover(); return; }
+    if(activeBox?.isConnected && activeMode === 'click') return;
+    const overCard = activeBox && !!e.target.closest?.('.lexibridge-ui');
+    const entry = overCard || !e.target.closest?.(interactive) ? null : entryAt(e.clientX, e.clientY);
+    if(overCard || (entry && entry === activeEntry)) { cancelHover(); return; }
+    if(entry !== hoverEntry) {
+      clearTimeout(openTimer);
+      hoverEntry = entry;
+      if(entry) openTimer = setTimeout(() => {
+        if(enabled && hoverEntry === entry && validEntry(entry)) showWordCard(entry, 'hover');
       }, HOVER_OPEN_MS);
     }
-  }
-  let pointerFrame = null;
-  document.addEventListener("mousemove", (e) => {
-    if(!enabled || pointerFrame) return;
-    pointerFrame = requestAnimationFrame(() => {
-      pointerFrame = null;
-      onPointer(e);
-    });
-  }, {passive: true});
-
-  // Select a word that is not in the list yet: offer to add it.
-  document.addEventListener("mouseup", (e) => {
-    if(!enabled || e.target.closest?.('.lexibridge-ui')) {
-      return;
+    // Keep the existing preview while waiting for its replacement.
+    if(!entry && activeBox?.isConnected && closeTimer === null) {
+      const box = activeBox;
+      closeTimer = setTimeout(() => LexiBridgeUI.closeCard(box), HOVER_CLOSE_MS);
+    } else if(entry) {
+      clearTimeout(closeTimer);
+      closeTimer = null;
     }
-    // Let the browser finish updating the selection first.
+  }
+  let pointerFrame = null, lastPointer = null;
+  document.addEventListener('pointermove', e => {
+    if(!enabled || e.pointerType !== 'mouse') return;
+    lastPointer = e;
+    if(pointerFrame !== null) return;
+    pointerFrame = requestAnimationFrame(() => { pointerFrame = null; onPointer(lastPointer); });
+  }, {passive: true});
+  window.addEventListener('scroll', e => {
+    if(inUI(e)) return;
+    cancelHover();
+    interactionVersion++;
+    if(activeMode === 'hover') LexiBridgeUI.closeCard(activeBox);
+    LexiBridgeUI.hidePill();
+  }, {capture: true, passive: true});
+  document.addEventListener('pointerdown', e => {
+    if(inUI(e)) return;
+    cancelHover();
+    interactionVersion++;
+  }, true);
+  document.addEventListener('keydown', e => {
+    if(!e.isComposing && e.key === 'Escape') { cancelHover(); interactionVersion++; }
+  }, true);
+  document.addEventListener('selectionchange', () => {
+    if(document.activeElement?.closest('.lexibridge-ui')) return;
+    LexiBridgeUI.hidePill();
+    interactionVersion++;
+    if(!window.getSelection().isCollapsed) { cancelHover(); LexiBridgeUI.closeCard(); }
+  });
+  const navigated = () => { cancelHover(); interactionVersion++; LexiBridgeUI.closeAll(); };
+  window.addEventListener('popstate', navigated);
+  window.addEventListener('hashchange', navigated);
+  document.addEventListener('visibilitychange', () => { if(document.hidden) navigated(); });
+  document.addEventListener('pointerout', e => {
+    if(e.relatedTarget) return;
+    cancelHover();
+    if(activeMode === 'hover') LexiBridgeUI.closeCard(activeBox);
+  });
+
+  document.addEventListener('mouseup', e => {
+    if(!enabled || e.button !== 0 || inUI(e)) return;
     setTimeout(() => {
       LexiBridgeUI.hidePill();
-      const selection = window.getSelection();
-      const text = selection.toString().trim();
-      if(selection.isCollapsed || !LexiBridge.isWord(text) || LexiBridge.lookup(dict, LexiBridge.normalizeWord(text))) {
-	return;
-      }
-      const node = selection.anchorNode;
-      const parent = node?.nodeType === Node.TEXT_NODE ? node.parentElement : node;
-      if(!parent || parent.closest('input, textarea, .lexibridge-ui') || parent.isContentEditable) {
-	return;
-      }
-      const range = selection.getRangeAt(0).cloneRange();
-      LexiBridgeUI.showPill(range.getBoundingClientRect(), () => addFromSelection(text, range));
+      const selection = window.getSelection(), text = selection.toString().trim();
+      if(selection.isCollapsed || !LexiBridge.isWord(text) || LexiBridge.lookup(dict, LexiBridge.normalizeWord(text))) return;
+      const range = selection.getRangeAt(0).cloneRange(), anchor = rangeAnchor(range);
+      if(!anchor()) return;
+      LexiBridgeUI.showPill(anchor, () => addFromSelection(text, range));
     });
   });
-  document.addEventListener("mousedown", (e) => {
-    if(!e.target.closest?.('.lexibridge-ui')) LexiBridgeUI.hidePill();
+  document.addEventListener('mousedown', e => {
+    if(!inUI(e)) LexiBridgeUI.hidePill();
   });
-  window.addEventListener("scroll", () => LexiBridgeUI.hidePill(), {passive: true});
 
   async function addFromSelection(text, range) {
-    // Base form and definition from the bundled word lists, if known.
+    const version = ++interactionVersion, anchor = rangeAnchor(range);
     const {word, definition} = await chrome.runtime.sendMessage({action: 'lookup', data: {word: text}});
-    const card = {
-      word,
-      surface: text,
-      lang: defLang,
-      band: band(word),
-      anchor: () => range.getBoundingClientRect(),
-      onSpeak: () => speak(word),
-    };
+    if(version !== interactionVersion || !anchor()) return;
+    const card = {word, surface: text, lang: defLang, band: band(word), anchor, onSpeak: () => speak(word)};
     if(definition) {
-      // One click: add it and show what it means, with a way back. The
-      // selection goes so the new highlight shows.
-      await addWord(word, definition);
+      await changeWord({op: 'add', word, definition});
+      if(version !== interactionVersion || !anchor()) return;
       window.getSelection().removeAllRanges();
-      LexiBridgeUI.showCard({...card, definition, state: 'added', onUndoAdd: () => removeWord(word)});
+      LexiBridgeUI.showCard({...card, definition, state: 'added',
+        onUndoAdd: () => changeWord({op: 'remove', word})});
     } else {
-      LexiBridgeUI.showCard({...card, definition: '', state: 'new', onSave: async(value) => {
-	await addWord(word, value);
-	window.getSelection().removeAllRanges();
+      LexiBridgeUI.showCard({...card, definition: '', state: 'new', onSave: async value => {
+        await changeWord({op: 'add', word, definition: value});
+        if(version === interactionVersion && anchor()) window.getSelection().removeAllRanges();
       }});
     }
   }
+  if(enabled) queueScan(document.body);
 })();

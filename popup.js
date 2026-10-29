@@ -62,7 +62,9 @@
       return null; // page opened before install/update, or not scriptable
     }
   }
+  let renderVersion = 0;
   async function render() {
+    const version = ++renderVersion;
     const on = !blocked.includes(domain);
     toggle.checked = on;
     site.classList.toggle("is-on", on);
@@ -71,7 +73,9 @@
       return;
     }
     const stats = await pageStats();
-    status.textContent = stats ? t('popup_siteOnCount', num(stats.count)) : t('popup_siteOn');
+    if(version !== renderVersion) return;
+    status.textContent = !stats ? t('popup_siteInactive') :
+      stats.enabled ? t('popup_siteOnCount', num(stats.count)) : t('popup_siteOff');
   }
   if(domain) {
     $("domain").textContent = domain;
